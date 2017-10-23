@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2002
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Naos.Logging.Domain", "Naos.Logging.Domain\Naos.Logging.Domain.csproj", "{58F546FE-D06E-49C6-81F7-F4AE54D50519}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Naos.Logging.Test", "Naos.Logging.Test\Naos.Logging.Test.csproj", "{281B01AC-EAE0-4F3A-9210-1FF46E8CFEDE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{58F546FE-D06E-49C6-81F7-F4AE54D50519}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58F546FE-D06E-49C6-81F7-F4AE54D50519}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58F546FE-D06E-49C6-81F7-F4AE54D50519}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58F546FE-D06E-49C6-81F7-F4AE54D50519}.Release|Any CPU.Build.0 = Release|Any CPU
+		{281B01AC-EAE0-4F3A-9210-1FF46E8CFEDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{281B01AC-EAE0-4F3A-9210-1FF46E8CFEDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{281B01AC-EAE0-4F3A-9210-1FF46E8CFEDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{281B01AC-EAE0-4F3A-9210-1FF46E8CFEDE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0E4BC097-6D8E-40E4-BC47-54B2B1D67A67}
+	EndGlobalSection
+EndGlobal
