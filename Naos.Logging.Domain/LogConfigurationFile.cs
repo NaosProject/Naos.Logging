@@ -7,12 +7,8 @@
 namespace Naos.Logging.Domain
 {
     using System;
-    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
-    using System.Linq;
-
-    using Its.Log.Instrumentation;
 
     using OBeautifulCode.Math.Recipes;
 
@@ -21,7 +17,7 @@ namespace Naos.Logging.Domain
     using static System.FormattableString;
 
     /// <summary>
-    /// File focused implementation of <see cref="LogConfigurationBase" />.
+    /// <see cref="File"/> focused implementation of <see cref="LogConfigurationBase" />.
     /// </summary>
     public class LogConfigurationFile : LogConfigurationBase, IEquatable<LogConfigurationFile>
     {
@@ -90,7 +86,7 @@ namespace Naos.Logging.Domain
     }
 
     /// <summary>
-    /// <see cref="EventLog"/> focused implementation of <see cref="LogProcessorFile" />.
+    /// <see cref="File"/> focused implementation of <see cref="LogProcessorBase" />.
     /// </summary>
     public class LogProcessorFile : LogProcessorBase
     {
@@ -123,23 +119,14 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc cref="LogProcessorBase" />
-        protected override void InternalLog(LogEntry logEntry)
+        protected override void InternalLog(LogItem logItem)
         {
-            new { logEntry }.Must().NotBeNull().OrThrowFirstFailure();
+            new { logItem }.Must().NotBeNull().OrThrowFirstFailure();
 
             // TODO: Trace.Listeners.Add(new TextWriterTraceListener("Log_TextWriterOutput.log", "myListener"));
             var fileLock = new object();
-            string logMessage = null;
-            logMessage = logEntry.Subject?.ToLogString() ?? "Null Subject Supplied to EntryPosted in " + nameof(LogProcessing);
-            if ((logEntry.Params != null) && logEntry.Params.Any())
-            {
-                foreach (var param in logEntry.Params)
-                {
-                    logMessage = logMessage + " - " + param.ToLogString();
-                }
-            }
-
-            var message = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture) + ": " + logMessage.ToLogString();
+            var logMessage = logItem.BuildLogMessage(true);
+            var message = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture) + ": " + logMessage;
 
             lock (fileLock)
             {

@@ -8,8 +8,11 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Its.Log.Instrumentation;
+
+    using OBeautifulCode.Enum.Recipes;
 
     using Spritely.Recipes;
 
@@ -41,7 +44,9 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <param name="logProcessorSettings">Configuration for log processing.</param>
         /// <param name="announcer">Optional announcer to communicate setup state; DEFAULT is null.</param>
-        public void Setup(LogProcessorSettings logProcessorSettings, Action<string> announcer = null)
+        /// <param name="configuredAndManagedLogProcessors">Optional configured and externally managed log processors; DEFAULT is null.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Keeping this way.")]
+        public void Setup(LogProcessorSettings logProcessorSettings, Action<string> announcer = null, IReadOnlyCollection<LogProcessorBase> configuredAndManagedLogProcessors = null)
         {
             var localAnnouncer = announcer ?? NullAnnouncement;
 
@@ -53,25 +58,33 @@ namespace Naos.Logging.Domain
 
                 new { logProcessorSettings }.Must().NotBeNull().OrThrowFirstFailure();
 
-                var loggers = new List<LogProcessorBase>();
+                var loggers = new List<LogProcessorBase>(configuredAndManagedLogProcessors ?? new LogProcessorBase[0]);
                 foreach (var configuration in logProcessorSettings.Configurations)
                 {
-                    var fileConfiguration = configuration as LogConfigurationFile;
-                    if (fileConfiguration != null)
+                    if (configuration is LogConfigurationFile fileConfiguration)
                     {
                         var fileLogger = new LogProcessorFile(fileConfiguration);
                         new { fileLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         loggers.Add(fileLogger);
                         localAnnouncer(Invariant($"Wired up {fileLogger.GetType().FullName} ; {fileLogger}."));
                     }
-
-                    var eventLogConfiguration = configuration as LogConfigurationEventLog;
-                    if (eventLogConfiguration != null)
+                    else if (configuration is LogConfigurationEventLog eventLogConfiguration)
                     {
                         var eventLogLogger = new LogProcessorEventLog(eventLogConfiguration);
                         new { eventLogLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         loggers.Add(eventLogLogger);
                         localAnnouncer(Invariant($"Wired up {eventLogLogger.GetType().FullName} : {eventLogLogger}."));
+                    }
+                    else if (configuration is LogConfigurationConsole consoleConfiguration)
+                    {
+                        var consoleLogger = new LogProcessorConsole(consoleConfiguration);
+                        new { consoleLogger }.Must().NotBeNull().OrThrowFirstFailure();
+                        loggers.Add(consoleLogger);
+                        localAnnouncer(Invariant($"Wired up {consoleLogger.GetType().FullName} : {consoleLogger}."));
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(Invariant($"Unsupported implementation of {nameof(LogConfigurationBase)} - {configuration.GetType().FullName}, try providing a pre-configured implementation of {nameof(LogProcessorBase)} until the config type is supported."));
                     }
                 }
 
@@ -163,6 +176,29 @@ namespace Naos.Logging.Domain
         /// Log a <see cref="LogEntry"/> from <see cref="Its.Log" />.
         /// </summary>
         /// <param name="context">Context it is coming from.</param>
+        /// <param name="message">Message to log.</param>
+        public void Log(LogContexts context, string message)
+        {
+            var entry = new LogEntry(message);
+            this.Log(context, entry);
+        }
+
+        /// <summary>
+        /// Log a <see cref="LogEntry"/> from <see cref="Its.Log" />.
+        /// </summary>
+        /// <param name="context">Context it is coming from.</param>
+        /// <param name="comment">Comment to log.</param>
+        /// <param name="subject">Subject to log.</param>
+        public void Log(LogContexts context, string comment, object subject)
+        {
+            var entry = new LogEntry(comment, subject);
+            this.Log(context, entry);
+        }
+
+        /// <summary>
+        /// Log a <see cref="LogEntry"/> from <see cref="Its.Log" />.
+        /// </summary>
+        /// <param name="context">Context it is coming from.</param>
         /// <param name="logEntry">Entry to log.</param>
         public void Log(LogContexts context, LogEntry logEntry)
         {
@@ -171,18 +207,19 @@ namespace Naos.Logging.Domain
                 return;
             }
 
-            if (this.logConfigurationBase.ContextsToLog.HasFlag(context))
+            if (this.logConfigurationBase.ContextsToLog.HasFlagOverlap(context))
             {
                 var localLogEntry = logEntry ?? new LogEntry(Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(LogProcessorBase)}.{nameof(this.Log)}"));
 
-                this.InternalLog(localLogEntry);
+                var logItem = new LogItem(context, localLogEntry);
+                this.InternalLog(logItem);
             }
         }
 
         /// <summary>
-        /// Log a <see cref="LogEntry"/> from <see cref="Its.Log" />.
+        /// Log a <see cref="LogItem" />.
         /// </summary>
-        /// <param name="logEntry">Entry to log.</param>
-        protected abstract void InternalLog(LogEntry logEntry);
+        /// <param name="logItem">Item to log.</param>
+        protected abstract void InternalLog(LogItem logItem);
     }
 }

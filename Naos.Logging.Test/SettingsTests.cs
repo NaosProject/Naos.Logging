@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SettingsSerializationTests.cs" company="Naos">
+// <copyright file="SettingsTests.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ namespace Naos.Logging.Test
 
     using static System.FormattableString;
 
-    public static class SettingsSerializationTests
+    public static class SettingsTests
     {
         private static readonly NaosBsonSerializer BsonSerializerToUse = new NaosBsonSerializer();
 
@@ -35,7 +35,7 @@ namespace Naos.Logging.Test
 
         private static readonly LogConfigurationFile FileConfiguration = new LogConfigurationFile(LogContexts.All, "C:\\Temp\\File.log");
 
-        private static readonly LogConfigurationEventLog EventLogConfiguration = new LogConfigurationEventLog(LogContexts.All, "Application", "Localhost", "Source");
+        private static readonly LogConfigurationEventLog EventLogConfiguration = new LogConfigurationEventLog(LogContexts.All, source: "Source", logName: "Application", machineName: "Localhost");
 
         private static readonly LogProcessorSettings LogProcessorSettingsAll = new LogProcessorSettings(new LogConfigurationBase[] { FileConfiguration, EventLogConfiguration });
 
@@ -178,23 +178,28 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(LogContexts.EntryPosted, logName, machineName, source),
-                                                Second = new LogConfigurationEventLog(LogContexts.ItsLogInternalErrors, logName, machineName, source),
+                                                First = new LogConfigurationEventLog(LogContexts.EntryPosted, source: source, logName: logName, machineName: machineName),
+                                                Second = new LogConfigurationEventLog(LogContexts.ItsLogInternalErrors, source: source, logName: logName, machineName: machineName),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(logContexts, "Log1", machineName, source),
-                                                Second = new LogConfigurationEventLog(logContexts, "Log2", machineName, source),
+                                                First = new LogConfigurationEventLog(logContexts, source: source, logName: "Log1", machineName: machineName),
+                                                Second = new LogConfigurationEventLog(logContexts, source: source, logName: "Log2", machineName: machineName),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(logContexts, logName, "Machine1", source),
-                                                Second = new LogConfigurationEventLog(logContexts, logName, "Machine2", source),
+                                                First = new LogConfigurationEventLog(logContexts, source: source, shouldCreateSource: true, logName: logName, machineName: machineName),
+                                                Second = new LogConfigurationEventLog(logContexts, source: source, shouldCreateSource: false, logName: logName, machineName: machineName),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(logContexts, logName, machineName, "Source1"),
-                                                Second = new LogConfigurationEventLog(logContexts, logName, machineName, "Source2"),
+                                                First = new LogConfigurationEventLog(logContexts, source: source, logName: logName, machineName: "Machine1"),
+                                                Second = new LogConfigurationEventLog(logContexts, source: source, logName: logName, machineName: "Machine2"),
+                                            },
+                                        new
+                                            {
+                                                First = new LogConfigurationEventLog(logContexts, source: "Source1", logName: logName, machineName: machineName),
+                                                Second = new LogConfigurationEventLog(logContexts, source: "Source2", logName: logName, machineName: machineName),
                                             },
                                     }.ToList();
 
@@ -227,8 +232,76 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(logContexts, logName, machineName, source),
-                                                Second = new LogConfigurationEventLog(logContexts, logName, machineName, source),
+                                                First = new LogConfigurationEventLog(logContexts, source: source, logName: logName, machineName: machineName),
+                                                Second = new LogConfigurationEventLog(logContexts, source: source, logName: logName, machineName: machineName),
+                                            },
+                                    }.ToList();
+
+            // Act & Assert
+            notEqualTests.ForEach(
+                _ =>
+                    {
+                        if (_.First != null && _.Second != null)
+                        {
+                            _.First.Equals(_.Second).Should().BeTrue(Invariant($"First: {_.First}; Second: {_.Second}"));
+                            _.First.Equals((object)_.Second).Should().BeTrue(Invariant($"First: {_.First}; Second: {_.Second}"));
+                            (_.First.GetHashCode() == _.Second.GetHashCode()).Should().BeTrue(Invariant($"First: {_.First}; Second: {_.Second}"));
+                        }
+
+                        (_.First == _.Second).Should().BeTrue(Invariant($"First: {_.First}; Second: {_.Second}"));
+                        (_.First != _.Second).Should().BeFalse(Invariant($"First: {_.First}; Second: {_.Second}"));
+                    });
+        }
+
+        [Fact]
+        public static void ConsoleConfiguration___EqualityLogic___Should_be_valid___When_different_data()
+        {
+            // Arrange
+            var notEqualTests = new[]
+                                    {
+                                        new
+                                            {
+                                                First = new LogConfigurationConsole(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
+                                                Second = new LogConfigurationConsole(LogContexts.EntryPostedException, LogContexts.AppDomainUnhandledException),
+                                            },
+                                        new
+                                            {
+                                                First = new LogConfigurationConsole(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
+                                                Second = new LogConfigurationConsole(LogContexts.AppDomainUnhandledException, LogContexts.EntryPostedInformation),
+                                            },
+                                        new
+                                            {
+                                                First = new LogConfigurationConsole(LogContexts.EntryPostedException, LogContexts.EntryPosted),
+                                                Second = new LogConfigurationConsole(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
+                                            },
+                                    }.ToList();
+
+            // Act & Assert
+            notEqualTests.ForEach(
+                _ =>
+                    {
+                        if (_.First != null && _.Second != null)
+                        {
+                            (_.First.GetHashCode() == _.Second.GetHashCode()).Should().BeFalse(Invariant($"First: {_.First}; Second: {_.Second}"));
+                            _.First.Equals(_.Second).Should().BeFalse(Invariant($"First: {_.First}; Second: {_.Second}"));
+                            _.First.Equals((object)_.Second).Should().BeFalse(Invariant($"First: {_.First}; Second: {_.Second}"));
+                        }
+
+                        (_.First == _.Second).Should().BeFalse(Invariant($"First: {_.First}; Second: {_.Second}"));
+                        (_.First != _.Second).Should().BeTrue(Invariant($"First: {_.First}; Second: {_.Second}"));
+                    });
+        }
+
+        [Fact]
+        public static void ConsoleConfiguration___EqualityLogic___Should_be_valid___When_same_data()
+        {
+            // Arrange
+            var notEqualTests = new[]
+                                    {
+                                        new
+                                            {
+                                                First = new LogConfigurationConsole(LogContexts.EntryPosted, LogContexts.AllErrors),
+                                                Second = new LogConfigurationConsole(LogContexts.EntryPosted, LogContexts.AllErrors),
                                             },
                                     }.ToList();
 

@@ -106,6 +106,11 @@ namespace Naos.Logging.Domain
         UnexpectedErrors = LogContexts.AppDomainUnhandledException | LogContexts.ItsLogInternalErrors,
 
         /// <summary>
+        /// All errors.
+        /// </summary>
+        AllErrors = LogContexts.UnexpectedErrors | LogContexts.EntryPostedException,
+
+        /// <summary>
         /// Log all.
         /// </summary>
         All = LogContexts.UnexpectedErrors | LogContexts.EntryPosted,
