@@ -6,6 +6,7 @@
 
 namespace Naos.Logging.Domain
 {
+    using System;
     using System.Linq;
 
     using Its.Log.Instrumentation;
@@ -40,6 +41,11 @@ namespace Naos.Logging.Domain
         /// Gets the <see cref="LogEntry" /> to process.
         /// </summary>
         public LogEntry LogEntry { get; private set; }
+
+        /// <summary>
+        /// Gets <see cref="DateTime" /> the item was logged in <see cref="DateTimeKind.Utc" />.
+        /// </summary>
+        public DateTime LoggedTimeUtc => this.LogEntry.TimeStamp;
 
         /// <summary>
         /// Builds a log message from the entry.

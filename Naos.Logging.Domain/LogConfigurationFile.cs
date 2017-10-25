@@ -143,7 +143,7 @@ namespace Naos.Logging.Domain
         /// <inheritdoc cref="object" />
         public override string ToString()
         {
-            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.fileConfiguration.LogFilePath)}: {this.fileConfiguration.LogFilePath}, {nameof(this.fileConfiguration.CreateDirectoryStructureIfMissing)}: {this.fileConfiguration.CreateDirectoryStructureIfMissing}, {nameof(this.didCreateDirectory)}: {this.didCreateDirectory}");
+            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.fileConfiguration.ContextsToLog)}: {this.fileConfiguration.ContextsToLog}; {nameof(this.fileConfiguration.LogFilePath)}: {this.fileConfiguration.LogFilePath}; {nameof(this.fileConfiguration.CreateDirectoryStructureIfMissing)}: {this.fileConfiguration.CreateDirectoryStructureIfMissing}; {nameof(this.didCreateDirectory)}: {this.didCreateDirectory}");
             return ret;
         }
     }

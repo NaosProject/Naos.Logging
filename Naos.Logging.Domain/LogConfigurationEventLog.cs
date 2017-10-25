@@ -8,7 +8,6 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Diagnostics;
-    using System.Linq;
 
     using OBeautifulCode.Enum.Recipes;
     using OBeautifulCode.Math.Recipes;
@@ -158,7 +157,7 @@ namespace Naos.Logging.Domain
         /// <inheritdoc cref="object" />
         public override string ToString()
         {
-            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.eventLogConfiguration.Source)}: {this.eventLogConfiguration.Source}; {nameof(this.eventLogConfiguration.ShouldCreateSource)}: {this.eventLogConfiguration.ShouldCreateSource}");
+            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.eventLogConfiguration.ContextsToLog)}: {this.eventLogConfiguration.ContextsToLog}; {nameof(this.eventLogConfiguration.Source)}: {this.eventLogConfiguration.Source}; {nameof(this.eventLogConfiguration.ShouldCreateSource)}: {this.eventLogConfiguration.ShouldCreateSource}");
             return ret;
         }
     }
