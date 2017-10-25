@@ -7,7 +7,6 @@
 namespace Naos.Logging.Domain
 {
     using System;
-    using System.Linq;
 
     using OBeautifulCode.Enum.Recipes;
     using OBeautifulCode.Math.Recipes;
@@ -108,12 +107,14 @@ namespace Naos.Logging.Domain
 
             var logMessage = logItem.BuildLogMessage();
 
-            if (this.consoleConfiguration.ContextsToLogConsoleOut.HasFlagOverlap(logItem.Context))
+            if (this.consoleConfiguration.ContextsToLogConsoleOut.HasFlagOverlap(logItem.Context)
+                && !this.consoleConfiguration.ContextsToLogConsoleOut.HasFlag(LogContexts.None))
             {
                 Console.Out.WriteLine(logMessage);
             }
 
-            if (this.consoleConfiguration.ContextsToLogConsoleError.HasFlagOverlap(logItem.Context))
+            if (this.consoleConfiguration.ContextsToLogConsoleError.HasFlagOverlap(logItem.Context)
+                && !this.consoleConfiguration.ContextsToLogConsoleError.HasFlag(LogContexts.None))
             {
                 Console.Error.WriteLine(logMessage);
             }

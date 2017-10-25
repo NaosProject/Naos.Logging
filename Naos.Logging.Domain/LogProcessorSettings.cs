@@ -48,8 +48,6 @@ namespace Naos.Logging.Domain
         /// <param name="contextsToLog">Contexts to log.</param>
         protected LogConfigurationBase(LogContexts contextsToLog)
         {
-            contextsToLog.HasFlag(LogContexts.Invalid).Named(Invariant($"{nameof(contextsToLog)}-CannotContain-{LogContexts.Invalid}")).Must().BeFalse().OrThrowFirstFailure();
-
             this.ContextsToLog = contextsToLog;
         }
 
@@ -60,40 +58,50 @@ namespace Naos.Logging.Domain
     }
 
     /// <summary>
+    /// In memory implementation of <see cref="LogConfigurationBase" />.
+    /// </summary>
+    public class LogConfigurationMemory : LogConfigurationBase
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LogConfigurationMemory"/> class.
+        /// </summary>
+        /// <param name="contextsToLog">Contexts to log.</param>
+        public LogConfigurationMemory(LogContexts contextsToLog)
+            : base(contextsToLog)
+        {
+        }
+    }
+
+    /// <summary>
     /// Enumeration of the various contexts that can be logged from.
     /// </summary>
     [Flags]
     public enum LogContexts
     {
         /// <summary>
-        /// Invalid default option.
-        /// </summary>
-        Invalid = 1,
-
-        /// <summary>
         /// Log none.
         /// </summary>
-        None = 2,
+        None = 1,
 
         /// <summary>
         /// Messages from the <see cref="AppDomain" /> event <see cref="AppDomain.UnhandledException" />.
         /// </summary>
-        AppDomainUnhandledException = 4,
+        AppDomainUnhandledException = 2,
 
         /// <summary>
         /// Messages from the <see cref="Its.Log" /> event <see cref="Log.InternalErrors" />.
         /// </summary>
-        ItsLogInternalErrors = 8,
+        ItsLogInternalErrors = 4,
 
         /// <summary>
         /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that is NOT an <see cref="Exception" />.
         /// </summary>
-        EntryPostedInformation = 16,
+        EntryPostedInformation = 8,
 
         /// <summary>
         /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that IS an <see cref="Exception" />.
         /// </summary>
-        EntryPostedException = 32,
+        EntryPostedException = 16,
 
         /// <summary>
         /// All entry posted events.

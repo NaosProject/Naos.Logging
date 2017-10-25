@@ -202,7 +202,8 @@ namespace Naos.Logging.Domain
         /// <param name="logEntry">Entry to log.</param>
         public void Log(LogContexts context, LogEntry logEntry)
         {
-            if (this.logConfigurationBase.ContextsToLog.HasFlag(LogContexts.None))
+            // if it is only None then cut out; can NOT do a HasFlag here, LogProcessorConsole for example can have the None flag but still need to be called directly...
+            if (this.logConfigurationBase.ContextsToLog == LogContexts.None)
             {
                 return;
             }
@@ -221,5 +222,33 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <param name="logItem">Item to log.</param>
         protected abstract void InternalLog(LogItem logItem);
+    }
+
+    /// <summary>
+    /// In memory implementation of <see cref="LogProcessorBase" />.
+    /// </summary>
+    public class LogProcessorMemory : LogProcessorBase
+    {
+        private readonly List<LogItem> trackedItems = new List<LogItem>();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LogProcessorMemory"/> class.
+        /// </summary>
+        /// <param name="logConfigurationBase">Configuration.</param>
+        public LogProcessorMemory(LogConfigurationBase logConfigurationBase)
+            : base(logConfigurationBase)
+        {
+        }
+
+        /// <inheritdoc cref="LogProcessorBase" />
+        protected override void InternalLog(LogItem logItem)
+        {
+            this.trackedItems.Add(logItem);
+        }
+
+        /// <summary>
+        /// Gets the items tracked from logging.
+        /// </summary>
+        public IReadOnlyList<LogItem> TrackedItems => this.trackedItems;
     }
 }

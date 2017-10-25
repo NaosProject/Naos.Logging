@@ -24,7 +24,7 @@ namespace Naos.Logging.Domain
         /// <param name="logEntry"><see cref="LogEntry" /> to process.</param>
         public LogItem(LogContexts context, LogEntry logEntry)
         {
-            new { context }.Must().NotBeEqualTo(LogContexts.Invalid).OrThrowFirstFailure();
+            new { context }.Must().NotBeEqualTo(LogContexts.None).OrThrowFirstFailure();
             new { logEntry }.Must().NotBeNull().OrThrowFirstFailure();
 
             this.Context = context;

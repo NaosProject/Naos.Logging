@@ -135,6 +135,12 @@ namespace Naos.Logging.Domain
         /// <inheritdoc cref="LogProcessorBase" />
         protected override void InternalLog(LogItem logItem)
         {
+            // if it is has the None flag then cut out.
+            if (this.eventLogConfiguration.ContextsToLog.HasFlag(LogContexts.None))
+            {
+                return;
+            }
+
             new { logItem }.Must().NotBeNull().OrThrowFirstFailure();
 
             using (var eventLog = new EventLog(this.eventLogConfiguration.LogName, this.eventLogConfiguration.MachineName, this.eventLogConfiguration.Source))

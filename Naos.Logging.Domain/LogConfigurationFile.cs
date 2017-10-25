@@ -121,6 +121,12 @@ namespace Naos.Logging.Domain
         /// <inheritdoc cref="LogProcessorBase" />
         protected override void InternalLog(LogItem logItem)
         {
+            // if it is has the None flag then cut out.
+            if (this.fileConfiguration.ContextsToLog.HasFlag(LogContexts.None))
+            {
+                return;
+            }
+
             new { logItem }.Must().NotBeNull().OrThrowFirstFailure();
 
             // TODO: Trace.Listeners.Add(new TextWriterTraceListener("Log_TextWriterOutput.log", "myListener"));
