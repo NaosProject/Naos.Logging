@@ -69,21 +69,21 @@ namespace Naos.Logging.Domain
                         var fileLogger = new LogProcessorFile(fileConfiguration);
                         new { fileLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         logProcessors.Add(fileLogger);
-                        localAnnouncer(Invariant($"Wired up {fileLogger.GetType().FullName} ; {fileLogger}."));
+                        localAnnouncer(Invariant($"Wired up {fileLogger}."));
                     }
                     else if (configuration is LogConfigurationEventLog eventLogConfiguration)
                     {
                         var eventLogLogger = new LogProcessorEventLog(eventLogConfiguration);
                         new { eventLogLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         logProcessors.Add(eventLogLogger);
-                        localAnnouncer(Invariant($"Wired up {eventLogLogger.GetType().FullName} : {eventLogLogger}."));
+                        localAnnouncer(Invariant($"Wired up {eventLogLogger}."));
                     }
                     else if (configuration is LogConfigurationConsole consoleConfiguration)
                     {
                         var consoleLogger = new LogProcessorConsole(consoleConfiguration);
                         new { consoleLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         logProcessors.Add(consoleLogger);
-                        localAnnouncer(Invariant($"Wired up {consoleLogger.GetType().FullName} : {consoleLogger}."));
+                        localAnnouncer(Invariant($"Wired up {consoleLogger}."));
                     }
                     else
                     {
