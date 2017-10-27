@@ -56,28 +56,33 @@ namespace Naos.Logging.Domain
 
                 new { logProcessorSettings }.Must().NotBeNull().OrThrowFirstFailure();
 
-                var loggers = new List<LogProcessorBase>(configuredAndManagedLogProcessors ?? new LogProcessorBase[0]);
+                var logProcessors = new List<LogProcessorBase>(configuredAndManagedLogProcessors ?? new LogProcessorBase[0]);
+                if (logProcessors.Any())
+                {
+                    localAnnouncer(Invariant($"Used pre-configured loggers: {string.Join(",", logProcessors)}"));
+                }
+
                 foreach (var configuration in logProcessorSettings.Configurations)
                 {
                     if (configuration is LogConfigurationFile fileConfiguration)
                     {
                         var fileLogger = new LogProcessorFile(fileConfiguration);
                         new { fileLogger }.Must().NotBeNull().OrThrowFirstFailure();
-                        loggers.Add(fileLogger);
+                        logProcessors.Add(fileLogger);
                         localAnnouncer(Invariant($"Wired up {fileLogger.GetType().FullName} ; {fileLogger}."));
                     }
                     else if (configuration is LogConfigurationEventLog eventLogConfiguration)
                     {
                         var eventLogLogger = new LogProcessorEventLog(eventLogConfiguration);
                         new { eventLogLogger }.Must().NotBeNull().OrThrowFirstFailure();
-                        loggers.Add(eventLogLogger);
+                        logProcessors.Add(eventLogLogger);
                         localAnnouncer(Invariant($"Wired up {eventLogLogger.GetType().FullName} : {eventLogLogger}."));
                     }
                     else if (configuration is LogConfigurationConsole consoleConfiguration)
                     {
                         var consoleLogger = new LogProcessorConsole(consoleConfiguration);
                         new { consoleLogger }.Must().NotBeNull().OrThrowFirstFailure();
-                        loggers.Add(consoleLogger);
+                        logProcessors.Add(consoleLogger);
                         localAnnouncer(Invariant($"Wired up {consoleLogger.GetType().FullName} : {consoleLogger}."));
                     }
                     else
@@ -86,7 +91,7 @@ namespace Naos.Logging.Domain
                     }
                 }
 
-                this.activeLogProcessors = loggers;
+                this.activeLogProcessors = logProcessors;
 
                 this.WireUpAppDomainUnhandledExceptionToToActiveLogProcessors(localAnnouncer);
                 this.WireUpItsLogInternalErrorsToActiveLogProcessors(localAnnouncer);

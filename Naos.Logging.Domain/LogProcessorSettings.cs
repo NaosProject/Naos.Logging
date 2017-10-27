@@ -16,8 +16,8 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Initializes a new instance of the <see cref="LogProcessorSettings"/> class.
         /// </summary>
-        /// <param name="configurations">Configurations to setup.</param>
-        public LogProcessorSettings(IReadOnlyCollection<LogConfigurationBase> configurations)
+        /// <param name="configurations">Configurations to setup; DEFAULT is null but only to be used in null logging scenarios or custom provided log processors.</param>
+        public LogProcessorSettings(IReadOnlyCollection<LogConfigurationBase> configurations = null)
         {
             this.Configurations = configurations ?? new List<LogConfigurationBase>();
         }
