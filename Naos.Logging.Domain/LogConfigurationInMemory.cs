@@ -85,6 +85,8 @@ namespace Naos.Logging.Domain
     {
         private readonly Queue<LogItem> loggedItems = new Queue<LogItem>();
 
+        private readonly object syncLoggedItems = new object();
+
         private readonly LogConfigurationInMemory memoryConfiguration;
 
         /// <summary>
@@ -108,24 +110,47 @@ namespace Naos.Logging.Domain
                 return;
             }
 
-            this.loggedItems.Enqueue(logItem);
-
-            if (this.memoryConfiguration.MaxLoggedItemCount == -1)
+            lock (this.syncLoggedItems)
             {
-                // no pruning just grow infinitely.
-                return;
+                this.loggedItems.Enqueue(logItem);
+
+                if (this.memoryConfiguration.MaxLoggedItemCount == -1)
+                {
+                    // no pruning just grow infinitely.
+                    return;
+                }
+
+                if (this.loggedItems.Count > this.memoryConfiguration.MaxLoggedItemCount)
+                {
+                    this.loggedItems.Dequeue();
+                }
             }
+        }
 
-            if (this.loggedItems.Count > this.memoryConfiguration.MaxLoggedItemCount)
+        /// <summary>
+        /// Purge all <see cref="LoggedItems" />.
+        /// </summary>
+        public void PurgeAllLoggedItems()
+        {
+            lock (this.syncLoggedItems)
             {
-                this.loggedItems.Dequeue();
+                this.loggedItems.Clear();
             }
         }
 
         /// <summary>
         /// Gets the items tracked from logging.
         /// </summary>
-        public IReadOnlyList<LogItem> LoggedItems => this.loggedItems.ToList();
+        public IReadOnlyList<LogItem> LoggedItems
+        {
+            get
+            {
+                lock (this.syncLoggedItems)
+                {
+                    return this.loggedItems.ToList();
+                }
+            }
+        }
 
         /// <inheritdoc cref="object" />
         public override string ToString()

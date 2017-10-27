@@ -135,6 +135,22 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
+        public static void LogProcessor___Purge___Works()
+        {
+            // Arrange
+            var configuration = new LogConfigurationInMemory(LogContexts.All);
+            var processor = new LogProcessorInMemory(configuration);
+            var logCallCount = 10;
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogContexts.EntryPostedInformation, "Hello"));
+
+            // Act
+            processor.PurgeAllLoggedItems();
+
+            // Assert
+            processor.LoggedItems.Count.Should().Be(0);
+        }
+
+        [Fact]
         public static void RoundtripSerialization___LogConfigurationInMemory___Works()
         {
             // Arrange
