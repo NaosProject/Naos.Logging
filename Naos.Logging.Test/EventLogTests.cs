@@ -36,7 +36,7 @@ namespace Naos.Logging.Test
             actual.LogName.Should().Be(LogConfigurationEventLog.DefaultLogName);
             actual.MachineName.Should().Be(LogConfigurationEventLog.DefaultMachineName);
             actual.Source.Should().Be(Process.GetCurrentProcess().ProcessName);
-            actual.ShouldCreateSource.Should().Be(false);
+            actual.ShouldCreateSourceIfMissing.Should().Be(false);
         }
 
         [Fact]
@@ -50,14 +50,14 @@ namespace Naos.Logging.Test
             var shouldCreateSource = true;
 
             // Act
-            var actual = new LogConfigurationEventLog(contextsToLog, source, shouldCreateSource, logName, machineName);
+            var actual = new LogConfigurationEventLog(contextsToLog, source, logName, machineName, shouldCreateSource);
 
             // Assert
             actual.Should().NotBeNull();
             actual.LogName.Should().Be(logName);
             actual.MachineName.Should().Be(machineName);
             actual.Source.Should().Be(source);
-            actual.ShouldCreateSource.Should().Be(shouldCreateSource);
+            actual.ShouldCreateSourceIfMissing.Should().Be(shouldCreateSource);
         }
 
         [Fact]
@@ -115,8 +115,8 @@ namespace Naos.Logging.Test
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(logContexts, source: source, shouldCreateSource: true, logName: logName, machineName: machineName),
-                                                Second = new LogConfigurationEventLog(logContexts, source: source, shouldCreateSource: false, logName: logName, machineName: machineName),
+                                                First = new LogConfigurationEventLog(logContexts, source: source, shouldCreateSourceIfMissing: true, logName: logName, machineName: machineName),
+                                                Second = new LogConfigurationEventLog(logContexts, source: source, shouldCreateSourceIfMissing: false, logName: logName, machineName: machineName),
                                             },
                                         new
                                             {

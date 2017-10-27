@@ -29,7 +29,7 @@ namespace Naos.Logging.Test
 
         internal static readonly LogConfigurationFile FileConfiguration = new LogConfigurationFile(LogContexts.All, "C:\\Temp\\File.log");
 
-        internal static readonly LogConfigurationEventLog EventLogConfiguration = new LogConfigurationEventLog(LogContexts.All, "Source", false, "Application", "Localhost");
+        internal static readonly LogConfigurationEventLog EventLogConfiguration = new LogConfigurationEventLog(LogContexts.All, "Source", "Application", "Localhost", false);
 
         internal static readonly LogConfigurationConsole ConsoleConfiguration = new LogConfigurationConsole(LogContexts.All, LogContexts.AllErrors);
 

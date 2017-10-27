@@ -56,7 +56,7 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Non_logging_context()
         {
             // Arrange
-            var config = new LogConfigurationEventLog(LogContexts.UnexpectedErrors, "MySourceLawson", true, "MyLogLawson", "MyMachine");
+            var config = new LogConfigurationEventLog(LogContexts.UnexpectedErrors, "MySourceLawson", "MyLogLawson", "MyMachine", true);
             var logger = new LogProcessorEventLog(config);
 
             // Act
@@ -70,7 +70,7 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Logging_context_information()
         {
             // Arrange
-            var config = new LogConfigurationEventLog(LogContexts.EntryPosted, "MySource", true, "MyLog", "Laptop");
+            var config = new LogConfigurationEventLog(LogContexts.EntryPosted, "MySource", "MyLog", "Laptop", true);
             var logger = new LogProcessorEventLog(config);
 
             // Act
@@ -84,7 +84,7 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Logging_context_error()
         {
             // Arrange
-            var config = new LogConfigurationEventLog(LogContexts.UnexpectedErrors, "MySource", true, "MyLog", "Laptop");
+            var config = new LogConfigurationEventLog(LogContexts.UnexpectedErrors, "MySource", "MyLog", "Laptop", true);
             var logger = new LogProcessorEventLog(config);
 
             // Act

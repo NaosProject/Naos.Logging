@@ -36,14 +36,14 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <param name="contextsToLog">Contexts to log.</param>
         /// <param name="source">Optional event log source; DEFAULT is <see cref="Process.GetCurrentProcess"/> <see cref="Process.ProcessName" />.</param>
-        /// <param name="shouldCreateSource">Value indicating whether or not to create the source if missing.</param>
+        /// <param name="shouldCreateSourceIfMissing">Value indicating whether or not to create the source if missing.</param>
         /// <param name="logName">Optional log name; DEFAULT is <see cref="DefaultLogName" />.</param>
         /// <param name="machineName">Optional machine name; DEFAULT is <see cref="DefaultMachineName" />.</param>
-        public LogConfigurationEventLog(LogContexts contextsToLog, string source = null, bool shouldCreateSource = false, string logName = DefaultLogName, string machineName = DefaultMachineName)
+        public LogConfigurationEventLog(LogContexts contextsToLog, string source = null, string logName = DefaultLogName, string machineName = DefaultMachineName, bool shouldCreateSourceIfMissing = false)
             : base(contextsToLog)
         {
             this.Source = string.IsNullOrWhiteSpace(source) ? Process.GetCurrentProcess().ProcessName : source;
-            this.ShouldCreateSource = shouldCreateSource;
+            this.ShouldCreateSourceIfMissing = shouldCreateSourceIfMissing;
             this.LogName = string.IsNullOrWhiteSpace(logName) ? DefaultLogName : logName;
             this.MachineName = string.IsNullOrWhiteSpace(machineName) ? DefaultMachineName : machineName;
         }
@@ -56,7 +56,7 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Gets a value indicating whether or not to create the source if missing.
         /// </summary>
-        public bool ShouldCreateSource { get; private set; }
+        public bool ShouldCreateSourceIfMissing { get; private set; }
 
         /// <summary>
         /// Gets the event log source to use.
@@ -86,7 +86,7 @@ namespace Naos.Logging.Domain
                 return false;
             }
 
-            return first.ContextsToLog == second.ContextsToLog && first.Source == second.Source && first.ShouldCreateSource == second.ShouldCreateSource && first.LogName == second.LogName && first.MachineName == second.MachineName;
+            return first.ContextsToLog == second.ContextsToLog && first.Source == second.Source && first.ShouldCreateSourceIfMissing == second.ShouldCreateSourceIfMissing && first.LogName == second.LogName && first.MachineName == second.MachineName;
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Naos.Logging.Domain
         public override bool Equals(object obj) => this == (obj as LogConfigurationEventLog);
 
         /// <inheritdoc />
-        public override int GetHashCode() => HashCodeHelper.Initialize().Hash(this.ContextsToLog.ToString()).Hash(this.Source).Hash(this.ShouldCreateSource).Hash(this.LogName).Hash(this.MachineName).Value;
+        public override int GetHashCode() => HashCodeHelper.Initialize().Hash(this.ContextsToLog.ToString()).Hash(this.Source).Hash(this.ShouldCreateSourceIfMissing).Hash(this.LogName).Hash(this.MachineName).Value;
     }
 
     /// <summary>
@@ -125,7 +125,7 @@ namespace Naos.Logging.Domain
 
             this.eventLogConfiguration = eventLogConfiguration;
 
-            if (this.eventLogConfiguration.ShouldCreateSource)
+            if (this.eventLogConfiguration.ShouldCreateSourceIfMissing)
             {
                 this.eventLogConfiguration.CreateEventLogSourceIfMissing();
             }
@@ -157,7 +157,7 @@ namespace Naos.Logging.Domain
         /// <inheritdoc cref="object" />
         public override string ToString()
         {
-            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.eventLogConfiguration.ContextsToLog)}: {this.eventLogConfiguration.ContextsToLog}; {nameof(this.eventLogConfiguration.Source)}: {this.eventLogConfiguration.Source}; {nameof(this.eventLogConfiguration.ShouldCreateSource)}: {this.eventLogConfiguration.ShouldCreateSource}");
+            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.eventLogConfiguration.ContextsToLog)}: {this.eventLogConfiguration.ContextsToLog}; {nameof(this.eventLogConfiguration.Source)}: {this.eventLogConfiguration.Source}; {nameof(this.eventLogConfiguration.ShouldCreateSourceIfMissing)}: {this.eventLogConfiguration.ShouldCreateSourceIfMissing}");
             return ret;
         }
     }
@@ -175,7 +175,7 @@ namespace Naos.Logging.Domain
         {
             new { eventLogConfiguration }.Must().NotBeNull().OrThrowFirstFailure();
 
-            new { CreateSourceIfMissing = eventLogConfiguration.ShouldCreateSource }.Must().BeTrue().OrThrowFirstFailure();
+            new { CreateSourceIfMissing = eventLogConfiguration.ShouldCreateSourceIfMissing }.Must().BeTrue().OrThrowFirstFailure();
 
             if (!EventLog.SourceExists(eventLogConfiguration.Source))
             {
