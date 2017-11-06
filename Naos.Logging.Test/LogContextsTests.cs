@@ -36,5 +36,20 @@ namespace Naos.Logging.Test
             all.Should().BeEquivalentTo(expected);
             hasFlagNone.Should().BeFalse();
         }
+
+        [Fact]
+        public static void All_values_can_cast_to_short()
+        {
+            // Arrange
+            var all = EnumExtensions.GetEnumValues<LogContexts>();
+
+            // Act
+            var actual = all.Select(_ => (short)_).ToList();
+            var roundtrip = actual.Select(_ => (LogContexts)_).ToList();
+
+            // Assert
+            actual.Count.Should().Be(all.Count);
+            roundtrip.Count.Should().Be(all.Count);
+        }
     }
 }

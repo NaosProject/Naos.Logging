@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogConfigurationFile.cs" company="Naos">
+// <copyright file="FileLogConfiguration.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -19,15 +19,15 @@ namespace Naos.Logging.Domain
     /// <summary>
     /// <see cref="File"/> focused implementation of <see cref="LogConfigurationBase" />.
     /// </summary>
-    public class LogConfigurationFile : LogConfigurationBase, IEquatable<LogConfigurationFile>
+    public class FileLogConfiguration : LogConfigurationBase, IEquatable<FileLogConfiguration>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LogConfigurationFile"/> class.
+        /// Initializes a new instance of the <see cref="FileLogConfiguration"/> class.
         /// </summary>
         /// <param name="contextsToLog">Contexts to log.</param>
         /// <param name="logFilePath">File path to write logs to.</param>
         /// <param name="createDirectoryStructureIfMissing">Optional value indicating whether to create the directory structure if it's missing; DEFAULT is true.</param>
-        public LogConfigurationFile(LogContexts contextsToLog, string logFilePath, bool createDirectoryStructureIfMissing = true)
+        public FileLogConfiguration(LogContexts contextsToLog, string logFilePath, bool createDirectoryStructureIfMissing = true)
             : base(contextsToLog)
         {
             new { logFilePath }.Must().NotBeNull().And().NotBeWhiteSpace().OrThrowFirstFailure();
@@ -52,7 +52,7 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are equal.</returns>
-        public static bool operator ==(LogConfigurationFile first, LogConfigurationFile second)
+        public static bool operator ==(FileLogConfiguration first, FileLogConfiguration second)
         {
             if (ReferenceEquals(first, second))
             {
@@ -73,13 +73,13 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are inequal.</returns>
-        public static bool operator !=(LogConfigurationFile first, LogConfigurationFile second) => !(first == second);
+        public static bool operator !=(FileLogConfiguration first, FileLogConfiguration second) => !(first == second);
 
         /// <inheritdoc />
-        public bool Equals(LogConfigurationFile other) => this == other;
+        public bool Equals(FileLogConfiguration other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => this == (obj as LogConfigurationFile);
+        public override bool Equals(object obj) => this == (obj as FileLogConfiguration);
 
         /// <inheritdoc />
         public override int GetHashCode() => HashCodeHelper.Initialize().Hash(this.ContextsToLog.ToString()).Hash(this.LogFilePath).Hash(this.CreateDirectoryStructureIfMissing).Value;
@@ -88,17 +88,17 @@ namespace Naos.Logging.Domain
     /// <summary>
     /// <see cref="File"/> focused implementation of <see cref="LogProcessorBase" />.
     /// </summary>
-    public class LogProcessorFile : LogProcessorBase
+    public class FileLogProcessor : LogProcessorBase
     {
-        private readonly LogConfigurationFile fileConfiguration;
+        private readonly FileLogConfiguration fileConfiguration;
 
         private readonly bool didCreateDirectory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LogProcessorFile"/> class.
+        /// Initializes a new instance of the <see cref="FileLogProcessor"/> class.
         /// </summary>
         /// <param name="fileConfiguration">Configuration.</param>
-        public LogProcessorFile(LogConfigurationFile fileConfiguration)
+        public FileLogProcessor(FileLogConfiguration fileConfiguration)
             : base(fileConfiguration)
         {
             new { fileConfiguration }.Must().NotBeNull().OrThrowFirstFailure();
@@ -119,6 +119,27 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc cref="LogProcessorBase" />
+        public override void Log(LogMessage logMessage)
+        {
+            // if it is has the None flag then cut out.
+            if (this.fileConfiguration.ContextsToLog.HasFlag(LogContexts.None))
+            {
+                return;
+            }
+
+            new { logMessage }.Must().NotBeNull().OrThrowFirstFailure();
+
+            // TODO: Trace.Listeners.Add(new TextWriterTraceListener("Log_TextWriterOutput.log", "myListener"));
+            var fileLock = new object();
+            var message = Invariant($"{logMessage.LoggedDateTimeUtc.ToString("o", CultureInfo.InvariantCulture)}|{logMessage.Context}|{logMessage.Message}");
+
+            lock (fileLock)
+            {
+                File.AppendAllText(this.fileConfiguration.LogFilePath, message + Environment.NewLine);
+            }
+        }
+
+        /// <inheritdoc cref="LogProcessorBase" />
         protected override void InternalLog(LogItem logItem)
         {
             // if it is has the None flag then cut out.
@@ -129,15 +150,9 @@ namespace Naos.Logging.Domain
 
             new { logItem }.Must().NotBeNull().OrThrowFirstFailure();
 
-            // TODO: Trace.Listeners.Add(new TextWriterTraceListener("Log_TextWriterOutput.log", "myListener"));
-            var fileLock = new object();
-            var logMessage = logItem.BuildLogMessage(true);
-            var message = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture) + ": " + logMessage;
+            var logMessage = new LogMessage(logItem.Context, logItem.BuildLogMessage(true), logItem.LoggedTimeUtc);
 
-            lock (fileLock)
-            {
-                File.AppendAllText(this.fileConfiguration.LogFilePath, message + Environment.NewLine);
-            }
+            this.Log(logMessage);
         }
 
         /// <inheritdoc cref="object" />

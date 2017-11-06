@@ -30,7 +30,7 @@ namespace Naos.Logging.Test
             var contextsToLogConsoleError = LogContexts.AllErrors;
 
             // Act
-            var actual = new LogConfigurationConsole(contextsToLogConsoleOut, contextsToLogConsoleError);
+            var actual = new ConsoleLogConfiguration(contextsToLogConsoleOut, contextsToLogConsoleError);
 
             // Assert
             actual.Should().NotBeNull();
@@ -40,7 +40,7 @@ namespace Naos.Logging.Test
         public static void LogProcessorConsoleConstructor___Null_config___Throws()
         {
             // Arrange
-            Action action = () => new LogProcessorConsole(null);
+            Action action = () => new ConsoleLogProcessor(null);
 
             // Act
             var exception = Record.Exception(action);
@@ -61,7 +61,7 @@ namespace Naos.Logging.Test
                     // Arrange
                     var infoCanary = A.Dummy<string>();
                     var errorCanary = A.Dummy<string>();
-                    var logProcessor = new LogProcessorConsole(new LogConfigurationConsole(LogContexts.All, LogContexts.AllErrors));
+                    var logProcessor = new ConsoleLogProcessor(new ConsoleLogConfiguration(LogContexts.All, LogContexts.AllErrors));
                     Console.SetOut(consoleOut);
                     Console.SetError(consoleError);
 
@@ -88,7 +88,7 @@ namespace Naos.Logging.Test
 
             void ThrowIfObjectsDiffer(object actualAsObject)
             {
-                var actual = actualAsObject as LogConfigurationConsole;
+                var actual = actualAsObject as ConsoleLogConfiguration;
                 actual.Should().NotBeNull();
                 actual.Should().Be(expected);
             }
@@ -105,18 +105,18 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new LogConfigurationConsole(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
-                                                Second = new LogConfigurationConsole(LogContexts.EntryPostedException, LogContexts.AppDomainUnhandledException),
+                                                First = new ConsoleLogConfiguration(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
+                                                Second = new ConsoleLogConfiguration(LogContexts.EntryPostedException, LogContexts.AppDomainUnhandledException),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationConsole(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
-                                                Second = new LogConfigurationConsole(LogContexts.AppDomainUnhandledException, LogContexts.EntryPostedInformation),
+                                                First = new ConsoleLogConfiguration(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
+                                                Second = new ConsoleLogConfiguration(LogContexts.AppDomainUnhandledException, LogContexts.EntryPostedInformation),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationConsole(LogContexts.EntryPostedException, LogContexts.EntryPosted),
-                                                Second = new LogConfigurationConsole(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
+                                                First = new ConsoleLogConfiguration(LogContexts.EntryPostedException, LogContexts.EntryPosted),
+                                                Second = new ConsoleLogConfiguration(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
                                             },
                                     }.ToList();
 
@@ -144,8 +144,8 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new LogConfigurationConsole(LogContexts.EntryPosted, LogContexts.AllErrors),
-                                                Second = new LogConfigurationConsole(LogContexts.EntryPosted, LogContexts.AllErrors),
+                                                First = new ConsoleLogConfiguration(LogContexts.EntryPosted, LogContexts.AllErrors),
+                                                Second = new ConsoleLogConfiguration(LogContexts.EntryPosted, LogContexts.AllErrors),
                                             },
                                     }.ToList();
 

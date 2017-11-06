@@ -28,8 +28,8 @@ namespace Naos.Logging.Test
         public static void EventLog_default_config___Test___Non_logging_context()
         {
             // Arrange
-            var config = new LogConfigurationEventLog(LogContexts.UnexpectedErrors);
-            var logger = new LogProcessorEventLog(config);
+            var config = new EventLogConfiguration(LogContexts.UnexpectedErrors);
+            var logger = new EventLogProcessor(config);
 
             // Act
             logger.Log(LogContexts.EntryPostedInformation, "MessageShouldntBeThere", "SubjectShouldntBeThere");
@@ -42,8 +42,8 @@ namespace Naos.Logging.Test
         public static void EventLog_default_config___Test___Logging_context()
         {
             // Arrange
-            var config = new LogConfigurationEventLog(LogContexts.UnexpectedErrors);
-            var logger = new LogProcessorEventLog(config);
+            var config = new EventLogConfiguration(LogContexts.UnexpectedErrors);
+            var logger = new EventLogProcessor(config);
 
             // Act
             logger.Log(LogContexts.ItsLogInternalErrors, "Message", "Subject");
@@ -56,8 +56,8 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Non_logging_context()
         {
             // Arrange
-            var config = new LogConfigurationEventLog(LogContexts.UnexpectedErrors, "MySourceLawson", "MyLogLawson", "MyMachine", true);
-            var logger = new LogProcessorEventLog(config);
+            var config = new EventLogConfiguration(LogContexts.UnexpectedErrors, "MySourceLawson", "MyLogLawson", "MyMachine", true);
+            var logger = new EventLogProcessor(config);
 
             // Act
             logger.Log(LogContexts.EntryPostedInformation, "MessageShouldntBeThere", "SubjectShouldntBeThere");
@@ -70,8 +70,8 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Logging_context_information()
         {
             // Arrange
-            var config = new LogConfigurationEventLog(LogContexts.EntryPosted, "MySource", "MyLog", "Laptop", true);
-            var logger = new LogProcessorEventLog(config);
+            var config = new EventLogConfiguration(LogContexts.EntryPosted, "MySource", "MyLog", "Laptop", true);
+            var logger = new EventLogProcessor(config);
 
             // Act
             logger.Log(LogContexts.EntryPostedInformation, "Message Information", "Subject");
@@ -84,14 +84,28 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Logging_context_error()
         {
             // Arrange
-            var config = new LogConfigurationEventLog(LogContexts.UnexpectedErrors, "MySource", "MyLog", "Laptop", true);
-            var logger = new LogProcessorEventLog(config);
+            var config = new EventLogConfiguration(LogContexts.UnexpectedErrors, "MySource", "MyLog", "Laptop", true);
+            var logger = new EventLogProcessor(config);
 
             // Act
             logger.Log(LogContexts.ItsLogInternalErrors, "Message Error", "Subject");
 
             // Assert
             /* Confirm entry - by hand */
+        }
+
+        [Fact(Skip = "For debugging log processors.")]
+        public static void EventLog_custom_config___Test___Reading()
+        {
+            // Arrange
+            var config = new EventLogConfiguration(LogContexts.UnexpectedErrors, "MySource", "MyLog", "Laptop", true);
+            var logger = new EventLogReader(config);
+
+            // Act
+            var entries = logger.ReadAll();
+
+            // Assert
+            entries.Count.Should().NotBe(0);
         }
     }
 }

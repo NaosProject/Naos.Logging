@@ -82,5 +82,11 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <param name="logItem">Item to log.</param>
         protected abstract void InternalLog(LogItem logItem);
+
+        /// <summary>
+        /// Log a <see cref="LogMessage" />.
+        /// </summary>
+        /// <param name="logMessage">Message to log.</param>
+        public abstract void Log(LogMessage logMessage);
     }
 }

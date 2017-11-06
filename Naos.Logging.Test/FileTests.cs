@@ -26,7 +26,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Null_path___Throws()
         {
             // Arrange
-            Action action = () => new LogConfigurationFile(LogContexts.All, null);
+            Action action = () => new FileLogConfiguration(LogContexts.All, null);
 
             // Act
             var exception = Record.Exception(action);
@@ -41,7 +41,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Empty_string_path___Throws()
         {
             // Arrange
-            Action action = () => new LogConfigurationFile(LogContexts.All, string.Empty);
+            Action action = () => new FileLogConfiguration(LogContexts.All, string.Empty);
 
             // Act
             var exception = Record.Exception(action);
@@ -56,7 +56,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___WhiteSpace_path___Throws()
         {
             // Arrange
-            Action action = () => new LogConfigurationFile(LogContexts.All, '\t'.ToString());
+            Action action = () => new FileLogConfiguration(LogContexts.All, '\t'.ToString());
 
             // Act
             var exception = Record.Exception(action);
@@ -75,7 +75,7 @@ namespace Naos.Logging.Test
             var filePath = Path.GetTempFileName();
 
             // Act
-            var actual = new LogConfigurationFile(contextsToLog, filePath);
+            var actual = new FileLogConfiguration(contextsToLog, filePath);
 
             // Assert
             actual.Should().NotBeNull();
@@ -86,7 +86,7 @@ namespace Naos.Logging.Test
         public static void LogProcessorFileConstructor___Null_config___Throws()
         {
             // Arrange
-            Action action = () => new LogProcessorFile(null);
+            Action action = () => new FileLogProcessor(null);
 
             // Act
             var exception = Record.Exception(action);
@@ -105,8 +105,8 @@ namespace Naos.Logging.Test
             try
             {
                 // Arrange
-                var configuration = new LogConfigurationFile(LogContexts.AllErrors, tempFileName);
-                var processor = new LogProcessorFile(configuration);
+                var configuration = new FileLogConfiguration(LogContexts.AllErrors, tempFileName);
+                var processor = new FileLogProcessor(configuration);
 
                 var infoCanary = A.Dummy<string>();
                 var errorCanary = A.Dummy<string>();
@@ -137,7 +137,7 @@ namespace Naos.Logging.Test
 
             void ThrowIfObjectsDiffer(object actualAsObject)
             {
-                var actual = actualAsObject as LogConfigurationFile;
+                var actual = actualAsObject as FileLogConfiguration;
                 actual.Should().NotBeNull();
                 actual.Should().Be(expected);
             }
@@ -157,18 +157,18 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new LogConfigurationFile(LogContexts.EntryPosted, logFilePath, createDirectoryStructureIfMissing),
-                                                Second = new LogConfigurationFile(LogContexts.ItsLogInternalErrors, logFilePath, createDirectoryStructureIfMissing),
+                                                First = new FileLogConfiguration(LogContexts.EntryPosted, logFilePath, createDirectoryStructureIfMissing),
+                                                Second = new FileLogConfiguration(LogContexts.ItsLogInternalErrors, logFilePath, createDirectoryStructureIfMissing),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationFile(logContexts, "C:\\Path1", createDirectoryStructureIfMissing),
-                                                Second = new LogConfigurationFile(logContexts, "C:\\Path2", createDirectoryStructureIfMissing),
+                                                First = new FileLogConfiguration(logContexts, "C:\\Path1", createDirectoryStructureIfMissing),
+                                                Second = new FileLogConfiguration(logContexts, "C:\\Path2", createDirectoryStructureIfMissing),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationFile(logContexts, logFilePath, true),
-                                                Second = new LogConfigurationFile(logContexts, logFilePath, false),
+                                                First = new FileLogConfiguration(logContexts, logFilePath, true),
+                                                Second = new FileLogConfiguration(logContexts, logFilePath, false),
                                             },
                                     }.ToList();
 
@@ -200,8 +200,8 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new LogConfigurationFile(logContexts, logFilePath, createDirectoryStructureIfMissing),
-                                                Second = new LogConfigurationFile(logContexts, logFilePath, createDirectoryStructureIfMissing),
+                                                First = new FileLogConfiguration(logContexts, logFilePath, createDirectoryStructureIfMissing),
+                                                Second = new FileLogConfiguration(logContexts, logFilePath, createDirectoryStructureIfMissing),
                                             },
                                     }.ToList();
 

@@ -27,11 +27,11 @@ namespace Naos.Logging.Test
 
         private static readonly IReadOnlyCollection<IBinarySerializeAndDeserialize> BinarySerializers = new IBinarySerializeAndDeserialize[] { BsonSerializerToUse, JsonSerializerToUse }.ToList();
 
-        internal static readonly LogConfigurationFile FileConfiguration = new LogConfigurationFile(LogContexts.All, "C:\\Temp\\File.log");
+        internal static readonly FileLogConfiguration FileConfiguration = new FileLogConfiguration(LogContexts.All, "C:\\Temp\\File.log");
 
-        internal static readonly LogConfigurationEventLog EventLogConfiguration = new LogConfigurationEventLog(LogContexts.All, "Source", "Application", "Localhost", false);
+        internal static readonly EventLogConfiguration EventLogConfiguration = new EventLogConfiguration(LogContexts.All, "Source", "Application", "Localhost", false);
 
-        internal static readonly LogConfigurationConsole ConsoleConfiguration = new LogConfigurationConsole(LogContexts.All, LogContexts.AllErrors);
+        internal static readonly ConsoleLogConfiguration ConsoleConfiguration = new ConsoleLogConfiguration(LogContexts.All, LogContexts.AllErrors);
 
         internal static readonly LogProcessorSettings LogProcessorSettingsAll = new LogProcessorSettings(new LogConfigurationBase[] { FileConfiguration, EventLogConfiguration });
 

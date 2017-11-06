@@ -25,7 +25,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationInMemoryConstructor___Less_than_NegativeOne_MaxLoggedItemCount___Throws()
         {
             // Arrange
-            Action action = () => new LogConfigurationInMemory(LogContexts.All, -2);
+            Action action = () => new InMemoryLogConfiguration(LogContexts.All, -2);
 
             // Act
             var exception = Record.Exception(action);
@@ -40,7 +40,7 @@ namespace Naos.Logging.Test
         public static void LogProcessorInMemoryConstructor___Null_config___Throws()
         {
             // Arrange
-            Action action = () => new LogProcessorInMemory(null);
+            Action action = () => new InMemoryLogProcessor(null);
 
             // Act
             var exception = Record.Exception(action);
@@ -55,8 +55,8 @@ namespace Naos.Logging.Test
         public static void LogProcessor___Valid___Works()
         {
             // Arrange
-            var configuration = new LogConfigurationInMemory(LogContexts.All);
-            var processor = new LogProcessorInMemory(configuration);
+            var configuration = new InMemoryLogConfiguration(LogContexts.All);
+            var processor = new InMemoryLogProcessor(configuration);
 
             var infoCanary = A.Dummy<string>();
             var errorCanary = A.Dummy<string>();
@@ -67,16 +67,18 @@ namespace Naos.Logging.Test
 
             // Assert
             processor.LoggedItems.Count.Should().Be(2);
-            processor.LoggedItems.Single(_ => _.Context == LogContexts.EntryPostedInformation).LogEntry.Message.Should().Be(infoCanary);
-            processor.LoggedItems.Single(_ => _.Context == LogContexts.EntryPostedException).LogEntry.Message.Should().Be(errorCanary);
+            processor.LoggedItems.Single(_ => _.Context == LogContexts.EntryPostedInformation).Message.Should().Contain("Message = " + infoCanary);
+            processor.LoggedItems.Single(_ => _.Context == LogContexts.EntryPostedInformation).Message.Should().Contain("Subject = " + infoCanary);
+            processor.LoggedItems.Single(_ => _.Context == LogContexts.EntryPostedException).Message.Should().Contain("Message = " + errorCanary);
+            processor.LoggedItems.Single(_ => _.Context == LogContexts.EntryPostedException).Message.Should().Contain("Subject = " + errorCanary);
         }
 
         [Fact]
         public static void LogProcessor___Default_max_elements___Honored()
         {
             // Arrange
-            var configuration = new LogConfigurationInMemory(LogContexts.All);
-            var processor = new LogProcessorInMemory(configuration);
+            var configuration = new InMemoryLogConfiguration(LogContexts.All);
+            var processor = new InMemoryLogProcessor(configuration);
             var logCallCount = 1000;
 
             // Act
@@ -91,8 +93,8 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var maxLoggedItemCount = 0;
-            var configuration = new LogConfigurationInMemory(LogContexts.All, maxLoggedItemCount);
-            var processor = new LogProcessorInMemory(configuration);
+            var configuration = new InMemoryLogConfiguration(LogContexts.All, maxLoggedItemCount);
+            var processor = new InMemoryLogProcessor(configuration);
             var logCallCount = 1000;
 
             // Act
@@ -107,8 +109,8 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var maxLoggedItemCount = 1;
-            var configuration = new LogConfigurationInMemory(LogContexts.All, maxLoggedItemCount);
-            var processor = new LogProcessorInMemory(configuration);
+            var configuration = new InMemoryLogConfiguration(LogContexts.All, maxLoggedItemCount);
+            var processor = new InMemoryLogProcessor(configuration);
             var logCallCount = 1000;
 
             // Act
@@ -123,8 +125,8 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var maxLoggedItemCount = 2;
-            var configuration = new LogConfigurationInMemory(LogContexts.All, maxLoggedItemCount);
-            var processor = new LogProcessorInMemory(configuration);
+            var configuration = new InMemoryLogConfiguration(LogContexts.All, maxLoggedItemCount);
+            var processor = new InMemoryLogProcessor(configuration);
             var logCallCount = 1000;
 
             // Act
@@ -138,8 +140,8 @@ namespace Naos.Logging.Test
         public static void LogProcessor___Purge___Works()
         {
             // Arrange
-            var configuration = new LogConfigurationInMemory(LogContexts.All);
-            var processor = new LogProcessorInMemory(configuration);
+            var configuration = new InMemoryLogConfiguration(LogContexts.All);
+            var processor = new InMemoryLogProcessor(configuration);
             var logCallCount = 10;
             Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogContexts.EntryPostedInformation, "Hello"));
 
@@ -154,11 +156,11 @@ namespace Naos.Logging.Test
         public static void RoundtripSerialization___LogConfigurationInMemory___Works()
         {
             // Arrange
-            var expected = new LogConfigurationInMemory(LogContexts.All);
+            var expected = new InMemoryLogConfiguration(LogContexts.All);
 
             void ThrowIfObjectsDiffer(object actualAsObject)
             {
-                var actual = actualAsObject as LogConfigurationInMemory;
+                var actual = actualAsObject as InMemoryLogConfiguration;
                 actual.Should().NotBeNull();
                 actual.Should().Be(expected);
             }
@@ -175,13 +177,13 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new LogConfigurationInMemory(LogContexts.EntryPosted, 1),
-                                                Second = new LogConfigurationInMemory(LogContexts.ItsLogInternalErrors, 1),
+                                                First = new InMemoryLogConfiguration(LogContexts.EntryPosted, 1),
+                                                Second = new InMemoryLogConfiguration(LogContexts.ItsLogInternalErrors, 1),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationInMemory(LogContexts.EntryPosted, 1),
-                                                Second = new LogConfigurationInMemory(LogContexts.EntryPosted, 0),
+                                                First = new InMemoryLogConfiguration(LogContexts.EntryPosted, 1),
+                                                Second = new InMemoryLogConfiguration(LogContexts.EntryPosted, 0),
                                             },
                                     }.ToList();
 
@@ -211,8 +213,8 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new LogConfigurationInMemory(logContexts, 1),
-                                                Second = new LogConfigurationInMemory(logContexts, 1),
+                                                First = new InMemoryLogConfiguration(logContexts, 1),
+                                                Second = new InMemoryLogConfiguration(logContexts, 1),
                                             },
                                     }.ToList();
 

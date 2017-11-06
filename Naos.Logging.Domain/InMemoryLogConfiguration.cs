@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogConfigurationInMemory.cs" company="Naos">
+// <copyright file="InMemoryLogConfiguration.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -19,14 +19,14 @@ namespace Naos.Logging.Domain
     /// <summary>
     /// In memory implementation of <see cref="LogConfigurationBase" />.
     /// </summary>
-    public class LogConfigurationInMemory : LogConfigurationBase, IEquatable<LogConfigurationInMemory>
+    public class InMemoryLogConfiguration : LogConfigurationBase, IEquatable<InMemoryLogConfiguration>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LogConfigurationInMemory"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryLogConfiguration"/> class.
         /// </summary>
         /// <param name="contextsToLog">Contexts to log.</param>
         /// <param name="maxLoggedItemCount">Optional maximum number of elements to keep internally before removing the oldest items; DEFAULT is -1 which is infinite.</param>
-        public LogConfigurationInMemory(LogContexts contextsToLog, int maxLoggedItemCount = -1)
+        public InMemoryLogConfiguration(LogContexts contextsToLog, int maxLoggedItemCount = -1)
             : base(contextsToLog)
         {
             new { maxLoggedItemCount }.Must().BeGreaterThanOrEqualTo(-1).OrThrowFirstFailure();
@@ -45,7 +45,7 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are equal.</returns>
-        public static bool operator ==(LogConfigurationInMemory first, LogConfigurationInMemory second)
+        public static bool operator ==(InMemoryLogConfiguration first, InMemoryLogConfiguration second)
         {
             if (ReferenceEquals(first, second))
             {
@@ -66,13 +66,13 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are inequal.</returns>
-        public static bool operator !=(LogConfigurationInMemory first, LogConfigurationInMemory second) => !(first == second);
+        public static bool operator !=(InMemoryLogConfiguration first, InMemoryLogConfiguration second) => !(first == second);
 
         /// <inheritdoc />
-        public bool Equals(LogConfigurationInMemory other) => this == other;
+        public bool Equals(InMemoryLogConfiguration other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => this == (obj as LogConfigurationInMemory);
+        public override bool Equals(object obj) => this == (obj as InMemoryLogConfiguration);
 
         /// <inheritdoc />
         public override int GetHashCode() => HashCodeHelper.Initialize().Hash(this.ContextsToLog.ToString()).Hash(this.MaxLoggedItemCount).Value;
@@ -81,19 +81,19 @@ namespace Naos.Logging.Domain
     /// <summary>
     /// In memory implementation of <see cref="LogProcessorBase" />.
     /// </summary>
-    public class LogProcessorInMemory : LogProcessorBase
+    public class InMemoryLogProcessor : LogProcessorBase
     {
-        private readonly Queue<LogItem> loggedItems = new Queue<LogItem>();
+        private readonly Queue<LogMessage> loggedMessages = new Queue<LogMessage>();
 
-        private readonly object syncLoggedItems = new object();
+        private readonly object syncLoggedMessages = new object();
 
-        private readonly LogConfigurationInMemory memoryConfiguration;
+        private readonly InMemoryLogConfiguration memoryConfiguration;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LogProcessorInMemory"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryLogProcessor"/> class.
         /// </summary>
         /// <param name="memoryConfiguration">Configuration.</param>
-        public LogProcessorInMemory(LogConfigurationInMemory memoryConfiguration)
+        public InMemoryLogProcessor(InMemoryLogConfiguration memoryConfiguration)
             : base(memoryConfiguration)
         {
             new { memoryConfiguration }.Must().NotBeNull().OrThrowFirstFailure();
@@ -102,17 +102,13 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc cref="LogProcessorBase" />
-        protected override void InternalLog(LogItem logItem)
+        public override void Log(LogMessage logMessage)
         {
-            if (this.memoryConfiguration.MaxLoggedItemCount == 0)
-            {
-                // this is basically using it as a null LogProcessor.
-                return;
-            }
+            new { logMessage }.Must().NotBeNull().OrThrowFirstFailure();
 
-            lock (this.syncLoggedItems)
+            lock (this.syncLoggedMessages)
             {
-                this.loggedItems.Enqueue(logItem);
+                this.loggedMessages.Enqueue(logMessage);
 
                 if (this.memoryConfiguration.MaxLoggedItemCount == -1)
                 {
@@ -120,11 +116,27 @@ namespace Naos.Logging.Domain
                     return;
                 }
 
-                if (this.loggedItems.Count > this.memoryConfiguration.MaxLoggedItemCount)
+                if (this.loggedMessages.Count > this.memoryConfiguration.MaxLoggedItemCount)
                 {
-                    this.loggedItems.Dequeue();
+                    this.loggedMessages.Dequeue();
                 }
             }
+        }
+
+        /// <inheritdoc cref="LogProcessorBase" />
+        protected override void InternalLog(LogItem logItem)
+        {
+            new { logItem }.Must().NotBeNull().OrThrowFirstFailure();
+
+            if (this.memoryConfiguration.MaxLoggedItemCount == 0)
+            {
+                // this is basically using it as a null LogProcessor.
+                return;
+            }
+
+            var logMessage = new LogMessage(logItem.Context, logItem.BuildLogMessage(), logItem.LoggedTimeUtc);
+
+            this.Log(logMessage);
         }
 
         /// <summary>
@@ -132,22 +144,22 @@ namespace Naos.Logging.Domain
         /// </summary>
         public void PurgeAllLoggedItems()
         {
-            lock (this.syncLoggedItems)
+            lock (this.syncLoggedMessages)
             {
-                this.loggedItems.Clear();
+                this.loggedMessages.Clear();
             }
         }
 
         /// <summary>
         /// Gets the items tracked from logging.
         /// </summary>
-        public IReadOnlyList<LogItem> LoggedItems
+        public IReadOnlyList<LogMessage> LoggedItems
         {
             get
             {
-                lock (this.syncLoggedItems)
+                lock (this.syncLoggedMessages)
                 {
-                    return this.loggedItems.ToList();
+                    return this.loggedMessages.ToList();
                 }
             }
         }

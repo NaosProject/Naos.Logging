@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogConfigurationConsole.cs" company="Naos">
+// <copyright file="ConsoleLogConfiguration.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -7,6 +7,7 @@
 namespace Naos.Logging.Domain
 {
     using System;
+    using System.Globalization;
 
     using OBeautifulCode.Enum.Recipes;
     using OBeautifulCode.Math.Recipes;
@@ -18,14 +19,14 @@ namespace Naos.Logging.Domain
     /// <summary>
     /// <see cref="Console" /> focused implementation of <see cref="LogConfigurationBase" />.
     /// </summary>
-    public class LogConfigurationConsole : LogConfigurationBase, IEquatable<LogConfigurationConsole>
+    public class ConsoleLogConfiguration : LogConfigurationBase, IEquatable<ConsoleLogConfiguration>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LogConfigurationConsole"/> class.
+        /// Initializes a new instance of the <see cref="ConsoleLogConfiguration"/> class.
         /// </summary>
         /// <param name="contextsToLogConsoleOut"><see cref="LogContexts" /> to write to <see cref="Console.Out" />.</param>
         /// <param name="contextsToLogConsoleError"><see cref="LogContexts" /> to write to <see cref="Console.Error" />.</param>
-        public LogConfigurationConsole(LogContexts contextsToLogConsoleOut, LogContexts contextsToLogConsoleError)
+        public ConsoleLogConfiguration(LogContexts contextsToLogConsoleOut, LogContexts contextsToLogConsoleError)
             : base(contextsToLogConsoleOut | contextsToLogConsoleError)
         {
             this.ContextsToLogConsoleOut = contextsToLogConsoleOut;
@@ -48,7 +49,7 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are equal.</returns>
-        public static bool operator ==(LogConfigurationConsole first, LogConfigurationConsole second)
+        public static bool operator ==(ConsoleLogConfiguration first, ConsoleLogConfiguration second)
         {
             if (ReferenceEquals(first, second))
             {
@@ -69,13 +70,13 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are inequal.</returns>
-        public static bool operator !=(LogConfigurationConsole first, LogConfigurationConsole second) => !(first == second);
+        public static bool operator !=(ConsoleLogConfiguration first, ConsoleLogConfiguration second) => !(first == second);
 
         /// <inheritdoc />
-        public bool Equals(LogConfigurationConsole other) => this == other;
+        public bool Equals(ConsoleLogConfiguration other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => this == (obj as LogConfigurationConsole);
+        public override bool Equals(object obj) => this == (obj as ConsoleLogConfiguration);
 
         /// <inheritdoc />
         public override int GetHashCode() => HashCodeHelper.Initialize().Hash(this.ContextsToLog.ToString()).Hash(this.ContextsToLogConsoleOut.ToString()).Hash(this.ContextsToLogConsoleError.ToString()).Value;
@@ -84,15 +85,15 @@ namespace Naos.Logging.Domain
     /// <summary>
     /// <see cref="Console"/> focused implementation of <see cref="LogProcessorBase" />.
     /// </summary>
-    public class LogProcessorConsole : LogProcessorBase
+    public class ConsoleLogProcessor : LogProcessorBase
     {
-        private readonly LogConfigurationConsole consoleConfiguration;
+        private readonly ConsoleLogConfiguration consoleConfiguration;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LogProcessorConsole"/> class.
+        /// Initializes a new instance of the <see cref="ConsoleLogProcessor"/> class.
         /// </summary>
         /// <param name="consoleConfiguration">Configuration.</param>
-        public LogProcessorConsole(LogConfigurationConsole consoleConfiguration)
+        public ConsoleLogProcessor(ConsoleLogConfiguration consoleConfiguration)
             : base(consoleConfiguration)
         {
             new { consoleConfiguration }.Must().NotBeNull().OrThrowFirstFailure();
@@ -101,23 +102,33 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc cref="LogProcessorBase" />
+        public override void Log(LogMessage logMessage)
+        {
+            new { logMessage }.Must().NotBeNull().OrThrowFirstFailure();
+
+            var message = Invariant($"{logMessage.LoggedDateTimeUtc.ToString("o", CultureInfo.InvariantCulture)}|{logMessage.Context}|{logMessage.Message}");
+
+            if (this.consoleConfiguration.ContextsToLogConsoleOut.HasFlagOverlap(logMessage.Context)
+                && !this.consoleConfiguration.ContextsToLogConsoleOut.HasFlag(LogContexts.None))
+            {
+                Console.Out.WriteLine(message);
+            }
+
+            if (this.consoleConfiguration.ContextsToLogConsoleError.HasFlagOverlap(logMessage.Context)
+                && !this.consoleConfiguration.ContextsToLogConsoleError.HasFlag(LogContexts.None))
+            {
+                Console.Error.WriteLine(message);
+            }
+        }
+
+        /// <inheritdoc cref="LogProcessorBase" />
         protected override void InternalLog(LogItem logItem)
         {
             new { logItem }.Must().NotBeNull().OrThrowFirstFailure();
 
-            var logMessage = logItem.BuildLogMessage();
+            var logMessage = new LogMessage(logItem.Context, logItem.BuildLogMessage(), logItem.LoggedTimeUtc);
 
-            if (this.consoleConfiguration.ContextsToLogConsoleOut.HasFlagOverlap(logItem.Context)
-                && !this.consoleConfiguration.ContextsToLogConsoleOut.HasFlag(LogContexts.None))
-            {
-                Console.Out.WriteLine(logMessage);
-            }
-
-            if (this.consoleConfiguration.ContextsToLogConsoleError.HasFlagOverlap(logItem.Context)
-                && !this.consoleConfiguration.ContextsToLogConsoleError.HasFlag(LogContexts.None))
-            {
-                Console.Error.WriteLine(logMessage);
-            }
+            this.Log(logMessage);
         }
 
         /// <inheritdoc cref="object" />

@@ -43,14 +43,29 @@ namespace Naos.Logging.Domain
         /// <param name="logProcessorSettings">Configuration for log processing.</param>
         /// <param name="announcer">Optional announcer to communicate setup state; DEFAULT is null.</param>
         /// <param name="configuredAndManagedLogProcessors">Optional configured and externally managed log processors; DEFAULT is null.</param>
+        /// <param name="multipleCallsToSetupStrategy">Optional strategy to deal with multiple calls to <see cref="Setup" />; DEFAULT is <see cref="MultipleCallsToSetupStrategy.Throw" />.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Keeping this way.")]
-        public void Setup(LogProcessorSettings logProcessorSettings, Action<string> announcer = null, IReadOnlyCollection<LogProcessorBase> configuredAndManagedLogProcessors = null)
+        public void Setup(LogProcessorSettings logProcessorSettings, Action<string> announcer = null, IReadOnlyCollection<LogProcessorBase> configuredAndManagedLogProcessors = null, MultipleCallsToSetupStrategy multipleCallsToSetupStrategy = MultipleCallsToSetupStrategy.Throw)
         {
+            new { multipleCallsToSetupStrategy }.Must().NotBeEqualTo(MultipleCallsToSetupStrategy.Invalid).OrThrowFirstFailure();
             var localAnnouncer = announcer ?? NullAnnouncement;
 
             lock (this.sync)
             {
-                new { isSetup = this.hasBeenSetup }.Must().BeFalse().OrThrowFirstFailure();
+                if (this.hasBeenSetup)
+                {
+                    switch (multipleCallsToSetupStrategy)
+                    {
+                        case MultipleCallsToSetupStrategy.Throw:
+                            throw new ArgumentException(Invariant($"{nameof(LogProcessing)}.{nameof(LogProcessing.Setup)} was called a second time with {nameof(multipleCallsToSetupStrategy)} - {multipleCallsToSetupStrategy}."));
+                        case MultipleCallsToSetupStrategy.Ignore:
+                            return;
+                        case MultipleCallsToSetupStrategy.Overwrite:
+                            break;
+                        default:
+                            throw new NotSupportedException(Invariant($"{nameof(LogProcessing)}.{nameof(LogProcessing.Setup)} was called with unspported {nameof(multipleCallsToSetupStrategy)} - {multipleCallsToSetupStrategy}."));
+                    }
+                }
 
                 this.hasBeenSetup = true;
 
@@ -64,23 +79,23 @@ namespace Naos.Logging.Domain
 
                 foreach (var configuration in logProcessorSettings.Configurations)
                 {
-                    if (configuration is LogConfigurationFile fileConfiguration)
+                    if (configuration is FileLogConfiguration fileConfiguration)
                     {
-                        var fileLogger = new LogProcessorFile(fileConfiguration);
+                        var fileLogger = new FileLogProcessor(fileConfiguration);
                         new { fileLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         logProcessors.Add(fileLogger);
                         localAnnouncer(Invariant($"Wired up {fileLogger}."));
                     }
-                    else if (configuration is LogConfigurationEventLog eventLogConfiguration)
+                    else if (configuration is EventLogConfiguration eventLogConfiguration)
                     {
-                        var eventLogLogger = new LogProcessorEventLog(eventLogConfiguration);
+                        var eventLogLogger = new EventLogProcessor(eventLogConfiguration);
                         new { eventLogLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         logProcessors.Add(eventLogLogger);
                         localAnnouncer(Invariant($"Wired up {eventLogLogger}."));
                     }
-                    else if (configuration is LogConfigurationConsole consoleConfiguration)
+                    else if (configuration is ConsoleLogConfiguration consoleConfiguration)
                     {
-                        var consoleLogger = new LogProcessorConsole(consoleConfiguration);
+                        var consoleLogger = new ConsoleLogProcessor(consoleConfiguration);
                         new { consoleLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         logProcessors.Add(consoleLogger);
                         localAnnouncer(Invariant($"Wired up {consoleLogger}."));
@@ -155,5 +170,31 @@ namespace Naos.Logging.Domain
         {
             /* no-op */
         }
+    }
+
+    /// <summary>
+    /// Enumeration of options when <see cref="LogProcessing.Setup" /> is called more than once.
+    /// </summary>
+    public enum MultipleCallsToSetupStrategy
+    {
+        /// <summary>
+        /// Invalid default state.
+        /// </summary>
+        Invalid,
+
+        /// <summary>
+        /// Throw an exception.
+        /// </summary>
+        Throw,
+
+        /// <summary>
+        /// Configure with new settings.
+        /// </summary>
+        Overwrite,
+
+        /// <summary>
+        /// Ignore the new settings.
+        /// </summary>
+        Ignore,
     }
 }

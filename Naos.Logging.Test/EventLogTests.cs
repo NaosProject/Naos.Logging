@@ -23,24 +23,24 @@ namespace Naos.Logging.Test
     public static class EventLogTests
     {
         [Fact]
-        public static void LogConfigurationEventLogConstructor___Valid___Works()
+        public static void EventLogConfigurationConstructor___Valid___Works()
         {
             // Arrange
             var contextsToLog = LogContexts.EntryPostedInformation;
 
             // Act
-            var actual = new LogConfigurationEventLog(contextsToLog);
+            var actual = new EventLogConfiguration(contextsToLog);
 
             // Assert
             actual.Should().NotBeNull();
-            actual.LogName.Should().Be(LogConfigurationEventLog.DefaultLogName);
-            actual.MachineName.Should().Be(LogConfigurationEventLog.DefaultMachineName);
+            actual.LogName.Should().Be(EventLogConfiguration.DefaultLogName);
+            actual.MachineName.Should().Be(EventLogConfiguration.DefaultMachineName);
             actual.Source.Should().Be(Process.GetCurrentProcess().ProcessName);
             actual.ShouldCreateSourceIfMissing.Should().Be(false);
         }
 
         [Fact]
-        public static void LogConfigurationEventLogConstructor___Valid_override_defaults___Works()
+        public static void EventLogConfigurationConstructor___Valid_override_defaults___Works()
         {
             // Arrange
             var contextsToLog = LogContexts.EntryPostedInformation;
@@ -50,7 +50,7 @@ namespace Naos.Logging.Test
             var shouldCreateSource = true;
 
             // Act
-            var actual = new LogConfigurationEventLog(contextsToLog, source, logName, machineName, shouldCreateSource);
+            var actual = new EventLogConfiguration(contextsToLog, source, logName, machineName, shouldCreateSource);
 
             // Assert
             actual.Should().NotBeNull();
@@ -64,7 +64,7 @@ namespace Naos.Logging.Test
         public static void LogProcessorEventLogConstructor___Null_config___Throws()
         {
             // Arrange
-            Action action = () => new LogProcessorEventLog(null);
+            Action action = () => new EventLogProcessor(null);
 
             // Act
             var exception = Record.Exception(action);
@@ -76,14 +76,14 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public static void RoundtripSerialization___LogConfigurationEventLog___Works()
+        public static void RoundtripSerialization___EventLogConfiguration___Works()
         {
             // Arrange
             var expected = ShareSerializationTestLogic.EventLogConfiguration;
 
             void ThrowIfObjectsDiffer(object actualAsObject)
             {
-                var actual = actualAsObject as LogConfigurationEventLog;
+                var actual = actualAsObject as EventLogConfiguration;
                 actual.Should().NotBeNull();
                 actual.Should().Be(expected);
             }
@@ -105,28 +105,28 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(LogContexts.EntryPosted, source: source, logName: logName, machineName: machineName),
-                                                Second = new LogConfigurationEventLog(LogContexts.ItsLogInternalErrors, source: source, logName: logName, machineName: machineName),
+                                                First = new EventLogConfiguration(LogContexts.EntryPosted, source: source, logName: logName, machineName: machineName),
+                                                Second = new EventLogConfiguration(LogContexts.ItsLogInternalErrors, source: source, logName: logName, machineName: machineName),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(logContexts, source: source, logName: "Log1", machineName: machineName),
-                                                Second = new LogConfigurationEventLog(logContexts, source: source, logName: "Log2", machineName: machineName),
+                                                First = new EventLogConfiguration(logContexts, source: source, logName: "Log1", machineName: machineName),
+                                                Second = new EventLogConfiguration(logContexts, source: source, logName: "Log2", machineName: machineName),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(logContexts, source: source, shouldCreateSourceIfMissing: true, logName: logName, machineName: machineName),
-                                                Second = new LogConfigurationEventLog(logContexts, source: source, shouldCreateSourceIfMissing: false, logName: logName, machineName: machineName),
+                                                First = new EventLogConfiguration(logContexts, source: source, shouldCreateSourceIfMissing: true, logName: logName, machineName: machineName),
+                                                Second = new EventLogConfiguration(logContexts, source: source, shouldCreateSourceIfMissing: false, logName: logName, machineName: machineName),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(logContexts, source: source, logName: logName, machineName: "Machine1"),
-                                                Second = new LogConfigurationEventLog(logContexts, source: source, logName: logName, machineName: "Machine2"),
+                                                First = new EventLogConfiguration(logContexts, source: source, logName: logName, machineName: "Machine1"),
+                                                Second = new EventLogConfiguration(logContexts, source: source, logName: logName, machineName: "Machine2"),
                                             },
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(logContexts, source: "Source1", logName: logName, machineName: machineName),
-                                                Second = new LogConfigurationEventLog(logContexts, source: "Source2", logName: logName, machineName: machineName),
+                                                First = new EventLogConfiguration(logContexts, source: "Source1", logName: logName, machineName: machineName),
+                                                Second = new EventLogConfiguration(logContexts, source: "Source2", logName: logName, machineName: machineName),
                                             },
                                     }.ToList();
 
@@ -159,8 +159,8 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new LogConfigurationEventLog(logContexts, source: source, logName: logName, machineName: machineName),
-                                                Second = new LogConfigurationEventLog(logContexts, source: source, logName: logName, machineName: machineName),
+                                                First = new EventLogConfiguration(logContexts, source: source, logName: logName, machineName: machineName),
+                                                Second = new EventLogConfiguration(logContexts, source: source, logName: logName, machineName: machineName),
                                             },
                                     }.ToList();
 
