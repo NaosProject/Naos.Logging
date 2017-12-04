@@ -35,6 +35,14 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <returns>Collection of <see cref="LogMessage" />'s.</returns>
         public abstract IReadOnlyCollection<LogMessage> ReadAll();
+
+        /// <summary>
+        /// Reads the log for the specified range.
+        /// </summary>
+        /// <param name="startUtc">Start time to range to read in UTC.</param>
+        /// <param name="endUtc">End time of range to read in UTC.</param>
+        /// <returns>Collection of <see cref="LogMessage" />'s.</returns>
+        public abstract IReadOnlyCollection<LogMessage> ReadRange(DateTime startUtc, DateTime endUtc);
     }
 
     /// <summary>

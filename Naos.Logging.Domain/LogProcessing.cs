@@ -86,6 +86,13 @@ namespace Naos.Logging.Domain
                         logProcessors.Add(fileLogger);
                         localAnnouncer(Invariant($"Wired up {fileLogger}."));
                     }
+                    else if (configuration is TimeSlicedFilesLogConfiguration timeSlicedFilesConfiguration)
+                    {
+                        var timeSlicedFilesLogger = new TimeSlicedFilesLogProcessor(timeSlicedFilesConfiguration);
+                        new { fileLogger = timeSlicedFilesLogger }.Must().NotBeNull().OrThrowFirstFailure();
+                        logProcessors.Add(timeSlicedFilesLogger);
+                        localAnnouncer(Invariant($"Wired up {timeSlicedFilesLogger}."));
+                    }
                     else if (configuration is EventLogConfiguration eventLogConfiguration)
                     {
                         var eventLogLogger = new EventLogProcessor(eventLogConfiguration);

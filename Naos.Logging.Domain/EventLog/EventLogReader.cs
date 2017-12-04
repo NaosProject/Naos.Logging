@@ -6,6 +6,7 @@
 
 namespace Naos.Logging.Domain
 {
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
 
@@ -40,6 +41,12 @@ namespace Naos.Logging.Domain
             }
 
             return ret;
+        }
+
+        /// <inheritdoc cref="LogReaderBase" />
+        public override IReadOnlyCollection<LogMessage> ReadRange(DateTime startUtc, DateTime endUtc)
+        {
+            throw new NotSupportedException("Event Log does not support reading ranges of time.");
         }
     }
 }

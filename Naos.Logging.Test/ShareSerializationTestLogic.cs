@@ -29,6 +29,8 @@ namespace Naos.Logging.Test
 
         internal static readonly FileLogConfiguration FileConfiguration = new FileLogConfiguration(LogContexts.All, "C:\\Temp\\File.log");
 
+        internal static readonly TimeSlicedFilesLogConfiguration TimeSlicedFilesLogConfiguration = new TimeSlicedFilesLogConfiguration(LogContexts.All, "C:\\Temp\\", "LogFile", TimeSpan.FromHours(1));
+
         internal static readonly EventLogConfiguration EventLogConfiguration = new EventLogConfiguration(LogContexts.All, "Source", "Application", "Localhost", false);
 
         internal static readonly ConsoleLogConfiguration ConsoleConfiguration = new ConsoleLogConfiguration(LogContexts.All, LogContexts.AllErrors);
