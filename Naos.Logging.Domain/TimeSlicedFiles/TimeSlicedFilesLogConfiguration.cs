@@ -25,6 +25,8 @@ namespace Naos.Logging.Domain
     /// </summary>
     public class TimeSlicedFilesLogConfiguration : LogConfigurationBase, IEquatable<TimeSlicedFilesLogConfiguration>
     {
+        private IReadOnlyCollection<TimeSpan> sliceOffsets;
+
         /// <summary>
         /// File extension of files written without the leading period/dot "."
         /// </summary>
@@ -50,7 +52,7 @@ namespace Naos.Logging.Domain
             this.CreateDirectoryStructureIfMissing = createDirectoryStructureIfMissing;
             this.TimeSlicePerFile = timeSlicePerFile;
 
-            this.SliceOffsets = timeSlicePerFile.SliceIntoOffsetsPerDay();
+            this.sliceOffsets = timeSlicePerFile.SliceIntoOffsetsPerDay();
         }
 
         /// <summary>
@@ -72,11 +74,6 @@ namespace Naos.Logging.Domain
         /// Gets a value indicating whether to create the directory structure if it's missing.
         /// </summary>
         public bool CreateDirectoryStructureIfMissing { get; private set; }
-
-        /// <summary>
-        /// Gets the offsets of the day using the provided slice size.
-        /// </summary>
-        public IReadOnlyCollection<TimeSpan> SliceOffsets { get; private set; }
 
         /// <summary>
         /// Equality operator.
@@ -125,11 +122,20 @@ namespace Naos.Logging.Domain
         {
             var now = nowUtc == default(DateTime) ? DateTime.UtcNow : nowUtc;
             var date = now.ToString("yyyy-dd-MM", CultureInfo.InvariantCulture);
-            var offsets = this.SliceOffsets.FindOffsetRange(now);
+            var offsets = this.GetSliceOffsets().FindOffsetRange(now);
 
             var file = Invariant($"{this.FileNamePrefix}--{date}--{offsets.Item1.ToString("hhmm", CultureInfo.InvariantCulture)}Z-{offsets.Item2.ToString("hhmm", CultureInfo.InvariantCulture)}Z.{FileExtensionWithoutDot}");
             var path = Path.Combine(this.LogFileDirectoryPath, file);
             return path;
+        }
+
+        /// <summary>
+        /// Gets the offsets of the slices in the day.
+        /// </summary>
+        /// <returns>Offset collection.</returns>
+        public IReadOnlyCollection<TimeSpan> GetSliceOffsets()
+        {
+            return this.sliceOffsets;
         }
     }
 }

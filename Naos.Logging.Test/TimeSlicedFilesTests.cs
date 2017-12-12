@@ -15,6 +15,7 @@ namespace Naos.Logging.Test
     using FluentAssertions;
 
     using Naos.Logging.Domain;
+    using Naos.Serialization.Json;
 
     using Xunit;
 
@@ -22,6 +23,32 @@ namespace Naos.Logging.Test
 
     public static class TimeSlicedFilesTests
     {
+        [Fact]
+        public static void LogConfigurationTimeSliced___Can___Deserialize()
+        {
+            // Arrange
+            var input = @"
+                {
+                    ""contextsToLog"": ""all"",
+                    ""timeSlicePerFile"": ""00:01:00"",
+                    ""fileNamePrefix"": ""Log"",
+                    ""logFileDirectoryPath"": ""D:\\Logs"",
+                    ""createDirectoryStructureIfMissing"": true
+                }";
+
+            var serializer = new NaosJsonSerializer();
+
+            // Act
+            var result = serializer.Deserialize<LogConfigurationBase>(input);
+
+            // Assert
+            var typed = (TimeSlicedFilesLogConfiguration)result;
+            typed.LogFileDirectoryPath.Should().Be("D:\\Logs");
+            typed.TimeSlicePerFile.Should().Be(TimeSpan.FromMinutes(1));
+            typed.FileNamePrefix.Should().Be("Log");
+            typed.CreateDirectoryStructureIfMissing.Should().BeTrue();
+        }
+
         [Fact]
         public static void LogConfigurationFileConstructor___Null_prefix___Throws()
         {
