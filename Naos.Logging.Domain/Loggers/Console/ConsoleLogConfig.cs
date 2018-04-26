@@ -20,14 +20,14 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsoleLogConfig"/> class.
         /// </summary>
-        /// <param name="includeLogEntrySubjectAndParameters">Indicates whether to include <see cref="Its.Log"/> <see cref="LogEntry"/> subject and parameters when building the string message to log; DEFAULT is false</param>
+        /// <param name="logEntryPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         /// <param name="originsToLogConsoleOut">The log-item origins to log to <see cref="Console.Out" />.</param>
         /// <param name="originsToLogConsoleError">The log-item origins to log to <see cref="Console.Error" />.</param>
         public ConsoleLogConfig(
-            bool includeLogEntrySubjectAndParameters,
+            LogEntryPropertiesToIncludeInLogMessage logEntryPropertiesToIncludeInLogMessage,
             LogItemOrigins originsToLogConsoleOut,
             LogItemOrigins originsToLogConsoleError)
-            : base(originsToLogConsoleOut | originsToLogConsoleError, includeLogEntrySubjectAndParameters)
+            : base(originsToLogConsoleOut | originsToLogConsoleError, logEntryPropertiesToIncludeInLogMessage)
         {
             this.OriginsToLogConsoleOut = originsToLogConsoleOut;
             this.OriginsToLogConsoleError = originsToLogConsoleError;
@@ -64,7 +64,7 @@ namespace Naos.Logging.Domain
             }
 
             var result = (first.OriginsToLog == second.OriginsToLog) &&
-                         (first.IncludeLogEntrySubjectAndParameters == second.IncludeLogEntrySubjectAndParameters) &&
+                         (first.LogEntryPropertiesToIncludeInLogMessage == second.LogEntryPropertiesToIncludeInLogMessage) &&
                          (first.OriginsToLogConsoleOut == second.OriginsToLogConsoleOut) &&
                          (first.OriginsToLogConsoleError == second.OriginsToLogConsoleError);
             return result;
@@ -93,7 +93,7 @@ namespace Naos.Logging.Domain
             HashCodeHelper
                 .Initialize()
                 .Hash(this.OriginsToLog)
-                .Hash(this.IncludeLogEntrySubjectAndParameters)
+                .Hash(this.LogEntryPropertiesToIncludeInLogMessage)
                 .Hash(this.OriginsToLogConsoleOut)
                 .Hash(this.OriginsToLogConsoleError)
                 .Value;

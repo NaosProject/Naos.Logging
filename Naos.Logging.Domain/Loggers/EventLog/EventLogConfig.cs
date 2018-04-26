@@ -34,19 +34,19 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="EventLogConfig"/> class.
         /// </summary>
         /// <param name="originsToLog">The log-item origins to log for.</param>
-        /// <param name="includeLogEntrySubjectAndParameters">Indicates whether to include <see cref="Its.Log"/> <see cref="LogEntry"/> subject and parameters when building the string message to log; DEFAULT is false</param>
+        /// <param name="logEntryPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         /// <param name="source">Optional event log source; DEFAULT is running process' name.</param>
         /// <param name="shouldCreateSourceIfMissing">Value indicating whether or not to create the source if missing.</param>
         /// <param name="logName">Optional log name; DEFAULT is <see cref="DefaultLogName" />.</param>
         /// <param name="machineName">Optional machine name; DEFAULT is <see cref="DefaultMachineName" />.</param>
         public EventLogConfig(
             LogItemOrigins originsToLog,
-            bool includeLogEntrySubjectAndParameters,
+            LogEntryPropertiesToIncludeInLogMessage logEntryPropertiesToIncludeInLogMessage,
             string source = null,
             string logName = DefaultLogName,
             string machineName = DefaultMachineName,
             bool shouldCreateSourceIfMissing = false)
-            : base(originsToLog, includeLogEntrySubjectAndParameters)
+            : base(originsToLog, logEntryPropertiesToIncludeInLogMessage)
         {
             this.Source = string.IsNullOrWhiteSpace(source) ? ProcessHelpers.GetRunningProcess().Name() : source;
             this.ShouldCreateSourceIfMissing = shouldCreateSourceIfMissing;
@@ -95,7 +95,7 @@ namespace Naos.Logging.Domain
             }
 
             var result = (first.OriginsToLog == second.OriginsToLog) &&
-                         (first.IncludeLogEntrySubjectAndParameters == second.IncludeLogEntrySubjectAndParameters) &&
+                         (first.LogEntryPropertiesToIncludeInLogMessage == second.LogEntryPropertiesToIncludeInLogMessage) &&
                          (first.Source == second.Source) &&
                          (first.ShouldCreateSourceIfMissing == second.ShouldCreateSourceIfMissing) &&
                          (first.LogName == second.LogName) &&
@@ -126,7 +126,7 @@ namespace Naos.Logging.Domain
             HashCodeHelper
                 .Initialize()
                 .Hash(this.OriginsToLog)
-                .Hash(this.IncludeLogEntrySubjectAndParameters)
+                .Hash(this.LogEntryPropertiesToIncludeInLogMessage)
                 .Hash(this.Source)
                 .Hash(this.ShouldCreateSourceIfMissing)
                 .Hash(this.LogName)

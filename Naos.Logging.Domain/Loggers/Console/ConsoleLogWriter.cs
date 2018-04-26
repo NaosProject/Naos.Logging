@@ -11,8 +11,6 @@ namespace Naos.Logging.Domain
 
     using OBeautifulCode.Enum.Recipes;
 
-    using Spritely.Recipes;
-
     /// <summary>
     /// <see cref="Console"/> focused implementation of <see cref="LogWriterBase" />.
     /// </summary>
@@ -28,7 +26,10 @@ namespace Naos.Logging.Domain
             ConsoleLogConfig consoleConfig)
             : base(consoleConfig)
         {
-            new { consoleConfig }.Must().NotBeNull().OrThrowFirstFailure();
+            if (consoleConfig == null)
+            {
+                throw new ArgumentNullException(nameof(consoleConfig));
+            }
 
             this.consoleConfig = consoleConfig;
         }

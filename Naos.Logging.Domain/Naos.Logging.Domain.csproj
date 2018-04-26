@@ -59,6 +59,7 @@
     <Compile Include=".recipes\Spritely.MustValidation\RuleExtensions.cs" />
     <Compile Include=".recipes\Spritely.MustValidation\Rules.cs" />
     <Compile Include=".recipes\Spritely.MustValidation\ValidatedNotNullAttribute.cs" />
+    <Compile Include="Loggers\LogEntryPropertiesToIncludeInLogMessage.cs" />
     <Compile Include="LogItem\LogItem.cs" />
     <Compile Include="LogItem\LogItemOriginExtensions.cs" />
     <Compile Include="Loggers\Console\ConsoleLogWriter.cs" />

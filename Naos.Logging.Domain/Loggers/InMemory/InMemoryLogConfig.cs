@@ -23,13 +23,13 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="InMemoryLogConfig"/> class.
         /// </summary>
         /// <param name="originsToLog">The log-item origins to log for.</param>
-        /// <param name="includeLogEntrySubjectAndParameters">Indicates whether to include <see cref="Its.Log"/> <see cref="LogEntry"/> subject and parameters when building the string message to log; DEFAULT is false</param>
+        /// <param name="logEntryPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         /// <param name="maxLoggedItemCount">Optional maximum number of elements to keep internally before removing the oldest items; DEFAULT is -1 which is infinite.</param>
         public InMemoryLogConfig(
             LogItemOrigins originsToLog,
-            bool includeLogEntrySubjectAndParameters,
+            LogEntryPropertiesToIncludeInLogMessage logEntryPropertiesToIncludeInLogMessage,
             int maxLoggedItemCount = -1)
-            : base(originsToLog, includeLogEntrySubjectAndParameters)
+            : base(originsToLog, logEntryPropertiesToIncludeInLogMessage)
         {
             new { maxLoggedItemCount }.Must().BeGreaterThanOrEqualTo(-1).OrThrowFirstFailure();
 
@@ -62,7 +62,7 @@ namespace Naos.Logging.Domain
             }
 
             var result = (first.OriginsToLog == second.OriginsToLog) &&
-                         (first.IncludeLogEntrySubjectAndParameters == second.IncludeLogEntrySubjectAndParameters) &&
+                         (first.LogEntryPropertiesToIncludeInLogMessage == second.LogEntryPropertiesToIncludeInLogMessage) &&
                          (first.MaxLoggedItemCount == second.MaxLoggedItemCount);
             return result;
         }
@@ -90,7 +90,7 @@ namespace Naos.Logging.Domain
             HashCodeHelper
                 .Initialize()
                 .Hash(this.OriginsToLog)
-                .Hash(this.IncludeLogEntrySubjectAndParameters)
+                .Hash(this.LogEntryPropertiesToIncludeInLogMessage)
                 .Hash(this.MaxLoggedItemCount)
                 .Value;
     }

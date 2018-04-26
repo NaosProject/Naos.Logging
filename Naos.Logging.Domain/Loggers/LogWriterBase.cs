@@ -128,7 +128,7 @@ namespace Naos.Logging.Domain
             LogEntry logEntry,
             LogItemContext logItemContext)
         {
-            var logMessage = BuildLogMessageFromLogEntry(logEntry, this.logWriterConfigBase.IncludeLogEntrySubjectAndParameters);
+            var logMessage = BuildLogMessageFromLogEntry(logEntry, this.logWriterConfigBase.LogEntryPropertiesToIncludeInLogMessage);
             var result = new LogItem(logItemContext, logMessage);
             return result;
         }
@@ -137,29 +137,41 @@ namespace Naos.Logging.Domain
         /// Builds a log message from a <see cref="LogItem" /> from a <see cref="LogEntry"/>.
         /// </summary>
         /// <param name="logEntry">The log entry.</param>
-        /// <param name="includeSubjectAndParameters">Indicates whether to include <see cref="Its.Log"/> <see cref="LogEntry"/> subject and parameters when building the message.</param>
+        /// <param name="logEntryPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         /// <returns>Log message.</returns>
         protected static string BuildLogMessageFromLogEntry(
             LogEntry logEntry,
-            bool includeSubjectAndParameters)
+            LogEntryPropertiesToIncludeInLogMessage logEntryPropertiesToIncludeInLogMessage)
         {
-            if (includeSubjectAndParameters)
+            string result;
+            if (logEntryPropertiesToIncludeInLogMessage == LogEntryPropertiesToIncludeInLogMessage.Default)
             {
-                var logMessage = logEntry.Subject?.ToLogString() ?? "Null Subject Supplied to EntryPosted in " + nameof(LogWriting);
-                if (logEntry.Params != null && logEntry.Params.Any())
-                {
-                    foreach (var param in logEntry.Params)
-                    {
-                        logMessage = logMessage + " - " + param.ToLogString();
-                    }
-                }
-
-                return logMessage.ToLogString();
+                result = logEntry.ToLogString();
             }
             else
             {
-                return logEntry.ToLogString();
+                result = string.Empty;
+
+                if (logEntryPropertiesToIncludeInLogMessage.HasFlag(LogEntryPropertiesToIncludeInLogMessage.Subject))
+                {
+                    result += logEntry.Subject?.ToLogString() ?? "Null Subject Supplied to EntryPosted in " + nameof(LogWriting);
+                }
+
+                if (logEntryPropertiesToIncludeInLogMessage.HasFlag(LogEntryPropertiesToIncludeInLogMessage.Parameters))
+                {
+                    if (logEntry.Params != null && logEntry.Params.Any())
+                    {
+                        foreach (var param in logEntry.Params)
+                        {
+                            result += " - " + param.ToLogString();
+                        }
+                    }
+                }
+
+                result = result.ToLogString();
             }
+
+            return result;
         }
     }
 }
