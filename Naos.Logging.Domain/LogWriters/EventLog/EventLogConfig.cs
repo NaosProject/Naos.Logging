@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="EventLogConfiguration.cs" company="Naos">
+// <copyright file="EventLogConfig.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -9,14 +9,14 @@ namespace Naos.Logging.Domain
     using System;
     using System.Diagnostics;
 
+    using Its.Log.Instrumentation;
+
     using OBeautifulCode.Math.Recipes;
 
-    using Spritely.Recipes;
-
     /// <summary>
-    /// <see cref="EventLog"/> focused implementation of <see cref="LogConfigurationBase" />.
+    /// <see cref="EventLog"/> focused implementation of <see cref="LogWriterConfigBase" />.
     /// </summary>
-    public class EventLogConfiguration : LogConfigurationBase, IEquatable<EventLogConfiguration>
+    public class EventLogConfig : LogWriterConfigBase, IEquatable<EventLogConfig>
     {
         /// <summary>
         /// Default <see cref="EventLog.Log" /> to use; "Application".
@@ -29,15 +29,22 @@ namespace Naos.Logging.Domain
         public const string DefaultMachineName = ".";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventLogConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="EventLogConfig"/> class.
         /// </summary>
-        /// <param name="contextsToLog">Contexts to log.</param>
+        /// <param name="originsToLog">The log-item origins to log for.</param>
+        /// <param name="includeLogEntrySubjectAndParameters">Indicates whether to include <see cref="Its.Log"/> <see cref="LogEntry"/> subject and parameters when building the string message to log; DEFAULT is false</param>
         /// <param name="source">Optional event log source; DEFAULT is <see cref="Process.GetCurrentProcess"/> <see cref="Process.ProcessName" />.</param>
         /// <param name="shouldCreateSourceIfMissing">Value indicating whether or not to create the source if missing.</param>
         /// <param name="logName">Optional log name; DEFAULT is <see cref="DefaultLogName" />.</param>
         /// <param name="machineName">Optional machine name; DEFAULT is <see cref="DefaultMachineName" />.</param>
-        public EventLogConfiguration(LogContexts contextsToLog, string source = null, string logName = DefaultLogName, string machineName = DefaultMachineName, bool shouldCreateSourceIfMissing = false)
-            : base(contextsToLog)
+        public EventLogConfig(
+            LogItemOrigins originsToLog,
+            bool includeLogEntrySubjectAndParameters,
+            string source = null,
+            string logName = DefaultLogName,
+            string machineName = DefaultMachineName,
+            bool shouldCreateSourceIfMissing = false)
+            : base(originsToLog, includeLogEntrySubjectAndParameters)
         {
             this.Source = string.IsNullOrWhiteSpace(source) ? Process.GetCurrentProcess().ProcessName : source;
             this.ShouldCreateSourceIfMissing = shouldCreateSourceIfMissing;
@@ -71,7 +78,9 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are equal.</returns>
-        public static bool operator ==(EventLogConfiguration first, EventLogConfiguration second)
+        public static bool operator ==(
+            EventLogConfig first,
+            EventLogConfig second)
         {
             if (ReferenceEquals(first, second))
             {
@@ -83,7 +92,13 @@ namespace Naos.Logging.Domain
                 return false;
             }
 
-            return first.ContextsToLog == second.ContextsToLog && first.Source == second.Source && first.ShouldCreateSourceIfMissing == second.ShouldCreateSourceIfMissing && first.LogName == second.LogName && first.MachineName == second.MachineName;
+            var result = (first.OriginsToLog == second.OriginsToLog) &&
+                         (first.IncludeLogEntrySubjectAndParameters == second.IncludeLogEntrySubjectAndParameters) &&
+                         (first.Source == second.Source) &&
+                         (first.ShouldCreateSourceIfMissing == second.ShouldCreateSourceIfMissing) &&
+                         (first.LogName == second.LogName) &&
+                         (first.MachineName == second.MachineName);
+            return result;
         }
 
         /// <summary>
@@ -92,50 +107,28 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are inequal.</returns>
-        public static bool operator !=(EventLogConfiguration first, EventLogConfiguration second) => !(first == second);
+        public static bool operator !=(
+            EventLogConfig first,
+            EventLogConfig second) => !(first == second);
 
         /// <inheritdoc />
-        public bool Equals(EventLogConfiguration other) => this == other;
+        public bool Equals(
+            EventLogConfig other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => this == (obj as EventLogConfiguration);
+        public override bool Equals(
+            object obj) => this == (obj as EventLogConfig);
 
         /// <inheritdoc />
-        public override int GetHashCode() => HashCodeHelper.Initialize().Hash(this.ContextsToLog.ToString()).Hash(this.Source).Hash(this.ShouldCreateSourceIfMissing).Hash(this.LogName).Hash(this.MachineName).Value;
-    }
-
-    /// <summary>
-    /// Extensions on <see cref="EventLogConfiguration" />.
-    /// </summary>
-    public static class EventLogConfigurationExtensions
-    {
-        /// <summary>
-        /// Create the <see cref="EventLog" /> <see cref="EventLog.Source" /> from configuration if it does not exist (requires considerable set of permissions).
-        /// </summary>
-        /// <param name="eventLogConfiguration">Configuration to use for creating source.</param>
-        public static void CreateEventLogSourceIfMissing(this EventLogConfiguration eventLogConfiguration)
-        {
-            new { eventLogConfiguration }.Must().NotBeNull().OrThrowFirstFailure();
-
-            new { CreateSourceIfMissing = eventLogConfiguration.ShouldCreateSourceIfMissing }.Must().BeTrue().OrThrowFirstFailure();
-
-            if (!EventLog.SourceExists(eventLogConfiguration.Source))
-            {
-                var sourceData = new EventSourceCreationData(eventLogConfiguration.Source, eventLogConfiguration.LogName);
-                EventLog.CreateEventSource(sourceData);
-            }
-        }
-
-        /// <summary>
-        /// Builds a new <see cref="EventLog" /> object from <see cref="EventLogConfiguration" />.
-        /// </summary>
-        /// <param name="eventLogConfiguration">Configuration to use.</param>
-        /// <returns>Event log object.</returns>
-        public static EventLog NewEventLogObject(this EventLogConfiguration eventLogConfiguration)
-        {
-            new { eventLogConfiguration }.Must().NotBeNull().OrThrowFirstFailure();
-
-            return new EventLog(eventLogConfiguration.LogName, eventLogConfiguration.MachineName, eventLogConfiguration.Source);
-        }
+        public override int GetHashCode() =>
+            HashCodeHelper
+                .Initialize()
+                .Hash(this.OriginsToLog)
+                .Hash(this.IncludeLogEntrySubjectAndParameters)
+                .Hash(this.Source)
+                .Hash(this.ShouldCreateSourceIfMissing)
+                .Hash(this.LogName)
+                .Hash(this.MachineName)
+                .Value;
     }
 }

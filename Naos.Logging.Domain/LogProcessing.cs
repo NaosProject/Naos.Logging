@@ -30,7 +30,7 @@ namespace Naos.Logging.Domain
 
         private bool hasBeenSetup = false;
 
-        private IReadOnlyCollection<LogProcessorBase> activeLogProcessors;
+        private IReadOnlyCollection<LogWriterBase> activeLogProcessors;
 
         private LogProcessing()
         {
@@ -45,7 +45,7 @@ namespace Naos.Logging.Domain
         /// <param name="configuredAndManagedLogProcessors">Optional configured and externally managed log processors; DEFAULT is null.</param>
         /// <param name="multipleCallsToSetupStrategy">Optional strategy to deal with multiple calls to <see cref="Setup" />; DEFAULT is <see cref="MultipleCallsToSetupStrategy.Throw" />.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Keeping this way.")]
-        public void Setup(LogProcessorSettings logProcessorSettings, Action<string> announcer = null, IReadOnlyCollection<LogProcessorBase> configuredAndManagedLogProcessors = null, MultipleCallsToSetupStrategy multipleCallsToSetupStrategy = MultipleCallsToSetupStrategy.Throw)
+        public void Setup(LogProcessorSettings logProcessorSettings, Action<string> announcer = null, IReadOnlyCollection<LogWriterBase> configuredAndManagedLogProcessors = null, MultipleCallsToSetupStrategy multipleCallsToSetupStrategy = MultipleCallsToSetupStrategy.Throw)
         {
             new { multipleCallsToSetupStrategy }.Must().NotBeEqualTo(MultipleCallsToSetupStrategy.Invalid).OrThrowFirstFailure();
             var localAnnouncer = announcer ?? NullAnnouncement;
@@ -71,7 +71,7 @@ namespace Naos.Logging.Domain
 
                 new { logProcessorSettings }.Must().NotBeNull().OrThrowFirstFailure();
 
-                var logProcessors = new List<LogProcessorBase>(configuredAndManagedLogProcessors ?? new LogProcessorBase[0]);
+                var logProcessors = new List<LogWriterBase>(configuredAndManagedLogProcessors ?? new LogWriterBase[0]);
                 if (logProcessors.Any())
                 {
                     localAnnouncer(Invariant($"Used pre-configured loggers: {string.Join(",", logProcessors)}"));
@@ -79,37 +79,37 @@ namespace Naos.Logging.Domain
 
                 foreach (var configuration in logProcessorSettings.Configurations)
                 {
-                    if (configuration is FileLogConfiguration fileConfiguration)
+                    if (configuration is FileLogConfig fileConfiguration)
                     {
-                        var fileLogger = new FileLogProcessor(fileConfiguration);
+                        var fileLogger = new FileLogWriter(fileConfiguration);
                         new { fileLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         logProcessors.Add(fileLogger);
                         localAnnouncer(Invariant($"Wired up {fileLogger}."));
                     }
-                    else if (configuration is TimeSlicedFilesLogConfiguration timeSlicedFilesConfiguration)
+                    else if (configuration is TimeSlicedFilesLogConfig timeSlicedFilesConfiguration)
                     {
-                        var timeSlicedFilesLogger = new TimeSlicedFilesLogProcessor(timeSlicedFilesConfiguration);
+                        var timeSlicedFilesLogger = new TimeSlicedFilesLogWriter(timeSlicedFilesConfiguration);
                         new { fileLogger = timeSlicedFilesLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         logProcessors.Add(timeSlicedFilesLogger);
                         localAnnouncer(Invariant($"Wired up {timeSlicedFilesLogger}."));
                     }
-                    else if (configuration is EventLogConfiguration eventLogConfiguration)
+                    else if (configuration is EventLogConfig eventLogConfiguration)
                     {
-                        var eventLogLogger = new EventLogProcessor(eventLogConfiguration);
+                        var eventLogLogger = new EventLogWriter(eventLogConfiguration);
                         new { eventLogLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         logProcessors.Add(eventLogLogger);
                         localAnnouncer(Invariant($"Wired up {eventLogLogger}."));
                     }
-                    else if (configuration is ConsoleLogConfiguration consoleConfiguration)
+                    else if (configuration is ConsoleLogConfig consoleConfiguration)
                     {
-                        var consoleLogger = new ConsoleLogProcessor(consoleConfiguration);
+                        var consoleLogger = new ConsoleLogWriter(consoleConfiguration);
                         new { consoleLogger }.Must().NotBeNull().OrThrowFirstFailure();
                         logProcessors.Add(consoleLogger);
                         localAnnouncer(Invariant($"Wired up {consoleLogger}."));
                     }
                     else
                     {
-                        throw new NotSupportedException(Invariant($"Unsupported implementation of {nameof(LogConfigurationBase)} - {configuration.GetType().FullName}, try providing a pre-configured implementation of {nameof(LogProcessorBase)} until the config type is supported."));
+                        throw new NotSupportedException(Invariant($"Unsupported implementation of {nameof(LogWriterConfigBase)} - {configuration.GetType().FullName}, try providing a pre-configured implementation of {nameof(LogWriterBase)} until the config type is supported."));
                     }
                 }
 
@@ -121,7 +121,7 @@ namespace Naos.Logging.Domain
             }
         }
 
-        private void LogOnActiveLogProcessors(LogContexts context, LogEntry logEntry)
+        private void LogOnActiveLogProcessors(LogItemOrigins context, LogEntry logEntry)
         {
             foreach (var logProcessor in this.activeLogProcessors)
             {
@@ -141,7 +141,7 @@ namespace Naos.Logging.Domain
             Log.InternalErrors += (sender, args) =>
                 {
                     var logEntry = args.LogEntry ?? new LogEntry(Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(Log)}.{nameof(Log.InternalErrors)}"));
-                    this.LogOnActiveLogProcessors(LogContexts.ItsLogInternalErrors, logEntry);
+                    this.LogOnActiveLogProcessors(LogItemOrigins.ItsLogInternalErrors, logEntry);
                 };
 
             announcer(Invariant($"Wired up {nameof(Log)}.{nameof(Log.InternalErrors)} to the {nameof(this.activeLogProcessors)}."));
@@ -153,7 +153,7 @@ namespace Naos.Logging.Domain
                 {
                     var logEntry = args.LogEntry ?? new LogEntry(Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(Log)}.{nameof(Log.EntryPosted)}"));
 
-                    var context = logEntry.Subject is Exception ? LogContexts.EntryPostedException : LogContexts.EntryPostedInformation;
+                    var context = logEntry.Subject is Exception ? LogItemOrigins.EntryPostedException : LogItemOrigins.EntryPostedInformation;
 
                     this.LogOnActiveLogProcessors(context, logEntry);
                 };
@@ -167,7 +167,7 @@ namespace Naos.Logging.Domain
                 {
                     var logEntry = new LogEntry(Invariant($"Unhandled exception encountered"), args.ExceptionObject);
 
-                    this.LogOnActiveLogProcessors(LogContexts.AppDomainUnhandledException, logEntry);
+                    this.LogOnActiveLogProcessors(LogItemOrigins.AppDomainUnhandledException, logEntry);
                 };
 
             announcer(Invariant($"Wired up {nameof(AppDomain)}.{nameof(AppDomain.UnhandledException)} to the {nameof(this.activeLogProcessors)}."));

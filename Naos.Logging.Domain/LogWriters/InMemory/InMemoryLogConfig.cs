@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="InMemoryLogConfiguration.cs" company="Naos">
+// <copyright file="InMemoryLogConfig.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -8,22 +8,28 @@ namespace Naos.Logging.Domain
 {
     using System;
 
+    using Its.Log.Instrumentation;
+
     using OBeautifulCode.Math.Recipes;
 
     using Spritely.Recipes;
 
     /// <summary>
-    /// In memory implementation of <see cref="LogConfigurationBase" />.
+    /// In memory implementation of <see cref="LogWriterConfigBase" />.
     /// </summary>
-    public class InMemoryLogConfiguration : LogConfigurationBase, IEquatable<InMemoryLogConfiguration>
+    public class InMemoryLogConfig : LogWriterConfigBase, IEquatable<InMemoryLogConfig>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryLogConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryLogConfig"/> class.
         /// </summary>
-        /// <param name="contextsToLog">Contexts to log.</param>
+        /// <param name="originsToLog">The log-item origins to log for.</param>
+        /// <param name="includeLogEntrySubjectAndParameters">Indicates whether to include <see cref="Its.Log"/> <see cref="LogEntry"/> subject and parameters when building the string message to log; DEFAULT is false</param>
         /// <param name="maxLoggedItemCount">Optional maximum number of elements to keep internally before removing the oldest items; DEFAULT is -1 which is infinite.</param>
-        public InMemoryLogConfiguration(LogContexts contextsToLog, int maxLoggedItemCount = -1)
-            : base(contextsToLog)
+        public InMemoryLogConfig(
+            LogItemOrigins originsToLog,
+            bool includeLogEntrySubjectAndParameters,
+            int maxLoggedItemCount = -1)
+            : base(originsToLog, includeLogEntrySubjectAndParameters)
         {
             new { maxLoggedItemCount }.Must().BeGreaterThanOrEqualTo(-1).OrThrowFirstFailure();
 
@@ -41,7 +47,9 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are equal.</returns>
-        public static bool operator ==(InMemoryLogConfiguration first, InMemoryLogConfiguration second)
+        public static bool operator ==(
+            InMemoryLogConfig first,
+            InMemoryLogConfig second)
         {
             if (ReferenceEquals(first, second))
             {
@@ -53,7 +61,10 @@ namespace Naos.Logging.Domain
                 return false;
             }
 
-            return first.ContextsToLog == second.ContextsToLog && first.MaxLoggedItemCount == second.MaxLoggedItemCount;
+            var result = (first.OriginsToLog == second.OriginsToLog) &&
+                         (first.IncludeLogEntrySubjectAndParameters == second.IncludeLogEntrySubjectAndParameters) &&
+                         (first.MaxLoggedItemCount == second.MaxLoggedItemCount);
+            return result;
         }
 
         /// <summary>
@@ -62,15 +73,25 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are inequal.</returns>
-        public static bool operator !=(InMemoryLogConfiguration first, InMemoryLogConfiguration second) => !(first == second);
+        public static bool operator !=(
+            InMemoryLogConfig first,
+            InMemoryLogConfig second) => !(first == second);
 
         /// <inheritdoc />
-        public bool Equals(InMemoryLogConfiguration other) => this == other;
+        public bool Equals(
+            InMemoryLogConfig other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => this == (obj as InMemoryLogConfiguration);
+        public override bool Equals(
+            object obj) => this == (obj as InMemoryLogConfig);
 
         /// <inheritdoc />
-        public override int GetHashCode() => HashCodeHelper.Initialize().Hash(this.ContextsToLog.ToString()).Hash(this.MaxLoggedItemCount).Value;
+        public override int GetHashCode() =>
+            HashCodeHelper
+                .Initialize()
+                .Hash(this.OriginsToLog)
+                .Hash(this.IncludeLogEntrySubjectAndParameters)
+                .Hash(this.MaxLoggedItemCount)
+                .Value;
     }
 }

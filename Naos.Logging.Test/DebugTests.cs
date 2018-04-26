@@ -28,11 +28,11 @@ namespace Naos.Logging.Test
         public static void EventLog_default_config___Test___Non_logging_context()
         {
             // Arrange
-            var config = new EventLogConfiguration(LogContexts.UnexpectedErrors);
-            var logger = new EventLogProcessor(config);
+            var config = new EventLogConfig(LogItemOrigins.UnexpectedErrors);
+            var logger = new EventLogWriter(config);
 
             // Act
-            logger.Log(LogContexts.EntryPostedInformation, "MessageShouldntBeThere", "SubjectShouldntBeThere");
+            logger.Log(LogItemOrigins.EntryPostedInformation, "MessageShouldntBeThere", "SubjectShouldntBeThere");
 
             // Assert
             /* Confirm no entry - by hand */
@@ -42,11 +42,11 @@ namespace Naos.Logging.Test
         public static void EventLog_default_config___Test___Logging_context()
         {
             // Arrange
-            var config = new EventLogConfiguration(LogContexts.UnexpectedErrors);
-            var logger = new EventLogProcessor(config);
+            var config = new EventLogConfig(LogItemOrigins.UnexpectedErrors);
+            var logger = new EventLogWriter(config);
 
             // Act
-            logger.Log(LogContexts.ItsLogInternalErrors, "Message", "Subject");
+            logger.Log(LogItemOrigins.ItsLogInternalErrors, "Message", "Subject");
 
             // Assert
             /* Confirm entry - by hand */
@@ -56,11 +56,11 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Non_logging_context()
         {
             // Arrange
-            var config = new EventLogConfiguration(LogContexts.UnexpectedErrors, "MySourceLawson", "MyLogLawson", "MyMachine", true);
-            var logger = new EventLogProcessor(config);
+            var config = new EventLogConfig(LogItemOrigins.UnexpectedErrors, "MySourceLawson", "MyLogLawson", "MyMachine", true);
+            var logger = new EventLogWriter(config);
 
             // Act
-            logger.Log(LogContexts.EntryPostedInformation, "MessageShouldntBeThere", "SubjectShouldntBeThere");
+            logger.Log(LogItemOrigins.EntryPostedInformation, "MessageShouldntBeThere", "SubjectShouldntBeThere");
 
             // Assert
             /* Confirm no entry - by hand */
@@ -70,11 +70,11 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Logging_context_information()
         {
             // Arrange
-            var config = new EventLogConfiguration(LogContexts.EntryPosted, "MySource", "MyLog", "Laptop", true);
-            var logger = new EventLogProcessor(config);
+            var config = new EventLogConfig(LogItemOrigins.EntryPosted, "MySource", "MyLog", "Laptop", true);
+            var logger = new EventLogWriter(config);
 
             // Act
-            logger.Log(LogContexts.EntryPostedInformation, "Message Information", "Subject");
+            logger.Log(LogItemOrigins.EntryPostedInformation, "Message Information", "Subject");
 
             // Assert
             /* Confirm entry - by hand */
@@ -84,11 +84,11 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Logging_context_error()
         {
             // Arrange
-            var config = new EventLogConfiguration(LogContexts.UnexpectedErrors, "MySource", "MyLog", "Laptop", true);
-            var logger = new EventLogProcessor(config);
+            var config = new EventLogConfig(LogItemOrigins.UnexpectedErrors, "MySource", "MyLog", "Laptop", true);
+            var logger = new EventLogWriter(config);
 
             // Act
-            logger.Log(LogContexts.ItsLogInternalErrors, "Message Error", "Subject");
+            logger.Log(LogItemOrigins.ItsLogInternalErrors, "Message Error", "Subject");
 
             // Assert
             /* Confirm entry - by hand */
@@ -98,7 +98,7 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Reading()
         {
             // Arrange
-            var config = new EventLogConfiguration(LogContexts.UnexpectedErrors, "MySource", "MyLog", "Laptop", true);
+            var config = new EventLogConfig(LogItemOrigins.UnexpectedErrors, "MySource", "MyLog", "Laptop", true);
             var logger = new EventLogReader(config);
 
             // Act

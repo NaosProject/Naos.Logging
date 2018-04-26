@@ -39,10 +39,10 @@ namespace Naos.Logging.Test
             var serializer = new NaosJsonSerializer();
 
             // Act
-            var result = serializer.Deserialize<LogConfigurationBase>(input);
+            var result = serializer.Deserialize<LogWriterConfigBase>(input);
 
             // Assert
-            var typed = (TimeSlicedFilesLogConfiguration)result;
+            var typed = (TimeSlicedFilesLogConfig)result;
             typed.LogFileDirectoryPath.Should().Be("D:\\Logs");
             typed.TimeSlicePerFile.Should().Be(TimeSpan.FromMinutes(1));
             typed.FileNamePrefix.Should().Be("Log");
@@ -53,7 +53,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Null_prefix___Throws()
         {
             // Arrange
-            Action action = () => new TimeSlicedFilesLogConfiguration(LogContexts.All, Path.GetTempPath(), null, TimeSpan.FromMinutes(10));
+            Action action = () => new TimeSlicedFilesLogConfig(LogItemOrigins.All, Path.GetTempPath(), null, TimeSpan.FromMinutes(10));
 
             // Act
             var exception = Record.Exception(action);
@@ -68,7 +68,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Empty_string_prefix___Throws()
         {
             // Arrange
-            Action action = () => new TimeSlicedFilesLogConfiguration(LogContexts.All, Path.GetTempPath(), string.Empty, TimeSpan.FromMinutes(10));
+            Action action = () => new TimeSlicedFilesLogConfig(LogItemOrigins.All, Path.GetTempPath(), string.Empty, TimeSpan.FromMinutes(10));
 
             // Act
             var exception = Record.Exception(action);
@@ -83,7 +83,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___WhiteSpace_prefix___Throws()
         {
             // Arrange
-            Action action = () => new TimeSlicedFilesLogConfiguration(LogContexts.All, Path.GetTempPath(), '\t'.ToString(), TimeSpan.FromMinutes(10));
+            Action action = () => new TimeSlicedFilesLogConfig(LogItemOrigins.All, Path.GetTempPath(), '\t'.ToString(), TimeSpan.FromMinutes(10));
 
             // Act
             var exception = Record.Exception(action);
@@ -98,13 +98,13 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Valid___Works()
         {
             // Arrange
-            var contextsToLog = LogContexts.EntryPostedInformation;
+            var contextsToLog = LogItemOrigins.EntryPostedInformation;
             var directoryPath = Path.GetTempPath();
             var filePrefix = Guid.NewGuid().ToString();
             var timeSlice = TimeSpan.FromHours(1);
 
             // Act
-            var actual = new TimeSlicedFilesLogConfiguration(contextsToLog, directoryPath, filePrefix, timeSlice);
+            var actual = new TimeSlicedFilesLogConfig(contextsToLog, directoryPath, filePrefix, timeSlice);
 
             // Assert
             actual.Should().NotBeNull();
@@ -118,7 +118,7 @@ namespace Naos.Logging.Test
         public static void LogProcessorFileConstructor___Null_config___Throws()
         {
             // Arrange
-            Action action = () => new FileLogProcessor(null);
+            Action action = () => new FileLogWriter(null);
 
             // Act
             var exception = Record.Exception(action);
@@ -137,15 +137,15 @@ namespace Naos.Logging.Test
             try
             {
                 // Arrange
-                var configuration = new TimeSlicedFilesLogConfiguration(LogContexts.AllErrors, tempDirectory, "TestFile", TimeSpan.FromMinutes(1));
-                var processor = new TimeSlicedFilesLogProcessor(configuration);
+                var configuration = new TimeSlicedFilesLogConfig(LogItemOrigins.AllErrors, tempDirectory, "TestFile", TimeSpan.FromMinutes(1));
+                var processor = new TimeSlicedFilesLogWriter(configuration);
 
                 var infoCanary = A.Dummy<string>();
                 var errorCanary = A.Dummy<string>();
 
                 // Act
-                processor.Log(LogContexts.EntryPostedInformation, infoCanary);
-                processor.Log(LogContexts.EntryPostedException, errorCanary);
+                processor.Log(LogItemOrigins.EntryPostedInformation, infoCanary);
+                processor.Log(LogItemOrigins.EntryPostedException, errorCanary);
 
                 // Assert
                 var files = Directory.GetFiles(tempDirectory);
@@ -164,11 +164,11 @@ namespace Naos.Logging.Test
         public static void RoundtripSerialization___LogConfigurationFile___Works()
         {
             // Arrange
-            var expected = ShareSerializationTestLogic.TimeSlicedFilesLogConfiguration;
+            var expected = ShareSerializationTestLogic.TimeSlicedFilesLogConfig;
 
             void ThrowIfObjectsDiffer(object actualAsObject)
             {
-                var actual = actualAsObject as TimeSlicedFilesLogConfiguration;
+                var actual = actualAsObject as TimeSlicedFilesLogConfig;
                 actual.Should().NotBeNull();
                 actual.Should().Be(expected);
             }
@@ -181,7 +181,7 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_different_data()
         {
             // Arrange
-            var logContexts = LogContexts.EntryPosted;
+            var logContexts = LogItemOrigins.EntryPosted;
             var filePrefix = A.Dummy<string>();
             var directoryPath = A.Dummy<string>();
             var timeSlice = TimeSpan.FromMinutes(10);
@@ -190,28 +190,28 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new TimeSlicedFilesLogConfiguration(LogContexts.EntryPosted, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
-                                                Second = new TimeSlicedFilesLogConfiguration(LogContexts.ItsLogInternalErrors, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
+                                                First = new TimeSlicedFilesLogConfig(LogItemOrigins.EntryPosted, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
+                                                Second = new TimeSlicedFilesLogConfig(LogItemOrigins.ItsLogInternalErrors, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
                                             },
                                         new
                                             {
-                                                First = new TimeSlicedFilesLogConfiguration(logContexts, "C:\\Path1", filePrefix, timeSlice, createDirectoryStructureIfMissing),
-                                                Second = new TimeSlicedFilesLogConfiguration(logContexts, "C:\\Path2", filePrefix, timeSlice, createDirectoryStructureIfMissing),
+                                                First = new TimeSlicedFilesLogConfig(logContexts, "C:\\Path1", filePrefix, timeSlice, createDirectoryStructureIfMissing),
+                                                Second = new TimeSlicedFilesLogConfig(logContexts, "C:\\Path2", filePrefix, timeSlice, createDirectoryStructureIfMissing),
                                             },
                                         new
                                             {
-                                                First = new TimeSlicedFilesLogConfiguration(logContexts, directoryPath, "Application", timeSlice, createDirectoryStructureIfMissing),
-                                                Second = new TimeSlicedFilesLogConfiguration(logContexts, directoryPath, "Database", timeSlice, createDirectoryStructureIfMissing),
+                                                First = new TimeSlicedFilesLogConfig(logContexts, directoryPath, "Application", timeSlice, createDirectoryStructureIfMissing),
+                                                Second = new TimeSlicedFilesLogConfig(logContexts, directoryPath, "Database", timeSlice, createDirectoryStructureIfMissing),
                                             },
                                         new
                                             {
-                                                First = new TimeSlicedFilesLogConfiguration(logContexts, directoryPath, filePrefix, TimeSpan.FromMinutes(10), createDirectoryStructureIfMissing),
-                                                Second = new TimeSlicedFilesLogConfiguration(logContexts, directoryPath, filePrefix, TimeSpan.FromMinutes(30), createDirectoryStructureIfMissing),
+                                                First = new TimeSlicedFilesLogConfig(logContexts, directoryPath, filePrefix, TimeSpan.FromMinutes(10), createDirectoryStructureIfMissing),
+                                                Second = new TimeSlicedFilesLogConfig(logContexts, directoryPath, filePrefix, TimeSpan.FromMinutes(30), createDirectoryStructureIfMissing),
                                             },
                                         new
                                             {
-                                                First = new TimeSlicedFilesLogConfiguration(logContexts, directoryPath, filePrefix, timeSlice, true),
-                                                Second = new TimeSlicedFilesLogConfiguration(logContexts, directoryPath, filePrefix, timeSlice, false),
+                                                First = new TimeSlicedFilesLogConfig(logContexts, directoryPath, filePrefix, timeSlice, true),
+                                                Second = new TimeSlicedFilesLogConfig(logContexts, directoryPath, filePrefix, timeSlice, false),
                                             },
                                     }.ToList();
 
@@ -235,7 +235,7 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_same_data()
         {
             // Arrange
-            var logContexts = LogContexts.EntryPosted;
+            var logContexts = LogItemOrigins.EntryPosted;
             var filePrefix = A.Dummy<string>();
             var directoryPath = A.Dummy<string>();
             var timeSlice = TimeSpan.FromMinutes(10);
@@ -245,8 +245,8 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new TimeSlicedFilesLogConfiguration(logContexts, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
-                                                Second = new TimeSlicedFilesLogConfiguration(logContexts, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
+                                                First = new TimeSlicedFilesLogConfig(logContexts, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
+                                                Second = new TimeSlicedFilesLogConfig(logContexts, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
                                             },
                                     }.ToList();
 

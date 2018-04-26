@@ -15,27 +15,27 @@ namespace Naos.Logging.Domain
     /// </summary>
     public class EventLogReader : LogReaderBase
     {
-        private readonly EventLogConfiguration eventLogConfiguration;
+        private readonly EventLogConfig _eventLogConfig;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventLogReader"/> class.
         /// </summary>
-        /// <param name="eventLogConfiguration">Configuration.</param>
-        public EventLogReader(EventLogConfiguration eventLogConfiguration)
-            : base(eventLogConfiguration)
+        /// <param name="eventLogConfig">Configuration.</param>
+        public EventLogReader(EventLogConfig eventLogConfig)
+            : base(eventLogConfig)
         {
-            this.eventLogConfiguration = eventLogConfiguration;
+            this._eventLogConfig = eventLogConfig;
         }
 
         /// <inheritdoc cref="LogReaderBase" />
-        public override IReadOnlyCollection<LogMessage> ReadAll()
+        public override IReadOnlyCollection<LogItem> ReadAll()
         {
-            var ret = new List<LogMessage>();
-            using (var eventLog = this.eventLogConfiguration.NewEventLogObject())
+            var ret = new List<LogItem>();
+            using (var eventLog = this._eventLogConfig.NewEventLogObject())
             {
                 foreach (EventLogEntry entry in eventLog.Entries)
                 {
-                    var logMessage = new LogMessage((LogContexts)entry.CategoryNumber, entry.Message, entry.TimeWritten.ToUniversalTime());
+                    var logMessage = new LogItem((LogItemOrigins)entry.CategoryNumber, entry.Message, entry.TimeWritten.ToUniversalTime());
                     ret.Add(logMessage);
                 }
             }
@@ -44,7 +44,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc cref="LogReaderBase" />
-        public override IReadOnlyCollection<LogMessage> ReadRange(DateTime startUtc, DateTime endUtc)
+        public override IReadOnlyCollection<LogItem> ReadRange(DateTime startUtc, DateTime endUtc)
         {
             throw new NotSupportedException("Event Log does not support reading ranges of time.");
         }

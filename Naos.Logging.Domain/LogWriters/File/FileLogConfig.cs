@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FileLogConfiguration.cs" company="Naos">
+// <copyright file="FileLogConfig.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -9,23 +9,30 @@ namespace Naos.Logging.Domain
     using System;
     using System.IO;
 
+    using Its.Log.Instrumentation;
+
     using OBeautifulCode.Math.Recipes;
 
     using Spritely.Recipes;
 
     /// <summary>
-    /// <see cref="File"/> focused implementation of <see cref="LogConfigurationBase" />.
+    /// <see cref="File"/> focused implementation of <see cref="LogWriterConfigBase" />.
     /// </summary>
-    public class FileLogConfiguration : LogConfigurationBase, IEquatable<FileLogConfiguration>
+    public class FileLogConfig : LogWriterConfigBase, IEquatable<FileLogConfig>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileLogConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="FileLogConfig"/> class.
         /// </summary>
-        /// <param name="contextsToLog">Contexts to log.</param>
+        /// <param name="originsToLog">The log-item origins to log for.</param>
+        /// <param name="includeLogEntrySubjectAndParameters">Indicates whether to include <see cref="Its.Log"/> <see cref="LogEntry"/> subject and parameters when building the string message to log; DEFAULT is false</param>
         /// <param name="logFilePath">File path to write logs to.</param>
         /// <param name="createDirectoryStructureIfMissing">Optional value indicating whether to create the directory structure if it's missing; DEFAULT is true.</param>
-        public FileLogConfiguration(LogContexts contextsToLog, string logFilePath, bool createDirectoryStructureIfMissing = true)
-            : base(contextsToLog)
+        public FileLogConfig(
+            LogItemOrigins originsToLog,
+            bool includeLogEntrySubjectAndParameters,
+            string logFilePath,
+            bool createDirectoryStructureIfMissing = true)
+            : base(originsToLog, includeLogEntrySubjectAndParameters)
         {
             new { logFilePath }.Must().NotBeNull().And().NotBeWhiteSpace().OrThrowFirstFailure();
 
@@ -49,7 +56,7 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are equal.</returns>
-        public static bool operator ==(FileLogConfiguration first, FileLogConfiguration second)
+        public static bool operator ==(FileLogConfig first, FileLogConfig second)
         {
             if (ReferenceEquals(first, second))
             {
@@ -61,7 +68,11 @@ namespace Naos.Logging.Domain
                 return false;
             }
 
-            return first.ContextsToLog == second.ContextsToLog && first.LogFilePath == second.LogFilePath && first.CreateDirectoryStructureIfMissing == second.CreateDirectoryStructureIfMissing;
+            var result = (first.OriginsToLog == second.OriginsToLog) &&
+                         (first.IncludeLogEntrySubjectAndParameters == second.IncludeLogEntrySubjectAndParameters) &&
+                         (first.LogFilePath == second.LogFilePath) &&
+                         (first.CreateDirectoryStructureIfMissing == second.CreateDirectoryStructureIfMissing);
+            return result;
         }
 
         /// <summary>
@@ -70,15 +81,26 @@ namespace Naos.Logging.Domain
         /// <param name="first">First parameter.</param>
         /// <param name="second">Second parameter.</param>
         /// <returns>A value indicating whether or not the two items are inequal.</returns>
-        public static bool operator !=(FileLogConfiguration first, FileLogConfiguration second) => !(first == second);
+        public static bool operator !=(
+            FileLogConfig first,
+            FileLogConfig second) => !(first == second);
 
         /// <inheritdoc />
-        public bool Equals(FileLogConfiguration other) => this == other;
+        public bool Equals(
+            FileLogConfig other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => this == (obj as FileLogConfiguration);
+        public override bool Equals(
+            object obj) => this == (obj as FileLogConfig);
 
         /// <inheritdoc />
-        public override int GetHashCode() => HashCodeHelper.Initialize().Hash(this.ContextsToLog.ToString()).Hash(this.LogFilePath).Hash(this.CreateDirectoryStructureIfMissing).Value;
+        public override int GetHashCode() =>
+            HashCodeHelper
+                .Initialize()
+                .Hash(this.OriginsToLog)
+                .Hash(this.IncludeLogEntrySubjectAndParameters)
+                .Hash(this.LogFilePath)
+                .Hash(this.CreateDirectoryStructureIfMissing)
+                .Value;
     }
 }

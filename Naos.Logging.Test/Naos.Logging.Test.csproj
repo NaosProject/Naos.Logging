@@ -113,6 +113,7 @@
     <Compile Include=".recipes\Spritely.MustValidation\RuleExtensions.cs" />
     <Compile Include=".recipes\Spritely.MustValidation\Rules.cs" />
     <Compile Include=".recipes\Spritely.MustValidation\ValidatedNotNullAttribute.cs" />
+    <Compile Include="LogItemOriginTest.cs" />
     <Compile Include="TimeSlicedFilesLogConfigurationExtensionsTests.cs" />
     <Compile Include="TimeSlicedFilesTests.cs" />
     <Compile Include="InMemoryTests.cs" />
@@ -142,6 +143,9 @@
       <Project>{58F546FE-D06E-49C6-81F7-F4AE54D50519}</Project>
       <Name>Naos.Logging.Domain</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Naos.Build.Analyzers.1.51.0-dealwithstylecopbeta\build\Naos.Build.Analyzers.targets" Condition="Exists('..\packages\Naos.Build.Analyzers.1.51.0-dealwithstylecopbeta\build\Naos.Build.Analyzers.targets')" />

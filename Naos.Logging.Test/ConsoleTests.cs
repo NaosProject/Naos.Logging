@@ -26,11 +26,11 @@ namespace Naos.Logging.Test
         public static void LogConfigurationConsoleConstructor___Valid___Works()
         {
             // Arrange
-            var contextsToLogConsoleOut = LogContexts.EntryPostedInformation;
-            var contextsToLogConsoleError = LogContexts.AllErrors;
+            var contextsToLogConsoleOut = LogItemOrigins.EntryPostedInformation;
+            var contextsToLogConsoleError = LogItemOrigins.AllErrors;
 
             // Act
-            var actual = new ConsoleLogConfiguration(contextsToLogConsoleOut, contextsToLogConsoleError);
+            var actual = new ConsoleLogConfig(contextsToLogConsoleOut, contextsToLogConsoleError);
 
             // Assert
             actual.Should().NotBeNull();
@@ -40,7 +40,7 @@ namespace Naos.Logging.Test
         public static void LogProcessorConsoleConstructor___Null_config___Throws()
         {
             // Arrange
-            Action action = () => new ConsoleLogProcessor(null);
+            Action action = () => new ConsoleLogWriter(null);
 
             // Act
             var exception = Record.Exception(action);
@@ -61,13 +61,13 @@ namespace Naos.Logging.Test
                     // Arrange
                     var infoCanary = A.Dummy<string>();
                     var errorCanary = A.Dummy<string>();
-                    var logProcessor = new ConsoleLogProcessor(new ConsoleLogConfiguration(LogContexts.All, LogContexts.AllErrors));
+                    var logProcessor = new ConsoleLogWriter(new ConsoleLogConfig(LogItemOrigins.All, LogItemOrigins.AllErrors));
                     Console.SetOut(consoleOut);
                     Console.SetError(consoleError);
 
                     // Act
-                    logProcessor.Log(LogContexts.EntryPostedInformation, infoCanary);
-                    logProcessor.Log(LogContexts.EntryPostedException, errorCanary);
+                    logProcessor.Log(LogItemOrigins.EntryPostedInformation, infoCanary);
+                    logProcessor.Log(LogItemOrigins.EntryPostedException, errorCanary);
 
                     var consoleOutOutput = consoleOut.ToString();
                     var consoleErrorOutput = consoleError.ToString();
@@ -84,11 +84,11 @@ namespace Naos.Logging.Test
         public static void RoundtripSerialization___LogConfigurationConsole___Works()
         {
             // Arrange
-            var expected = ShareSerializationTestLogic.ConsoleConfiguration;
+            var expected = ShareSerializationTestLogic.ConsoleConfig;
 
             void ThrowIfObjectsDiffer(object actualAsObject)
             {
-                var actual = actualAsObject as ConsoleLogConfiguration;
+                var actual = actualAsObject as ConsoleLogConfig;
                 actual.Should().NotBeNull();
                 actual.Should().Be(expected);
             }
@@ -105,18 +105,18 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new ConsoleLogConfiguration(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
-                                                Second = new ConsoleLogConfiguration(LogContexts.EntryPostedException, LogContexts.AppDomainUnhandledException),
+                                                First = new ConsoleLogConfig(LogItemOrigins.EntryPostedException, LogItemOrigins.EntryPostedInformation),
+                                                Second = new ConsoleLogConfig(LogItemOrigins.EntryPostedException, LogItemOrigins.AppDomainUnhandledException),
                                             },
                                         new
                                             {
-                                                First = new ConsoleLogConfiguration(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
-                                                Second = new ConsoleLogConfiguration(LogContexts.AppDomainUnhandledException, LogContexts.EntryPostedInformation),
+                                                First = new ConsoleLogConfig(LogItemOrigins.EntryPostedException, LogItemOrigins.EntryPostedInformation),
+                                                Second = new ConsoleLogConfig(LogItemOrigins.AppDomainUnhandledException, LogItemOrigins.EntryPostedInformation),
                                             },
                                         new
                                             {
-                                                First = new ConsoleLogConfiguration(LogContexts.EntryPostedException, LogContexts.EntryPosted),
-                                                Second = new ConsoleLogConfiguration(LogContexts.EntryPostedException, LogContexts.EntryPostedInformation),
+                                                First = new ConsoleLogConfig(LogItemOrigins.EntryPostedException, LogItemOrigins.EntryPosted),
+                                                Second = new ConsoleLogConfig(LogItemOrigins.EntryPostedException, LogItemOrigins.EntryPostedInformation),
                                             },
                                     }.ToList();
 
@@ -144,8 +144,8 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new ConsoleLogConfiguration(LogContexts.EntryPosted, LogContexts.AllErrors),
-                                                Second = new ConsoleLogConfiguration(LogContexts.EntryPosted, LogContexts.AllErrors),
+                                                First = new ConsoleLogConfig(LogItemOrigins.EntryPosted, LogItemOrigins.AllErrors),
+                                                Second = new ConsoleLogConfig(LogItemOrigins.EntryPosted, LogItemOrigins.AllErrors),
                                             },
                                     }.ToList();
 

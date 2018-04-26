@@ -27,15 +27,15 @@ namespace Naos.Logging.Test
 
         private static readonly IReadOnlyCollection<IBinarySerializeAndDeserialize> BinarySerializers = new IBinarySerializeAndDeserialize[] { BsonSerializerToUse, JsonSerializerToUse }.ToList();
 
-        internal static readonly FileLogConfiguration FileConfiguration = new FileLogConfiguration(LogContexts.All, "C:\\Temp\\File.log");
+        internal static readonly FileLogConfig FileConfig = new FileLogConfig(LogItemOrigins.All, "C:\\Temp\\File.log");
 
-        internal static readonly TimeSlicedFilesLogConfiguration TimeSlicedFilesLogConfiguration = new TimeSlicedFilesLogConfiguration(LogContexts.All, "C:\\Temp\\", "LogFile", TimeSpan.FromHours(1));
+        internal static readonly TimeSlicedFilesLogConfig TimeSlicedFilesLogConfig = new TimeSlicedFilesLogConfig(LogItemOrigins.All, "C:\\Temp\\", "LogFile", TimeSpan.FromHours(1));
 
-        internal static readonly EventLogConfiguration EventLogConfiguration = new EventLogConfiguration(LogContexts.All, "Source", "Application", "Localhost", false);
+        internal static readonly EventLogConfig EventLogConfig = new EventLogConfig(LogItemOrigins.All, "Source", "Application", "Localhost", false);
 
-        internal static readonly ConsoleLogConfiguration ConsoleConfiguration = new ConsoleLogConfiguration(LogContexts.All, LogContexts.AllErrors);
+        internal static readonly ConsoleLogConfig ConsoleConfig = new ConsoleLogConfig(LogItemOrigins.All, LogItemOrigins.AllErrors);
 
-        internal static readonly LogProcessorSettings LogProcessorSettingsAll = new LogProcessorSettings(new LogConfigurationBase[] { FileConfiguration, EventLogConfiguration });
+        internal static readonly LogProcessorSettings LogProcessorSettingsAll = new LogProcessorSettings(new LogWriterConfigBase[] { FileConfig, EventLogConfig });
 
         internal static void ActAndAssertForRoundtripSerialization(object expected, Action<object> throwIfObjectsDiffer)
         {

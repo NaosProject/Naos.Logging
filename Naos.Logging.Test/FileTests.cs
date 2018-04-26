@@ -26,7 +26,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Null_path___Throws()
         {
             // Arrange
-            Action action = () => new FileLogConfiguration(LogContexts.All, null);
+            Action action = () => new FileLogConfig(LogItemOrigins.All, null);
 
             // Act
             var exception = Record.Exception(action);
@@ -41,7 +41,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Empty_string_path___Throws()
         {
             // Arrange
-            Action action = () => new FileLogConfiguration(LogContexts.All, string.Empty);
+            Action action = () => new FileLogConfig(LogItemOrigins.All, string.Empty);
 
             // Act
             var exception = Record.Exception(action);
@@ -56,7 +56,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___WhiteSpace_path___Throws()
         {
             // Arrange
-            Action action = () => new FileLogConfiguration(LogContexts.All, '\t'.ToString());
+            Action action = () => new FileLogConfig(LogItemOrigins.All, '\t'.ToString());
 
             // Act
             var exception = Record.Exception(action);
@@ -71,11 +71,11 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Valid___Works()
         {
             // Arrange
-            var contextsToLog = LogContexts.EntryPostedInformation;
+            var contextsToLog = LogItemOrigins.EntryPostedInformation;
             var filePath = Path.GetTempFileName();
 
             // Act
-            var actual = new FileLogConfiguration(contextsToLog, filePath);
+            var actual = new FileLogConfig(contextsToLog, filePath);
 
             // Assert
             actual.Should().NotBeNull();
@@ -86,7 +86,7 @@ namespace Naos.Logging.Test
         public static void LogProcessorFileConstructor___Null_config___Throws()
         {
             // Arrange
-            Action action = () => new FileLogProcessor(null);
+            Action action = () => new FileLogWriter(null);
 
             // Act
             var exception = Record.Exception(action);
@@ -105,15 +105,15 @@ namespace Naos.Logging.Test
             try
             {
                 // Arrange
-                var configuration = new FileLogConfiguration(LogContexts.AllErrors, tempFileName);
-                var processor = new FileLogProcessor(configuration);
+                var configuration = new FileLogConfig(LogItemOrigins.AllErrors, tempFileName);
+                var processor = new FileLogWriter(configuration);
 
                 var infoCanary = A.Dummy<string>();
                 var errorCanary = A.Dummy<string>();
 
                 // Act
-                processor.Log(LogContexts.EntryPostedInformation, infoCanary);
-                processor.Log(LogContexts.EntryPostedException, errorCanary);
+                processor.Log(LogItemOrigins.EntryPostedInformation, infoCanary);
+                processor.Log(LogItemOrigins.EntryPostedException, errorCanary);
 
                 // Assert
                 var fileContents = File.ReadAllText(tempFileName);
@@ -133,11 +133,11 @@ namespace Naos.Logging.Test
         public static void RoundtripSerialization___LogConfigurationFile___Works()
         {
             // Arrange
-            var expected = ShareSerializationTestLogic.FileConfiguration;
+            var expected = ShareSerializationTestLogic.FileConfig;
 
             void ThrowIfObjectsDiffer(object actualAsObject)
             {
-                var actual = actualAsObject as FileLogConfiguration;
+                var actual = actualAsObject as FileLogConfig;
                 actual.Should().NotBeNull();
                 actual.Should().Be(expected);
             }
@@ -150,25 +150,25 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_different_data()
         {
             // Arrange
-            var logContexts = LogContexts.EntryPosted;
+            var logContexts = LogItemOrigins.EntryPosted;
             var logFilePath = A.Dummy<string>();
             var createDirectoryStructureIfMissing = true;
             var notEqualTests = new[]
                                     {
                                         new
                                             {
-                                                First = new FileLogConfiguration(LogContexts.EntryPosted, logFilePath, createDirectoryStructureIfMissing),
-                                                Second = new FileLogConfiguration(LogContexts.ItsLogInternalErrors, logFilePath, createDirectoryStructureIfMissing),
+                                                First = new FileLogConfig(LogItemOrigins.EntryPosted, logFilePath, createDirectoryStructureIfMissing),
+                                                Second = new FileLogConfig(LogItemOrigins.ItsLogInternalErrors, logFilePath, createDirectoryStructureIfMissing),
                                             },
                                         new
                                             {
-                                                First = new FileLogConfiguration(logContexts, "C:\\Path1", createDirectoryStructureIfMissing),
-                                                Second = new FileLogConfiguration(logContexts, "C:\\Path2", createDirectoryStructureIfMissing),
+                                                First = new FileLogConfig(logContexts, "C:\\Path1", createDirectoryStructureIfMissing),
+                                                Second = new FileLogConfig(logContexts, "C:\\Path2", createDirectoryStructureIfMissing),
                                             },
                                         new
                                             {
-                                                First = new FileLogConfiguration(logContexts, logFilePath, true),
-                                                Second = new FileLogConfiguration(logContexts, logFilePath, false),
+                                                First = new FileLogConfig(logContexts, logFilePath, true),
+                                                Second = new FileLogConfig(logContexts, logFilePath, false),
                                             },
                                     }.ToList();
 
@@ -192,7 +192,7 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_same_data()
         {
             // Arrange
-            var logContexts = LogContexts.All;
+            var logContexts = LogItemOrigins.All;
             var logFilePath = A.Dummy<string>();
             var createDirectoryStructureIfMissing = true;
 
@@ -200,8 +200,8 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new FileLogConfiguration(logContexts, logFilePath, createDirectoryStructureIfMissing),
-                                                Second = new FileLogConfiguration(logContexts, logFilePath, createDirectoryStructureIfMissing),
+                                                First = new FileLogConfig(logContexts, logFilePath, createDirectoryStructureIfMissing),
+                                                Second = new FileLogConfig(logContexts, logFilePath, createDirectoryStructureIfMissing),
                                             },
                                     }.ToList();
 

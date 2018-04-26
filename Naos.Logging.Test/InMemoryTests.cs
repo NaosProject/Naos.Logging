@@ -25,7 +25,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationInMemoryConstructor___Less_than_NegativeOne_MaxLoggedItemCount___Throws()
         {
             // Arrange
-            Action action = () => new InMemoryLogConfiguration(LogContexts.All, -2);
+            Action action = () => new InMemoryLogConfig(LogItemOrigins.All, -2);
 
             // Act
             var exception = Record.Exception(action);
@@ -40,7 +40,7 @@ namespace Naos.Logging.Test
         public static void LogProcessorInMemoryConstructor___Null_config___Throws()
         {
             // Arrange
-            Action action = () => new InMemoryLogProcessor(null);
+            Action action = () => new InMemoryLogWriter(null);
 
             // Act
             var exception = Record.Exception(action);
@@ -55,34 +55,34 @@ namespace Naos.Logging.Test
         public static void LogProcessor___Valid___Works()
         {
             // Arrange
-            var configuration = new InMemoryLogConfiguration(LogContexts.All);
-            var processor = new InMemoryLogProcessor(configuration);
+            var configuration = new InMemoryLogConfig(LogItemOrigins.All);
+            var processor = new InMemoryLogWriter(configuration);
 
             var infoCanary = A.Dummy<string>();
             var errorCanary = A.Dummy<string>();
 
             // Act
-            processor.Log(LogContexts.EntryPostedInformation, infoCanary);
-            processor.Log(LogContexts.EntryPostedException, errorCanary);
+            processor.Log(LogItemOrigins.EntryPostedInformation, infoCanary);
+            processor.Log(LogItemOrigins.EntryPostedException, errorCanary);
 
             // Assert
             processor.LoggedItems.Count.Should().Be(2);
-            processor.LoggedItems.Single(_ => _.Context == LogContexts.EntryPostedInformation).Message.Should().Contain("Message = " + infoCanary);
-            processor.LoggedItems.Single(_ => _.Context == LogContexts.EntryPostedInformation).Message.Should().Contain("Subject = " + infoCanary);
-            processor.LoggedItems.Single(_ => _.Context == LogContexts.EntryPostedException).Message.Should().Contain("Message = " + errorCanary);
-            processor.LoggedItems.Single(_ => _.Context == LogContexts.EntryPostedException).Message.Should().Contain("Subject = " + errorCanary);
+            processor.LoggedItems.Single(_ => _.Context == LogItemOrigins.EntryPostedInformation).Message.Should().Contain("Message = " + infoCanary);
+            processor.LoggedItems.Single(_ => _.Context == LogItemOrigins.EntryPostedInformation).Message.Should().Contain("Subject = " + infoCanary);
+            processor.LoggedItems.Single(_ => _.Context == LogItemOrigins.EntryPostedException).Message.Should().Contain("Message = " + errorCanary);
+            processor.LoggedItems.Single(_ => _.Context == LogItemOrigins.EntryPostedException).Message.Should().Contain("Subject = " + errorCanary);
         }
 
         [Fact]
         public static void LogProcessor___Default_max_elements___Honored()
         {
             // Arrange
-            var configuration = new InMemoryLogConfiguration(LogContexts.All);
-            var processor = new InMemoryLogProcessor(configuration);
+            var configuration = new InMemoryLogConfig(LogItemOrigins.All);
+            var processor = new InMemoryLogWriter(configuration);
             var logCallCount = 1000;
 
             // Act
-            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogContexts.EntryPostedInformation, "Hello"));
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogItemOrigins.EntryPostedInformation, "Hello"));
 
             // Assert
             processor.LoggedItems.Count.Should().Be(logCallCount);
@@ -93,12 +93,12 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var maxLoggedItemCount = 0;
-            var configuration = new InMemoryLogConfiguration(LogContexts.All, maxLoggedItemCount);
-            var processor = new InMemoryLogProcessor(configuration);
+            var configuration = new InMemoryLogConfig(LogItemOrigins.All, maxLoggedItemCount);
+            var processor = new InMemoryLogWriter(configuration);
             var logCallCount = 1000;
 
             // Act
-            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogContexts.EntryPostedInformation, "Hello"));
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogItemOrigins.EntryPostedInformation, "Hello"));
 
             // Assert
             processor.LoggedItems.Count.Should().Be(maxLoggedItemCount);
@@ -109,12 +109,12 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var maxLoggedItemCount = 1;
-            var configuration = new InMemoryLogConfiguration(LogContexts.All, maxLoggedItemCount);
-            var processor = new InMemoryLogProcessor(configuration);
+            var configuration = new InMemoryLogConfig(LogItemOrigins.All, maxLoggedItemCount);
+            var processor = new InMemoryLogWriter(configuration);
             var logCallCount = 1000;
 
             // Act
-            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogContexts.EntryPostedInformation, "Hello"));
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogItemOrigins.EntryPostedInformation, "Hello"));
 
             // Assert
             processor.LoggedItems.Count.Should().Be(maxLoggedItemCount);
@@ -125,12 +125,12 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var maxLoggedItemCount = 2;
-            var configuration = new InMemoryLogConfiguration(LogContexts.All, maxLoggedItemCount);
-            var processor = new InMemoryLogProcessor(configuration);
+            var configuration = new InMemoryLogConfig(LogItemOrigins.All, maxLoggedItemCount);
+            var processor = new InMemoryLogWriter(configuration);
             var logCallCount = 1000;
 
             // Act
-            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogContexts.EntryPostedInformation, "Hello"));
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogItemOrigins.EntryPostedInformation, "Hello"));
 
             // Assert
             processor.LoggedItems.Count.Should().Be(maxLoggedItemCount);
@@ -140,10 +140,10 @@ namespace Naos.Logging.Test
         public static void LogProcessor___Purge___Works()
         {
             // Arrange
-            var configuration = new InMemoryLogConfiguration(LogContexts.All);
-            var processor = new InMemoryLogProcessor(configuration);
+            var configuration = new InMemoryLogConfig(LogItemOrigins.All);
+            var processor = new InMemoryLogWriter(configuration);
             var logCallCount = 10;
-            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogContexts.EntryPostedInformation, "Hello"));
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogItemOrigins.EntryPostedInformation, "Hello"));
 
             // Act
             processor.PurgeAllLoggedItems();
@@ -156,11 +156,11 @@ namespace Naos.Logging.Test
         public static void RoundtripSerialization___LogConfigurationInMemory___Works()
         {
             // Arrange
-            var expected = new InMemoryLogConfiguration(LogContexts.All);
+            var expected = new InMemoryLogConfig(LogItemOrigins.All);
 
             void ThrowIfObjectsDiffer(object actualAsObject)
             {
-                var actual = actualAsObject as InMemoryLogConfiguration;
+                var actual = actualAsObject as InMemoryLogConfig;
                 actual.Should().NotBeNull();
                 actual.Should().Be(expected);
             }
@@ -177,13 +177,13 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new InMemoryLogConfiguration(LogContexts.EntryPosted, 1),
-                                                Second = new InMemoryLogConfiguration(LogContexts.ItsLogInternalErrors, 1),
+                                                First = new InMemoryLogConfig(LogItemOrigins.EntryPosted, 1),
+                                                Second = new InMemoryLogConfig(LogItemOrigins.ItsLogInternalErrors, 1),
                                             },
                                         new
                                             {
-                                                First = new InMemoryLogConfiguration(LogContexts.EntryPosted, 1),
-                                                Second = new InMemoryLogConfiguration(LogContexts.EntryPosted, 0),
+                                                First = new InMemoryLogConfig(LogItemOrigins.EntryPosted, 1),
+                                                Second = new InMemoryLogConfig(LogItemOrigins.EntryPosted, 0),
                                             },
                                     }.ToList();
 
@@ -207,14 +207,14 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_same_data()
         {
             // Arrange
-            var logContexts = LogContexts.All;
+            var logContexts = LogItemOrigins.All;
 
             var notEqualTests = new[]
                                     {
                                         new
                                             {
-                                                First = new InMemoryLogConfiguration(logContexts, 1),
-                                                Second = new InMemoryLogConfiguration(logContexts, 1),
+                                                First = new InMemoryLogConfig(logContexts, 1),
+                                                Second = new InMemoryLogConfig(logContexts, 1),
                                             },
                                     }.ToList();
 

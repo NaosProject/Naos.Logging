@@ -23,7 +23,7 @@ namespace Naos.Logging.Test
         public static void Constructor___Valid___Works()
         {
             // Arrange
-            var configurations = new LogConfigurationBase[] { ShareSerializationTestLogic.FileConfiguration, ShareSerializationTestLogic.EventLogConfiguration, ShareSerializationTestLogic.ConsoleConfiguration }.ToList();
+            var configurations = new LogWriterConfigBase[] { ShareSerializationTestLogic.FileConfig, ShareSerializationTestLogic.EventLogConfig, ShareSerializationTestLogic.ConsoleConfig }.ToList();
 
             // Act
             var actual = new LogProcessorSettings(configurations);
@@ -37,7 +37,7 @@ namespace Naos.Logging.Test
         public static void Constructor___Null_configuration___Empty_set()
         {
             // Arrange
-            LogConfigurationBase[] configurations = null;
+            LogWriterConfigBase[] configurations = null;
 
             // Act
             var actual = new LogProcessorSettings(configurations);

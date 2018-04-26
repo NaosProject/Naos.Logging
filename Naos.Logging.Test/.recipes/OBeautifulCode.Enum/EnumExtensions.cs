@@ -20,7 +20,6 @@ namespace OBeautifulCode.Enum.Recipes
     /// Adds some convenient extension methods to enums.
     /// </summary>
 #if !OBeautifulCodeEnumRecipesProject
-    [System.Diagnostics.DebuggerStepThrough]
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     [System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Enum", "See package version number")]
 #endif

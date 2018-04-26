@@ -8,20 +8,44 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
 
     using Spritely.Recipes;
 
+    using static System.FormattableString;
+
     /// <summary>
-    /// Extensions for use with <see cref="TimeSlicedFilesLogConfiguration" />.
+    /// Extensions for use with <see cref="TimeSlicedFilesLogConfig" />.
     /// </summary>
-    public static class TimeSlicedFilesLogConfigurationExtensions
+    public static class TimeSlicedFilesLogConfigExtensions
     {
+        /// <summary>
+        /// Compute the file path to log to right now using <see cref="DateTime" />.<see cref="DateTime.UtcNow" />.
+        /// </summary>
+        /// <param name="config">The configuration object.</param>
+        /// <param name="nowUtc">Optionally override "now".</param>
+        /// <returns>Correct file path to log to.</returns>
+        public static string ComputeFilePath(
+            this TimeSlicedFilesLogConfig config,
+            DateTime nowUtc = default(DateTime))
+        {
+            var now = nowUtc == default(DateTime) ? DateTime.UtcNow : nowUtc;
+            var date = now.ToString("yyyy-dd-MM", CultureInfo.InvariantCulture);
+            var offsets = config.GetSliceOffsets().FindOffsetRange(now);
+
+            var file = Invariant($"{config.FileNamePrefix}--{date}--{offsets.Item1.ToString("hhmm", CultureInfo.InvariantCulture)}Z-{offsets.Item2.ToString("hhmm", CultureInfo.InvariantCulture)}Z.{TimeSlicedFilesLogConfig.FileExtensionWithoutDot}");
+            var path = Path.Combine(config.LogFileDirectoryPath, file);
+            return path;
+        }
+
         /// <summary>
         /// Divide a day EQUALLY into slices using the slice size <see cref="TimeSpan" /> provided.
         /// </summary>
         /// <param name="sliceSize">Size of slice.</param>
         /// <returns>List of <see cref="TimeSpan" /> offsets.</returns>
-        public static IReadOnlyCollection<TimeSpan> SliceIntoOffsetsPerDay(this TimeSpan sliceSize)
+        public static IReadOnlyCollection<TimeSpan> SliceIntoOffsetsPerDay(
+            this TimeSpan sliceSize)
         {
             new { sliceSize }.Must().BeGreaterThanOrEqualTo(TimeSpan.FromMinutes(1)).OrThrowFirstFailure();
             new { sliceSize }.Must().BeLessThanOrEqualTo(TimeSpan.FromDays(1)).OrThrowFirstFailure();
@@ -52,7 +76,9 @@ namespace Naos.Logging.Domain
         /// <param name="offsets">Offsets to search within.</param>
         /// <param name="now">Time to search for.</param>
         /// <returns>Correct offset.</returns>
-        public static Tuple<TimeSpan, TimeSpan> FindOffsetRange(this IReadOnlyCollection<TimeSpan> offsets, DateTime now)
+        public static Tuple<TimeSpan, TimeSpan> FindOffsetRange(
+            this IReadOnlyCollection<TimeSpan> offsets,
+            DateTime now)
         {
             new { offsets }.Must().NotBeNull().And().NotBeEmptyEnumerable<TimeSpan>().OrThrowFirstFailure();
             now.Kind.Named(FormattableString.Invariant($"{nameof(now)}-Must-Be-Utc-Kind")).Must().BeEqualTo(DateTimeKind.Utc).OrThrowFirstFailure();

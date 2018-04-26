@@ -25,12 +25,12 @@ namespace Naos.Logging.Test
         public static void Constructor___Valid___Works()
         {
             // Arrange
-            var examine = LogContexts.AllErrors;
-            var expected = new[] { LogContexts.ItsLogInternalErrors, LogContexts.EntryPostedException, LogContexts.AppDomainUnhandledException };
+            var examine = LogItemOrigins.AllErrors;
+            var expected = new[] { LogItemOrigins.ItsLogInternalErrors, LogItemOrigins.EntryPostedException, LogItemOrigins.AppDomainUnhandledException };
 
             // Act
             var all = examine.GetIndividualFlags();
-            var hasFlagNone = examine.HasFlag(LogContexts.None);
+            var hasFlagNone = examine.HasFlag(LogItemOrigins.None);
 
             // Assert
             all.Should().BeEquivalentTo(expected);
@@ -41,11 +41,11 @@ namespace Naos.Logging.Test
         public static void All_values_can_cast_to_short()
         {
             // Arrange
-            var all = EnumExtensions.GetEnumValues<LogContexts>();
+            var all = EnumExtensions.GetEnumValues<LogItemOrigins>();
 
             // Act
             var actual = all.Select(_ => (short)_).ToList();
-            var roundtrip = actual.Select(_ => (LogContexts)_).ToList();
+            var roundtrip = actual.Select(_ => (LogItemOrigins)_).ToList();
 
             // Assert
             actual.Count.Should().Be(all.Count);
