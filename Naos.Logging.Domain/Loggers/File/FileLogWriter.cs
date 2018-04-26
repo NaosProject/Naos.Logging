@@ -10,7 +10,7 @@ namespace Naos.Logging.Domain
     using System.Globalization;
     using System.IO;
 
-    using Spritely.Recipes;
+    using static System.FormattableString;
 
     /// <summary>
     /// <see cref="File"/> focused implementation of <see cref="LogWriterBase" />.
@@ -25,15 +25,23 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="FileLogWriter"/> class.
         /// </summary>
         /// <param name="fileLogConfig">Configuration.</param>
-        public FileLogWriter(FileLogConfig fileLogConfig)
+        public FileLogWriter(
+            FileLogConfig fileLogConfig)
             : base(fileLogConfig)
         {
-            new { fileLogConfig }.Must().NotBeNull().OrThrowFirstFailure();
+            if (fileLogConfig == null)
+            {
+                throw new ArgumentNullException(nameof(fileLogConfig));
+            }
 
             this.fileLogConfig = fileLogConfig;
 
             var directoryPath = Path.GetDirectoryName(this.fileLogConfig.LogFilePath);
-            directoryPath.Named(FormattableString.Invariant($"directoryFrom-{this.fileLogConfig.LogFilePath}-must-be-real-path")).Must().NotBeNull().And().NotBeWhiteSpace().OrThrowFirstFailure();
+            if (string.IsNullOrWhiteSpace(directoryPath))
+            {
+                throw new ArgumentException(Invariant($"directory name from {nameof(this.fileLogConfig)}.{nameof(FileLogConfig.LogFilePath)} is null or white space"));
+            }
+
             if (this.fileLogConfig.CreateDirectoryStructureIfMissing && !Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath ?? "won't get here but VS can't figure that out");
@@ -49,6 +57,11 @@ namespace Naos.Logging.Domain
         protected override void LogInternal(
             LogItem logMessage)
         {
+            if (logMessage == null)
+            {
+                throw new ArgumentNullException(nameof(logMessage));
+            }
+
             // TODO: Trace.Listeners.Add(new TextWriterTraceListener("Log_TextWriterOutput.log", "myListener"));
             var fileLock = new object();
             var message = FormattableString.Invariant($"{logMessage.Context.LoggedTimeUtc.ToString("o", CultureInfo.InvariantCulture)}|{logMessage.Context}|{logMessage.Message}");

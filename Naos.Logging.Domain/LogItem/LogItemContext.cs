@@ -8,7 +8,7 @@ namespace Naos.Logging.Domain
 {
     using System;
 
-    using Spritely.Recipes;
+    using static System.FormattableString;
 
     /// <summary>
     /// Stores some context for a <see cref="LogItem"/>
@@ -31,9 +31,15 @@ namespace Naos.Logging.Domain
             string processName = null,
             string processFileVersion = null)
         {
-            var loggedTimeUtcDateTimeKind = loggedTimeUtc.Kind;
-            new { loggedTimeUtcDateTimeKind }.Must().BeEqualTo(DateTimeKind.Utc).OrThrowFirstFailure();
-            new { logItemOrigin }.Must().NotBeEqualTo(LogItemOrigin.Unknown).OrThrowFirstFailure();
+            if (loggedTimeUtc.Kind != DateTimeKind.Utc)
+            {
+                throw new ArgumentException(Invariant($"{nameof(loggedTimeUtc)}.{nameof(DateTime.Kind)} != {nameof(DateTimeKind)}.{nameof(DateTimeKind.Utc)}"));
+            }
+
+            if (logItemOrigin == LogItemOrigin.Unknown)
+            {
+                throw new ArgumentException(Invariant($"{nameof(logItemOrigin)} == {nameof(LogItemOrigin)}.{nameof(LogItemOrigin.Unknown)}"));
+            }
 
             this.LoggedTimeUtc = loggedTimeUtc;
             this.LogItemOrigin = logItemOrigin;

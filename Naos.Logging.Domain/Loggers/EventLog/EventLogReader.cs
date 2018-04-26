@@ -25,6 +25,11 @@ namespace Naos.Logging.Domain
             EventLogConfig eventLogConfig)
             : base(eventLogConfig)
         {
+            if (eventLogConfig == null)
+            {
+                throw new ArgumentNullException(nameof(eventLogConfig));
+            }
+
             this.eventLogConfig = eventLogConfig;
         }
 
@@ -46,7 +51,9 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc cref="LogReaderBase" />
-        public override IReadOnlyCollection<LogItem> ReadRange(DateTime startUtcInclusive, DateTime endUtcInclusive)
+        public override IReadOnlyCollection<LogItem> ReadRange(
+            DateTime startUtcInclusive,
+            DateTime endUtcInclusive)
         {
             throw new NotSupportedException("Event Log does not support reading ranges of time.");
         }

@@ -15,8 +15,6 @@ namespace Naos.Logging.Domain
 
     using OBeautifulCode.Enum.Recipes;
 
-    using Spritely.Recipes;
-
     /// <summary>
     /// Base class for all log writers.
     /// </summary>
@@ -37,7 +35,10 @@ namespace Naos.Logging.Domain
         protected LogWriterBase(
             LogWriterConfigBase logWriterConfigBase)
         {
-            new { logWriterConfigBase }.Must().NotBeNull().OrThrowFirstFailure();
+            if (logWriterConfigBase == null)
+            {
+                throw new ArgumentNullException(nameof(logWriterConfigBase));
+            }
 
             this.logWriterConfigBase = logWriterConfigBase;
             this.machineName = MachineName.GetMachineName();
@@ -52,7 +53,10 @@ namespace Naos.Logging.Domain
         public void Log(
             LogItem logItem)
         {
-            new { logItem }.Must().NotBeNull().OrThrowFirstFailure();
+            if (logItem == null)
+            {
+                throw new ArgumentNullException(nameof(logItem));
+            }
 
             var origins = logItem.Context.LogItemOrigin.ToOrigins();
             if ((this.logWriterConfigBase.OriginsToLog != LogItemOrigins.None) && this.logWriterConfigBase.OriginsToLog.HasFlagOverlap(origins))

@@ -6,6 +6,8 @@
 
 namespace Naos.Logging.Domain
 {
+    using System;
+
     /// <summary>
     /// The atomic unit of logging, composed of a message and some context for that message.
     /// </summary>
@@ -20,6 +22,16 @@ namespace Naos.Logging.Domain
             LogItemContext context,
             string message)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
             this.Context = context;
             this.Message = message;
         }

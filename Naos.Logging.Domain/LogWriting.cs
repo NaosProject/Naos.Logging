@@ -12,8 +12,6 @@ namespace Naos.Logging.Domain
 
     using Its.Log.Instrumentation;
 
-    using Spritely.Recipes;
-
     using static System.FormattableString;
 
     /// <summary>
@@ -51,7 +49,16 @@ namespace Naos.Logging.Domain
             IReadOnlyCollection<LogWriterBase> configuredAndManagedLogWriters = null,
             MultipleCallsToSetupStrategy multipleCallsToSetupStrategy = MultipleCallsToSetupStrategy.Throw)
         {
-            new { multipleCallsToSetupStrategy }.Must().NotBeEqualTo(MultipleCallsToSetupStrategy.Invalid).OrThrowFirstFailure();
+            if (logWritingSettings == null)
+            {
+                throw new ArgumentNullException(nameof(logWritingSettings));
+            }
+
+            if (multipleCallsToSetupStrategy == MultipleCallsToSetupStrategy.Invalid)
+            {
+                throw new ArgumentException(Invariant($"{nameof(multipleCallsToSetupStrategy)} == {nameof(MultipleCallsToSetupStrategy.Invalid)}"));
+            }
+
             var localAnnouncer = announcer ?? NullAnnouncement;
 
             lock (this.sync)
@@ -72,8 +79,6 @@ namespace Naos.Logging.Domain
                 }
 
                 this.hasBeenSetup = true;
-
-                new { logWritingSettings }.Must().NotBeNull().OrThrowFirstFailure();
 
                 var logWriters = new List<LogWriterBase>(configuredAndManagedLogWriters ?? new LogWriterBase[0]);
                 if (logWriters.Any())
@@ -131,7 +136,8 @@ namespace Naos.Logging.Domain
             }
         }
 
-        private void WireUpItsLogInternalErrorsToActiveLogWriters(Action<string> announcer)
+        private void WireUpItsLogInternalErrorsToActiveLogWriters(
+            Action<string> announcer)
         {
             Log.InternalErrors += (sender, args) =>
             {
@@ -142,7 +148,8 @@ namespace Naos.Logging.Domain
             announcer(Invariant($"Wired up {nameof(Log)}.{nameof(Log.InternalErrors)} to the {nameof(this.activeLogWriters)}."));
         }
 
-        private void WireUpItsLogEntryPostedToActiveLogWriters(Action<string> announcer)
+        private void WireUpItsLogEntryPostedToActiveLogWriters(
+            Action<string> announcer)
         {
             Log.EntryPosted += (sender, args) =>
             {
@@ -156,7 +163,8 @@ namespace Naos.Logging.Domain
             announcer(Invariant($"Wired up {nameof(Log)}.{nameof(Log.EntryPosted)} to the {nameof(this.activeLogWriters)}."));
         }
 
-        private void WireUpAppDomainUnhandledExceptionToActiveLogWriters(Action<string> announcer)
+        private void WireUpAppDomainUnhandledExceptionToActiveLogWriters(
+            Action<string> announcer)
         {
             AppDomain.CurrentDomain.UnhandledException += (o, args) =>
             {
@@ -168,7 +176,8 @@ namespace Naos.Logging.Domain
             announcer(Invariant($"Wired up {nameof(AppDomain)}.{nameof(AppDomain.UnhandledException)} to the {nameof(this.activeLogWriters)}."));
         }
 
-        private static void NullAnnouncement(string message)
+        private static void NullAnnouncement(
+            string message)
         {
             /* no-op */
         }

@@ -10,8 +10,6 @@ namespace Naos.Logging.Domain
     using System.Globalization;
     using System.IO;
 
-    using Spritely.Recipes;
-
     /// <summary>
     /// <see cref="File"/> focused implementation of <see cref="LogWriterBase" />.
     /// </summary>
@@ -25,10 +23,14 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="TimeSlicedFilesLogWriter"/> class.
         /// </summary>
         /// <param name="timeSlicedFilesLogConfig">Configuration.</param>
-        public TimeSlicedFilesLogWriter(TimeSlicedFilesLogConfig timeSlicedFilesLogConfig)
+        public TimeSlicedFilesLogWriter(
+            TimeSlicedFilesLogConfig timeSlicedFilesLogConfig)
             : base(timeSlicedFilesLogConfig)
         {
-            new { timeSlicedFilesLogConfig }.Must().NotBeNull().OrThrowFirstFailure();
+            if (timeSlicedFilesLogConfig == null)
+            {
+                throw new ArgumentNullException(nameof(timeSlicedFilesLogConfig));
+            }
 
             this.timeSlicedFilesLogConfig = timeSlicedFilesLogConfig;
 
@@ -47,6 +49,11 @@ namespace Naos.Logging.Domain
         protected override void LogInternal(
             LogItem logMessage)
         {
+            if (logMessage == null)
+            {
+                throw new ArgumentNullException(nameof(logMessage));
+            }
+
             var fileLock = new object();
             var message = FormattableString.Invariant($"TimeSliced|{logMessage.Context.LoggedTimeUtc.ToString("o", CultureInfo.InvariantCulture)}|{logMessage.Context}|{logMessage.Message}");
 

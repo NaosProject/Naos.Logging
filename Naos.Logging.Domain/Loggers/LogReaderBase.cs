@@ -9,8 +9,6 @@ namespace Naos.Logging.Domain
     using System;
     using System.Collections.Generic;
 
-    using Spritely.Recipes;
-
     /// <summary>
     /// Base class for readers.
     /// </summary>
@@ -26,7 +24,10 @@ namespace Naos.Logging.Domain
         protected LogReaderBase(
             LogWriterConfigBase logConfigBase)
         {
-            new { logConfigBase }.Must().NotBeNull().OrThrowFirstFailure();
+            if (logConfigBase == null)
+            {
+                throw new ArgumentNullException(nameof(logConfigBase));
+            }
 
             this.logConfigBase = logConfigBase;
         }

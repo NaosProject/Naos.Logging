@@ -10,8 +10,7 @@ namespace Naos.Logging.Domain
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
-
-    using Spritely.Recipes;
+    using System.Linq;
 
     using static System.FormattableString;
 
@@ -30,6 +29,11 @@ namespace Naos.Logging.Domain
             this TimeSlicedFilesLogConfig config,
             DateTime nowUtc = default(DateTime))
         {
+            if (config == null)
+            {
+                throw new ArgumentException(nameof(config));
+            }
+
             var now = nowUtc == default(DateTime) ? DateTime.UtcNow : nowUtc;
             var date = now.ToString("yyyy-dd-MM", CultureInfo.InvariantCulture);
             var offsets = config.GetSliceOffsets().FindOffsetRange(now);
@@ -47,8 +51,17 @@ namespace Naos.Logging.Domain
         public static IReadOnlyCollection<TimeSpan> SliceIntoOffsetsPerDay(
             this TimeSpan sliceSize)
         {
-            new { sliceSize }.Must().BeGreaterThanOrEqualTo(TimeSpan.FromMinutes(1)).OrThrowFirstFailure();
-            new { sliceSize }.Must().BeLessThanOrEqualTo(TimeSpan.FromDays(1)).OrThrowFirstFailure();
+            var oneMinute = TimeSpan.FromMinutes(1);
+            if (sliceSize < oneMinute)
+            {
+                throw new ArgumentOutOfRangeException(Invariant($"{nameof(sliceSize)} is < {oneMinute}"));
+            }
+
+            var oneDay = TimeSpan.FromDays(1);
+            if (sliceSize > oneDay)
+            {
+                throw new ArgumentOutOfRangeException(Invariant($"{nameof(sliceSize)} is > {oneDay}"));
+            }
 
             var dayMinutes = TimeSpan.FromDays(1).TotalMinutes;
             var sliceMinutes = sliceSize.TotalMinutes;
@@ -56,7 +69,7 @@ namespace Naos.Logging.Domain
             var sliceCountInteger = (int)sliceCount;
             if (Math.Abs(sliceCountInteger - sliceCount) > 0)
             {
-                throw new ArgumentException(FormattableString.Invariant($"Must specify a time slice that can be divided into a day equally; {sliceSize} does not."));
+                throw new ArgumentException(Invariant($"Must specify a time slice that can be divided into a day equally; {sliceSize} does not."));
             }
 
             var timeSpan = TimeSpan.Zero;
@@ -80,8 +93,20 @@ namespace Naos.Logging.Domain
             this IReadOnlyCollection<TimeSpan> offsets,
             DateTime now)
         {
-            new { offsets }.Must().NotBeNull().And().NotBeEmptyEnumerable<TimeSpan>().OrThrowFirstFailure();
-            now.Kind.Named(FormattableString.Invariant($"{nameof(now)}-Must-Be-Utc-Kind")).Must().BeEqualTo(DateTimeKind.Utc).OrThrowFirstFailure();
+            if (offsets == null)
+            {
+                throw new ArgumentNullException(nameof(offsets));
+            }
+
+            if (!offsets.Any())
+            {
+                throw new ArgumentException(Invariant($"{nameof(offsets)} is empty"));
+            }
+
+            if (now.Kind != DateTimeKind.Utc)
+            {
+                throw new ArgumentException(Invariant($"{nameof(now)}.{nameof(DateTime.Kind)} != {nameof(DateTimeKind)}.{nameof(DateTimeKind.Utc)}"));
+            }
 
             var dayStart = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc);
             var nowOffset = now - dayStart;

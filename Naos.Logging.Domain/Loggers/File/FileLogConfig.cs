@@ -13,7 +13,7 @@ namespace Naos.Logging.Domain
 
     using OBeautifulCode.Math.Recipes;
 
-    using Spritely.Recipes;
+    using static System.FormattableString;
 
     /// <summary>
     /// <see cref="File"/> focused implementation of <see cref="LogWriterConfigBase" />.
@@ -34,7 +34,10 @@ namespace Naos.Logging.Domain
             bool createDirectoryStructureIfMissing = true)
             : base(originsToLog, logEntryPropertiesToIncludeInLogMessage)
         {
-            new { logFilePath }.Must().NotBeNull().And().NotBeWhiteSpace().OrThrowFirstFailure();
+            if (string.IsNullOrWhiteSpace(logFilePath))
+            {
+                throw new ArgumentException(Invariant($"{nameof(logFilePath)} is null or white space"));
+            }
 
             this.LogFilePath = logFilePath;
             this.CreateDirectoryStructureIfMissing = createDirectoryStructureIfMissing;

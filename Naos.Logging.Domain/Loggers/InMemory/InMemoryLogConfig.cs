@@ -12,7 +12,7 @@ namespace Naos.Logging.Domain
 
     using OBeautifulCode.Math.Recipes;
 
-    using Spritely.Recipes;
+    using static System.FormattableString;
 
     /// <summary>
     /// In memory implementation of <see cref="LogWriterConfigBase" />.
@@ -31,7 +31,10 @@ namespace Naos.Logging.Domain
             int maxLoggedItemCount = -1)
             : base(originsToLog, logEntryPropertiesToIncludeInLogMessage)
         {
-            new { maxLoggedItemCount }.Must().BeGreaterThanOrEqualTo(-1).OrThrowFirstFailure();
+            if (maxLoggedItemCount < -1)
+            {
+                throw new ArgumentOutOfRangeException(Invariant($"{nameof(maxLoggedItemCount)} is <= -1; value is {maxLoggedItemCount}"));
+            }
 
             this.MaxLoggedItemCount = maxLoggedItemCount;
         }

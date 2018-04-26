@@ -12,8 +12,6 @@ namespace Naos.Logging.Domain
 
     using OBeautifulCode.Enum.Recipes;
 
-    using Spritely.Recipes;
-
     /// <summary>
     /// <see cref="EventLog"/> focused implementation of <see cref="LogWriterBase" />.
     /// </summary>
@@ -35,7 +33,10 @@ namespace Naos.Logging.Domain
             EventLogConfig eventLogConfig)
             : base(eventLogConfig)
         {
-            new { eventLogConfig }.Must().NotBeNull().OrThrowFirstFailure();
+            if (eventLogConfig == null)
+            {
+                throw new ArgumentNullException(nameof(eventLogConfig));
+            }
 
             this.eventLogConfig = eventLogConfig;
 
@@ -49,6 +50,11 @@ namespace Naos.Logging.Domain
         protected override void LogInternal(
             LogItem logItem)
         {
+            if (logItem == null)
+            {
+                throw new ArgumentNullException(nameof(logItem));
+            }
+
             Interlocked.Increment(ref this.eventId);
             if (this.eventId >= MaxEventId)
             {

@@ -10,8 +10,6 @@ namespace Naos.Logging.Domain
     using System.Collections.Generic;
     using System.Linq;
 
-    using Spritely.Recipes;
-
     /// <summary>
     /// In memory implementation of <see cref="LogWriterBase" />.
     /// </summary>
@@ -31,14 +29,23 @@ namespace Naos.Logging.Domain
             InMemoryLogConfig memoryConfig)
             : base(memoryConfig)
         {
-            new { memoryConfig }.Must().NotBeNull().OrThrowFirstFailure();
+            if (memoryConfig == null)
+            {
+                throw new ArgumentNullException(nameof(memoryConfig));
+            }
 
             this.memoryLogConfig = memoryConfig;
         }
 
         /// <inheritdoc  />
-        protected override void LogInternal(LogItem logMessage)
+        protected override void LogInternal(
+            LogItem logMessage)
         {
+            if (logMessage == null)
+            {
+                throw new ArgumentNullException(nameof(logMessage));
+            }
+
             lock (this.syncLoggedMessages)
             {
                 this.loggedMessages.Enqueue(logMessage);

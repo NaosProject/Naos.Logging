@@ -6,9 +6,10 @@
 
 namespace Naos.Logging.Domain
 {
+    using System;
     using System.Diagnostics;
 
-    using Spritely.Recipes;
+    using static System.FormattableString;
 
     /// <summary>
     /// Extensions on <see cref="EventLogConfig" />.
@@ -22,9 +23,15 @@ namespace Naos.Logging.Domain
         public static void CreateEventLogSourceIfMissing(
             this EventLogConfig eventLogConfig)
         {
-            new { eventLogConfig }.Must().NotBeNull().OrThrowFirstFailure();
+            if (eventLogConfig == null)
+            {
+                throw new ArgumentNullException(nameof(eventLogConfig));
+            }
 
-            new { CreateSourceIfMissing = eventLogConfig.ShouldCreateSourceIfMissing }.Must().BeTrue().OrThrowFirstFailure();
+            if (!eventLogConfig.ShouldCreateSourceIfMissing)
+            {
+                throw new ArgumentException(Invariant($"{nameof(eventLogConfig)}.{nameof(EventLogConfig.ShouldCreateSourceIfMissing)} == false"));
+            }
 
             if (!EventLog.SourceExists(eventLogConfig.Source))
             {
@@ -41,7 +48,10 @@ namespace Naos.Logging.Domain
         public static EventLog NewEventLogObject(
             this EventLogConfig eventLogConfig)
         {
-            new { eventLogConfig }.Must().NotBeNull().OrThrowFirstFailure();
+            if (eventLogConfig == null)
+            {
+                throw new ArgumentNullException(nameof(eventLogConfig));
+            }
 
             return new EventLog(eventLogConfig.LogName, eventLogConfig.MachineName, eventLogConfig.Source);
         }

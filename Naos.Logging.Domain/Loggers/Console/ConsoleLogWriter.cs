@@ -38,6 +38,11 @@ namespace Naos.Logging.Domain
         protected override void LogInternal(
             LogItem logItem)
         {
+            if (logItem == null)
+            {
+                throw new ArgumentNullException(nameof(logItem));
+            }
+
             var message = FormattableString.Invariant($"{logItem.Context.LoggedTimeUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Message}");
 
             var origins = logItem.Context.LogItemOrigin.ToOrigins();
