@@ -79,7 +79,6 @@
     <Compile Include="Loggers\LogWriterBase.cs" />
     <Compile Include="LogProcessorSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Loggers\TimeSlicedFiles\TimeSlicedFilesLogReader.cs" />
     <Compile Include="Loggers\TimeSlicedFiles\TimeSlicedFilesLogConfig.cs" />
     <Compile Include="Loggers\TimeSlicedFiles\TimeSlicedFilesLogConfigExtensions.cs" />
     <Compile Include="Loggers\TimeSlicedFiles\TimeSlicedFilesLogWriter.cs" />

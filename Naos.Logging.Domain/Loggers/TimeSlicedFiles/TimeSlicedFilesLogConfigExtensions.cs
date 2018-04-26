@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TimeSlicedFilesLogConfigurationExtensions.cs" company="Naos">
+// <copyright file="TimeSlicedFilesLogConfigExtensions.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------

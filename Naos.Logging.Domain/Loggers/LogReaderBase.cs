@@ -17,18 +17,18 @@ namespace Naos.Logging.Domain
     public abstract class LogReaderBase
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields", Justification = "Keeping for now to maintain contract of providing it.")]
-        private readonly LogWriterConfigBase logConfigurationBase;
+        private readonly LogWriterConfigBase logConfigBase;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogReaderBase"/> class.
         /// </summary>
-        /// <param name="logConfigurationBase">Base configuration.</param>
+        /// <param name="logConfigBase">Base configuration.</param>
         protected LogReaderBase(
-            LogWriterConfigBase logConfigurationBase)
+            LogWriterConfigBase logConfigBase)
         {
-            new { logConfigurationBase }.Must().NotBeNull().OrThrowFirstFailure();
+            new { logConfigBase }.Must().NotBeNull().OrThrowFirstFailure();
 
-            this.logConfigurationBase = logConfigurationBase;
+            this.logConfigBase = logConfigBase;
         }
 
         /// <summary>
