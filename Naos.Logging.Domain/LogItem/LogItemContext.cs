@@ -21,22 +21,19 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <param name="loggedTimeUtc">The date/time, in UTC, when the log-item was logged.</param>
         /// <param name="logItemOrigin">The origin of the log-item.</param>
-        /// <param name="machineName">The name of the machine that generated the log-item.</param>
-        /// <param name="processName">The name of the process that generated the log-item.</param>
-        /// <param name="processFileVersion">The file version of the process that generated the log-item.</param>
+        /// <param name="machineName">Optional name of the machine that generated the log-item.</param>
+        /// <param name="processName">Optional name of the process that generated the log-item.</param>
+        /// <param name="processFileVersion">Optional file version of the process that generated the log-item.</param>
         public LogItemContext(
             DateTime loggedTimeUtc,
             LogItemOrigin logItemOrigin,
-            string machineName,
-            string processName,
-            string processFileVersion)
+            string machineName = null,
+            string processName = null,
+            string processFileVersion = null)
         {
             var loggedTimeUtcDateTimeKind = loggedTimeUtc.Kind;
             new { loggedTimeUtcDateTimeKind }.Must().BeEqualTo(DateTimeKind.Utc).OrThrowFirstFailure();
             new { logItemOrigin }.Must().NotBeEqualTo(LogItemOrigin.Unknown).OrThrowFirstFailure();
-            new { machineName }.Must().NotBeNull().And().NotBeWhiteSpace().OrThrowFirstFailure();
-            new { processName }.Must().NotBeNull().And().NotBeWhiteSpace().OrThrowFirstFailure();
-            new { processFileVersion }.Must().NotBeNull().And().NotBeWhiteSpace().OrThrowFirstFailure();
 
             this.LoggedTimeUtc = loggedTimeUtc;
             this.LogItemOrigin = logItemOrigin;

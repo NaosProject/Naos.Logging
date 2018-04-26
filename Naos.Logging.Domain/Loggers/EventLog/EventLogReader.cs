@@ -15,27 +15,29 @@ namespace Naos.Logging.Domain
     /// </summary>
     public class EventLogReader : LogReaderBase
     {
-        private readonly EventLogConfig _eventLogConfig;
+        private readonly EventLogConfig eventLogConfig;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventLogReader"/> class.
         /// </summary>
         /// <param name="eventLogConfig">Configuration.</param>
-        public EventLogReader(EventLogConfig eventLogConfig)
+        public EventLogReader(
+            EventLogConfig eventLogConfig)
             : base(eventLogConfig)
         {
-            this._eventLogConfig = eventLogConfig;
+            this.eventLogConfig = eventLogConfig;
         }
 
         /// <inheritdoc cref="LogReaderBase" />
         public override IReadOnlyCollection<LogItem> ReadAll()
         {
             var ret = new List<LogItem>();
-            using (var eventLog = this._eventLogConfig.NewEventLogObject())
+            using (var eventLog = this.eventLogConfig.NewEventLogObject())
             {
                 foreach (EventLogEntry entry in eventLog.Entries)
                 {
-                    var logMessage = new LogItem((LogItemOrigins)entry.CategoryNumber, entry.Message, entry.TimeWritten.ToUniversalTime());
+                    var context = new LogItemContext(entry.TimeWritten.ToUniversalTime(), (LogItemOrigin)entry.CategoryNumber);
+                    var logMessage = new LogItem(context, entry.Message);
                     ret.Add(logMessage);
                 }
             }
@@ -44,7 +46,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc cref="LogReaderBase" />
-        public override IReadOnlyCollection<LogItem> ReadRange(DateTime startUtc, DateTime endUtc)
+        public override IReadOnlyCollection<LogItem> ReadRange(DateTime startUtcInclusive, DateTime endUtcInclusive)
         {
             throw new NotSupportedException("Event Log does not support reading ranges of time.");
         }

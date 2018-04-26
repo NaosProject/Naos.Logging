@@ -37,7 +37,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc  />
-        public override void LogInternal(LogItem logMessage)
+        protected override void LogInternal(LogItem logMessage)
         {
             lock (this.syncLoggedMessages)
             {

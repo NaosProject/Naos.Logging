@@ -46,7 +46,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
-        public override void LogInternal(
+        protected override void LogInternal(
             LogItem logMessage)
         {
             // TODO: Trace.Listeners.Add(new TextWriterTraceListener("Log_TextWriterOutput.log", "myListener"));

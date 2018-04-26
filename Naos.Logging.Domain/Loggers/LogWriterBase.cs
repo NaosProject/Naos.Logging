@@ -100,28 +100,19 @@ namespace Naos.Logging.Domain
             LogItemOrigin logItemOrigin,
             LogEntry logEntry)
         {
-            // if it is only None then cut out; can NOT do a HasFlag here, LogProcessorConsole for example can have the None flag but still need to be called directly...
-            if (this.logWriterConfigBase.OriginsToLog == LogItemOrigins.None)
-            {
-                return;
-            }
+            logEntry = logEntry ?? new LogEntry(FormattableString.Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(LogWriterBase)}.{nameof(this.Log)}"));
 
-            if (this.logWriterConfigBase.OriginsToLog.HasFlagOverlap(logItemOrigin.ToOrigins()))
-            {
-                logEntry = logEntry ?? new LogEntry(FormattableString.Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(LogWriterBase)}.{nameof(this.Log)}"));
+            var logItemContext = new LogItemContext(logEntry.TimeStamp, logItemOrigin, this.machineName, this.processName, this.processFileVersion);
+            var logItem = this.BuildLogItemFromLogEntry(logEntry, logItemContext);
 
-                var logItemContext = new LogItemContext(logEntry.TimeStamp, logItemOrigin, this.machineName, this.processName, this.processFileVersion);
-                var logItem = this.BuildLogItemFromLogEntry(logEntry, logItemContext);
-
-                this.Log(logItem);
-            }
+            this.Log(logItem);
         }
 
         /// <summary>
         /// Implementation-specific method for logging a <see cref="LogItem" />.
         /// </summary>
         /// <param name="logItem">The item to log.</param>
-        public abstract void LogInternal(
+        protected abstract void LogInternal(
             LogItem logItem);
 
         /// <summary>

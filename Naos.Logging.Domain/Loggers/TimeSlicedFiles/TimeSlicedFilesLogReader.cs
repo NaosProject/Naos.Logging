@@ -35,7 +35,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc cref="LogReaderBase" />
-        public override IReadOnlyCollection<LogItem> ReadRange(DateTime startUtc, DateTime endUtc)
+        public override IReadOnlyCollection<LogItem> ReadRange(DateTime startUtcInclusive, DateTime endUtcInclusive)
         {
             throw new NotImplementedException();
         }

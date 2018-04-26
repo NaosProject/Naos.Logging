@@ -46,7 +46,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
-        public override void LogInternal(
+        protected override void LogInternal(
             LogItem logItem)
         {
             Interlocked.Increment(ref this.eventId);

@@ -34,7 +34,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
-        public override void LogInternal(
+        protected override void LogInternal(
             LogItem logItem)
         {
             var message = FormattableString.Invariant($"{logItem.Context.LoggedTimeUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Message}");

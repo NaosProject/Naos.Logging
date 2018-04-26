@@ -44,7 +44,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
-        public override void LogInternal(
+        protected override void LogInternal(
             LogItem logMessage)
         {
             var fileLock = new object();

@@ -23,7 +23,8 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="LogReaderBase"/> class.
         /// </summary>
         /// <param name="logConfigurationBase">Base configuration.</param>
-        protected LogReaderBase(LogWriterConfigBase logConfigurationBase)
+        protected LogReaderBase(
+            LogWriterConfigBase logConfigurationBase)
         {
             new { logConfigurationBase }.Must().NotBeNull().OrThrowFirstFailure();
 
@@ -39,9 +40,11 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Reads the log for the specified range.
         /// </summary>
-        /// <param name="startUtc">Start time to range to read in UTC.</param>
-        /// <param name="endUtc">End time of range to read in UTC.</param>
+        /// <param name="startUtcInclusive">Start time of the range to read in UTC, inclusive of this time.</param>
+        /// <param name="endUtcInclusive">End time of the range to read in UTC, inclusive of this time.</param>
         /// <returns>Collection of <see cref="LogItem" />'s.</returns>
-        public abstract IReadOnlyCollection<LogItem> ReadRange(DateTime startUtc, DateTime endUtc);
+        public abstract IReadOnlyCollection<LogItem> ReadRange(
+            DateTime startUtcInclusive,
+            DateTime endUtcInclusive);
     }
 }
