@@ -145,7 +145,7 @@ namespace Naos.Logging.Domain
         {
             if (includeSubjectAndParameters)
             {
-                var logMessage = logEntry.Subject?.ToLogString() ?? "Null Subject Supplied to EntryPosted in " + nameof(LogProcessing);
+                var logMessage = logEntry.Subject?.ToLogString() ?? "Null Subject Supplied to EntryPosted in " + nameof(LogWriting);
                 if (logEntry.Params != null && logEntry.Params.Any())
                 {
                     foreach (var param in logEntry.Params)

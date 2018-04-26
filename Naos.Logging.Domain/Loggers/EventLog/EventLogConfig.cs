@@ -11,6 +11,8 @@ namespace Naos.Logging.Domain
 
     using Its.Log.Instrumentation;
 
+    using Naos.Diagnostics.Domain;
+
     using OBeautifulCode.Math.Recipes;
 
     /// <summary>
@@ -33,7 +35,7 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <param name="originsToLog">The log-item origins to log for.</param>
         /// <param name="includeLogEntrySubjectAndParameters">Indicates whether to include <see cref="Its.Log"/> <see cref="LogEntry"/> subject and parameters when building the string message to log; DEFAULT is false</param>
-        /// <param name="source">Optional event log source; DEFAULT is <see cref="Process.GetCurrentProcess"/> <see cref="Process.ProcessName" />.</param>
+        /// <param name="source">Optional event log source; DEFAULT is running process' name.</param>
         /// <param name="shouldCreateSourceIfMissing">Value indicating whether or not to create the source if missing.</param>
         /// <param name="logName">Optional log name; DEFAULT is <see cref="DefaultLogName" />.</param>
         /// <param name="machineName">Optional machine name; DEFAULT is <see cref="DefaultMachineName" />.</param>
@@ -46,7 +48,7 @@ namespace Naos.Logging.Domain
             bool shouldCreateSourceIfMissing = false)
             : base(originsToLog, includeLogEntrySubjectAndParameters)
         {
-            this.Source = string.IsNullOrWhiteSpace(source) ? Process.GetCurrentProcess().ProcessName : source;
+            this.Source = string.IsNullOrWhiteSpace(source) ? ProcessHelpers.GetRunningProcess().Name() : source;
             this.ShouldCreateSourceIfMissing = shouldCreateSourceIfMissing;
             this.LogName = string.IsNullOrWhiteSpace(logName) ? DefaultLogName : logName;
             this.MachineName = string.IsNullOrWhiteSpace(machineName) ? DefaultMachineName : machineName;

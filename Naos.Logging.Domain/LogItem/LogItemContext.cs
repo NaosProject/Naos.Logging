@@ -12,7 +12,7 @@ namespace Naos.Logging.Domain
 
     /// <summary>
     /// Stores some context for a <see cref="LogItem"/>
-    /// (e.g. it's origin, name of process within which the log-item was generated).
+    /// (e.g. it's origin, time logged, the name of process within which the log-item was generated).
     /// </summary>
     public class LogItemContext
     {
