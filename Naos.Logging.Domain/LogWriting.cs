@@ -155,7 +155,7 @@ namespace Naos.Logging.Domain
             {
                 var logEntry = args.LogEntry ?? new LogEntry(Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(Log)}.{nameof(Log.EntryPosted)}"));
 
-                var logItemOrigin = logEntry.Subject is Exception ? LogItemOrigin.EntryPostedException : LogItemOrigin.EntryPostedInformation;
+                var logItemOrigin = logEntry.Subject is Exception ? LogItemOrigin.ItsLogEntryPostedException : LogItemOrigin.ItsLogEntryPostedInformation;
 
                 this.LogToActiveLogWriters(logItemOrigin, logEntry);
             };

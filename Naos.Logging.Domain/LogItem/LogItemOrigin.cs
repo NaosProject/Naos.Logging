@@ -31,14 +31,19 @@ namespace Naos.Logging.Domain
         ItsLogInternalErrors,
 
         /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that is NOT an <see cref="Exception" />.
+        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that is some information.
         /// </summary>
-        EntryPostedInformation,
+        ItsLogEntryPostedInformation,
 
         /// <summary>
         /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that IS an <see cref="Exception" />.
         /// </summary>
-        EntryPostedException,
+        ItsLogEntryPostedException,
+
+        /// <summary>
+        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject related to telemetry.
+        /// </summary>
+        ItsLogEntryPostedTelemetry,
     }
 
     /// <summary>
@@ -63,19 +68,24 @@ namespace Naos.Logging.Domain
         ItsLogInternalErrors = 2,
 
         /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that is NOT an <see cref="Exception" />.
+        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that is some information.
         /// </summary>
-        EntryPostedInformation = 4,
+        ItsLogEntryPostedInformation = 4,
 
         /// <summary>
         /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that IS an <see cref="Exception" />.
         /// </summary>
-        EntryPostedException = 8,
+        ItsLogEntryPostedException = 8,
+
+        /// <summary>
+        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject related to telemetry.
+        /// </summary>
+        ItsLogEntryPostedTelemetry = 16,
 
         /// <summary>
         /// All entry posted events.
         /// </summary>
-        EntryPosted = EntryPostedInformation | EntryPostedException,
+        ItsLogEntryPosted = ItsLogEntryPostedInformation | ItsLogEntryPostedException,
 
         /// <summary>
         /// All unexpected errors.
@@ -85,11 +95,11 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// All errors.
         /// </summary>
-        AllErrors = UnexpectedErrors | EntryPostedException,
+        AllErrors = UnexpectedErrors | ItsLogEntryPostedException,
 
         /// <summary>
         /// Log all.
         /// </summary>
-        All = UnexpectedErrors | EntryPosted,
+        All = UnexpectedErrors | ItsLogEntryPosted | ItsLogEntryPostedTelemetry,
     }
 }
