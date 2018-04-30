@@ -14,6 +14,7 @@ namespace Naos.Logging.Domain
     using Naos.Diagnostics.Domain;
 
     using OBeautifulCode.Enum.Recipes;
+    using OBeautifulCode.TypeRepresentation;
 
     /// <summary>
     /// Base class for all log writers.
@@ -58,7 +59,7 @@ namespace Naos.Logging.Domain
                 throw new ArgumentNullException(nameof(logItem));
             }
 
-            var origins = logItem.Context.LogItemOrigin.ToOrigins();
+            var origins = logItem.Context.Origin.ToOrigins();
             if ((this.logWriterConfigBase.OriginsToLog != LogItemOrigins.None) && this.logWriterConfigBase.OriginsToLog.HasFlagOverlap(origins))
             {
                 this.LogInternal(logItem);
@@ -106,7 +107,7 @@ namespace Naos.Logging.Domain
         {
             logEntry = logEntry ?? new LogEntry(FormattableString.Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(LogWriterBase)}.{nameof(this.Log)}"));
 
-            var logItemContext = new LogItemContext(logEntry.TimeStamp, logItemOrigin, this.machineName, this.processName, this.processFileVersion);
+            var logItemContext = new LogItemContext(logEntry.TimeStamp, logItemOrigin, this.machineName, this.processName, this.processFileVersion, logEntry.CallingMethod, logEntry.CallingType.ToTypeDescription(), logEntry.Subject is Exception ex ? ex.StackTrace : null);
             var logItem = this.BuildLogItemFromLogEntry(logEntry, logItemContext);
 
             this.Log(logItem);

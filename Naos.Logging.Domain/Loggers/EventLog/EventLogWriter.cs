@@ -67,7 +67,7 @@ namespace Naos.Logging.Domain
                 }
             }
 
-            var origins = logItem.Context.LogItemOrigin.ToOrigins();
+            var origins = logItem.Context.Origin.ToOrigins();
             using (var eventLog = this.eventLogConfig.NewEventLogObject())
             {
                 var eventLogEntryType =
@@ -75,7 +75,7 @@ namespace Naos.Logging.Domain
                         EventLogEntryType.Error :
                         EventLogEntryType.Information;
 
-                eventLog.WriteEntry(logItem.Message, eventLogEntryType, this.eventId, (short)logItem.Context.LogItemOrigin);
+                eventLog.WriteEntry(logItem.Message, eventLogEntryType, this.eventId, (short)logItem.Context.Origin);
             }
         }
 
