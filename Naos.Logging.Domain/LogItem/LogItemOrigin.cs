@@ -41,6 +41,12 @@ namespace Naos.Logging.Domain
         ItsLogEntryPostedException,
 
         /// <summary>
+        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that are malformed
+        /// (contain data we would not expect like Category, ExceptionId, or Params).
+        /// </summary>
+        ItsLogEntryPostedMalformedLogEntry,
+
+        /// <summary>
         /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject related to telemetry.
         /// </summary>
         ItsLogEntryPostedTelemetry,
@@ -78,9 +84,15 @@ namespace Naos.Logging.Domain
         ItsLogEntryPostedException = 8,
 
         /// <summary>
+        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that are malformed
+        /// (contain data we would not expect like Category, ExceptionId, or Params).
+        /// </summary>
+        ItsLogEntryPostedMalformedLogEntry = 16,
+
+        /// <summary>
         /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject related to telemetry.
         /// </summary>
-        ItsLogEntryPostedTelemetry = 16,
+        ItsLogEntryPostedTelemetry = 32,
 
         /// <summary>
         /// All entry posted events.
@@ -90,7 +102,7 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// All unexpected errors.
         /// </summary>
-        UnexpectedErrors = AppDomainUnhandledException | ItsLogInternalErrors,
+        UnexpectedErrors = AppDomainUnhandledException | ItsLogInternalErrors | ItsLogEntryPostedMalformedLogEntry,
 
         /// <summary>
         /// All errors.
