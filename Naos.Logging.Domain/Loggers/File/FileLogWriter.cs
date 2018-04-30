@@ -55,16 +55,16 @@ namespace Naos.Logging.Domain
 
         /// <inheritdoc />
         protected override void LogInternal(
-            LogItem logMessage)
+            LogItem logItem)
         {
-            if (logMessage == null)
+            if (logItem == null)
             {
-                throw new ArgumentNullException(nameof(logMessage));
+                throw new ArgumentNullException(nameof(logItem));
             }
 
             // TODO: Trace.Listeners.Add(new TextWriterTraceListener("Log_TextWriterOutput.log", "myListener"));
             var fileLock = new object();
-            var message = FormattableString.Invariant($"{logMessage.Context.LoggedTimeUtc.ToString("o", CultureInfo.InvariantCulture)}|{logMessage.Context}|{logMessage.Message}");
+            var message = FormattableString.Invariant($"{logItem.Context.LoggedTimeUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Message}");
 
             lock (fileLock)
             {

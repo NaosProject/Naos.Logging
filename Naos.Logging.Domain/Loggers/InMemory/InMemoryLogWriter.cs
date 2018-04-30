@@ -39,16 +39,16 @@ namespace Naos.Logging.Domain
 
         /// <inheritdoc  />
         protected override void LogInternal(
-            LogItem logMessage)
+            LogItem logItem)
         {
-            if (logMessage == null)
+            if (logItem == null)
             {
-                throw new ArgumentNullException(nameof(logMessage));
+                throw new ArgumentNullException(nameof(logItem));
             }
 
             lock (this.syncLoggedMessages)
             {
-                this.loggedMessages.Enqueue(logMessage);
+                this.loggedMessages.Enqueue(logItem);
 
                 if (this.memoryLogConfig.MaxLoggedItemCount == -1)
                 {
