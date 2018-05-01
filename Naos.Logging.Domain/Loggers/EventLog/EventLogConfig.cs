@@ -12,6 +12,8 @@ namespace Naos.Logging.Domain
     using Its.Log.Instrumentation;
 
     using Naos.Diagnostics.Domain;
+    using Naos.Serialization.Domain;
+    using Naos.Serialization.Json;
 
     using OBeautifulCode.Math.Recipes;
 
@@ -29,6 +31,11 @@ namespace Naos.Logging.Domain
         /// Default <see cref="EventLog.MachineName" /> to use; "." (current machine interpreted by <see cref="EventLog" />).
         /// </summary>
         public const string DefaultMachineName = ".";
+
+        /// <summary>
+        /// Serializes and deserializes a log-item.
+        /// </summary>
+        public static readonly IBinarySerializeAndDeserialize LogItemSerializer = new NaosJsonSerializer();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventLogConfig"/> class.

@@ -36,18 +36,17 @@ namespace Naos.Logging.Domain
         /// <inheritdoc cref="LogReaderBase" />
         public override IReadOnlyCollection<LogItem> ReadAll()
         {
-            var ret = new List<LogItem>();
+            var result = new List<LogItem>();
             using (var eventLog = this.eventLogConfig.NewEventLogObject())
             {
                 foreach (EventLogEntry entry in eventLog.Entries)
                 {
-                    var context = new LogItemContext(entry.TimeWritten.ToUniversalTime(), (LogItemOrigin)entry.CategoryNumber);
-                    var logMessage = new LogItem(context, entry.Message);
-                    ret.Add(logMessage);
+                    var logItem = EventLogConfig.LogItemSerializer.Deserialize<LogItem>(entry.Data);
+                    result.Add(logItem);
                 }
             }
 
-            return ret;
+            return result;
         }
 
         /// <inheritdoc cref="LogReaderBase" />
