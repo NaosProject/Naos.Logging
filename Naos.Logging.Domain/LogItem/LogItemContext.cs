@@ -46,7 +46,7 @@ namespace Naos.Logging.Domain
 
             if (origin == LogItemOrigin.Unknown)
             {
-                throw new ArgumentException(Invariant($"{nameof(origin)} == {nameof(Origin)}.{nameof(LogItemOrigin.Unknown)}"));
+                throw new ArgumentException(Invariant($"{nameof(origin)} == {nameof(LogItemOrigin)}.{nameof(LogItemOrigin.Unknown)}"));
             }
 
             this.TimestampUtc = timestampUtc;
@@ -98,5 +98,19 @@ namespace Naos.Logging.Domain
         /// Gets the stack trace.
         /// </summary>
         public string StackTrace { get; private set; }
+
+        /// <summary>
+        /// Clones this context, replacing origin with the specified origin.
+        /// </summary>
+        /// <param name="origin">The origin to use in the cloned context.</param>
+        /// <returns>
+        /// A clone of this context, with the specified origin replacing the origin.
+        /// </returns>
+        public LogItemContext CloneWithOrigin(
+            LogItemOrigin origin)
+        {
+            var result = new LogItemContext(this.TimestampUtc, origin, this.MachineName, this.ProcessName, this.ProcessFileVersion, this.CallingMethod, this.CallingType, this.StackTrace);
+            return result;
+        }
     }
 }
