@@ -55,7 +55,7 @@ namespace Naos.Logging.Domain
             }
 
             var fileLock = new object();
-            var message = FormattableString.Invariant($"TimeSliced|{logItem.Context.TimestampUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Message}");
+            var message = FormattableString.Invariant($"TimeSliced|{logItem.Context.TimestampUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Subject.Summary}");
 
             lock (fileLock)
             {

@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogItemCorrelation.cs" company="Naos">
+// <copyright file="ActivityCorrelation.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -11,24 +11,33 @@ namespace Naos.Logging.Domain
     using static System.FormattableString;
 
     /// <summary>
-    /// Specifies how a <see cref="LogItem"/> is correlated with other/related <see cref="LogItem"/>s.
+    /// Specifies how a single <see cref="LogItem"/> is correlated with other
+    /// <see cref="LogItem"/>s within a defined block of code that explicitly
+    /// relates those items.
     /// </summary>
-    public class LogItemCorrelation
+    public class ActivityCorrelation : IHaveCorrelatingSubject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LogItemCorrelation"/> class.
+        /// Initializes a new instance of the <see cref="ActivityCorrelation"/> class.
         /// </summary>
         /// <param name="correlationId">An identifier used to correlate multiple log-items.</param>
-        /// <param name="elapsedMillisecondsFromFirst">The number of milliseconds that have elapsed from the first log-item in the set of correlated log-items.</param>
-        /// <param name="correlationPosition">The position of the log-item within a set of correlated log-items.</param>
-        public LogItemCorrelation(
+        /// <param name="correlatingSubject">The correlating subject.</param>
+        /// <param name="elapsedMillisecondsFromFirst">The number of milliseconds that have elapsed from the first log-item in the timeseries of correlated log-items.</param>
+        /// <param name="correlationPosition">The position of the log-item within a timeseries of correlated log-items.</param>
+        public ActivityCorrelation(
             string correlationId,
+            Subject correlatingSubject,
             long elapsedMillisecondsFromFirst,
-            LogItemCorrelationPosition correlationPosition)
+            ActivityCorrelationPosition correlationPosition)
         {
             if (string.IsNullOrWhiteSpace(correlationId))
             {
                 throw new ArgumentException(Invariant($"{nameof(correlationId)} is null or white space"));
+            }
+
+            if (correlatingSubject == null)
+            {
+                throw new ArgumentNullException(nameof(correlatingSubject));
             }
 
             if (elapsedMillisecondsFromFirst < 0)
@@ -36,20 +45,22 @@ namespace Naos.Logging.Domain
                 throw new ArgumentOutOfRangeException(Invariant($"{nameof(elapsedMillisecondsFromFirst)} < 0"));
             }
 
-            if (correlationPosition == LogItemCorrelationPosition.Unknown)
+            if (correlationPosition == ActivityCorrelationPosition.Unknown)
             {
-                throw new ArgumentException(Invariant($"{nameof(correlationPosition)} == {nameof(LogItemCorrelationPosition)}.{nameof(LogItemCorrelationPosition.Unknown)}"));
+                throw new ArgumentException(Invariant($"{nameof(correlationPosition)} == {nameof(ActivityCorrelationPosition)}.{nameof(ActivityCorrelationPosition.Unknown)}"));
             }
 
             this.CorrelationId = correlationId;
+            this.CorrelatingSubject = correlatingSubject;
             this.ElapsedMillisecondsFromFirst = elapsedMillisecondsFromFirst;
             this.CorrelationPosition = correlationPosition;
         }
 
-        /// <summary>
-        /// Gets an identifier used to correlate multiple log-items.
-        /// </summary>
+        /// <inheritdoc />
         public string CorrelationId { get; private set; }
+
+        /// <inheritdoc />
+        public Subject CorrelatingSubject { get; private set; }
 
         /// <summary>
         /// Gets the number of milliseconds that have elapsed from the first log-item in the timeseries of correlated log-items.
@@ -59,6 +70,6 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Gets the position of the log-item within a timeseries of correlated log-items.
         /// </summary>
-        public LogItemCorrelationPosition CorrelationPosition { get; private set; }
+        public ActivityCorrelationPosition CorrelationPosition { get; private set; }
     }
 }

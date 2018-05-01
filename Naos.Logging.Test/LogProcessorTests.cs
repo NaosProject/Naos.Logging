@@ -26,11 +26,11 @@ namespace Naos.Logging.Test
             var configurations = new LogWriterConfigBase[] { ShareSerializationTestLogic.FileConfig, ShareSerializationTestLogic.EventLogConfig, ShareSerializationTestLogic.ConsoleConfig }.ToList();
 
             // Act
-            var actual = new LogProcessorSettings(configurations);
+            var actual = new LogWritingSettings(configurations);
 
             // Assert
             actual.Should().NotBeNull();
-            actual.Configurations.Should().BeEquivalentTo(configurations);
+            actual.Configs.Should().BeEquivalentTo(configurations);
         }
 
         [Fact]
@@ -40,25 +40,25 @@ namespace Naos.Logging.Test
             LogWriterConfigBase[] configurations = null;
 
             // Act
-            var actual = new LogProcessorSettings(configurations);
+            var actual = new LogWritingSettings(configurations);
 
             // Assert
             actual.Should().NotBeNull();
-            actual.Configurations.Should().NotBeNull();
-            actual.Configurations.Should().BeEmpty();
+            actual.Configs.Should().NotBeNull();
+            actual.Configs.Should().BeEmpty();
         }
 
         [Fact]
         public static void RoundtripSerialization___LogProcessorSettings___Works()
         {
             // Arrange
-            var expected = ShareSerializationTestLogic.LogProcessorSettingsAll;
+            var expected = ShareSerializationTestLogic.LogWritingSettingsAll;
 
             void ThrowIfObjectsDiffer(object actualAsObject)
             {
-                var actual = actualAsObject as LogProcessorSettings;
+                var actual = actualAsObject as LogWritingSettings;
                 actual.Should().NotBeNull();
-                actual.Configurations.Should().BeEquivalentTo(expected.Configurations);
+                actual.Configs.Should().BeEquivalentTo(expected.Configs);
             }
 
             // Act & Assert

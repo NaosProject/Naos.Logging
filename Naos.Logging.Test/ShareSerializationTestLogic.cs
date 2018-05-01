@@ -35,7 +35,7 @@ namespace Naos.Logging.Test
 
         internal static readonly ConsoleLogConfig ConsoleConfig = new ConsoleLogConfig(LogItemOrigins.All, LogItemOrigins.AllErrors);
 
-        internal static readonly LogProcessorSettings LogProcessorSettingsAll = new LogProcessorSettings(new LogWriterConfigBase[] { FileConfig, EventLogConfig });
+        internal static readonly LogWritingSettings LogWritingSettingsAll = new LogWritingSettings(new LogWriterConfigBase[] { FileConfig, EventLogConfig });
 
         internal static void ActAndAssertForRoundtripSerialization(object expected, Action<object> throwIfObjectsDiffer)
         {

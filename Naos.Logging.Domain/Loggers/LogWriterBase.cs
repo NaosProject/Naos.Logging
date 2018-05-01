@@ -11,10 +11,7 @@ namespace Naos.Logging.Domain
 
     using Its.Log.Instrumentation;
 
-    using Naos.Diagnostics.Domain;
-
     using OBeautifulCode.Enum.Recipes;
-    using OBeautifulCode.TypeRepresentation;
 
     /// <summary>
     /// Base class for all log writers.
@@ -22,12 +19,6 @@ namespace Naos.Logging.Domain
     public abstract class LogWriterBase
     {
         private readonly LogWriterConfigBase logWriterConfigBase;
-
-        private readonly string machineName;
-
-        private readonly string processName;
-
-        private readonly string processFileVersion;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogWriterBase"/> class.
@@ -42,9 +33,6 @@ namespace Naos.Logging.Domain
             }
 
             this.logWriterConfigBase = logWriterConfigBase;
-            this.machineName = MachineName.GetMachineName();
-            this.processName = ProcessHelpers.GetRunningProcess().Name();
-            this.processFileVersion = ProcessHelpers.GetRunningProcess().FileVersion();
         }
 
         /// <summary>
@@ -67,76 +55,11 @@ namespace Naos.Logging.Domain
         }
 
         /// <summary>
-        /// Create an <see cref="Its.Log" /> <see cref="LogEntry"/>
-        /// from a string and log it.
-        /// </summary>
-        /// <param name="logItemOrigin">The origin of the logged item.</param>
-        /// <param name="message">Message to log.</param>
-        public void Log(
-            LogItemOrigin logItemOrigin,
-            string message)
-        {
-            var entry = new LogEntry(message);
-            this.Log(logItemOrigin, entry);
-        }
-
-        /// <summary>
-        /// Create an <see cref="Its.Log" /> <see cref="LogEntry"/>
-        /// from a comment and subject object and log it.
-        /// </summary>
-        /// <param name="logItemOrigin">The origin of the logged item.</param>
-        /// <param name="comment">Comment to log.</param>
-        /// <param name="subject">Subject to log.</param>
-        public void Log(
-            LogItemOrigin logItemOrigin,
-            string comment,
-            object subject)
-        {
-            var entry = new LogEntry(comment, subject);
-            this.Log(logItemOrigin, entry);
-        }
-
-        /// <summary>
-        /// Log a <see cref="LogEntry"/> from <see cref="Its.Log" />.
-        /// </summary>
-        /// <param name="logItemOrigin">The origin of the logged item.</param>
-        /// <param name="logEntry"><see cref="Its.Log" /> entry to log.</param>
-        public void Log(
-            LogItemOrigin logItemOrigin,
-            LogEntry logEntry)
-        {
-            logEntry = logEntry ?? new LogEntry(FormattableString.Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(LogWriterBase)}.{nameof(this.Log)}"));
-
-            var logItemContext = new LogItemContext(logEntry.TimeStamp, logItemOrigin, this.machineName, this.processName, this.processFileVersion, logEntry.CallingMethod, logEntry.CallingType.ToTypeDescription(), logEntry.Subject is Exception ex ? ex.StackTrace : null);
-            var logItem = this.BuildLogItemFromLogEntry(logEntry, logItemContext);
-
-            this.Log(logItem);
-        }
-
-        /// <summary>
         /// Implementation-specific method for logging a <see cref="LogItem" />.
         /// </summary>
         /// <param name="logItem">The item to log.</param>
         protected abstract void LogInternal(
             LogItem logItem);
-
-        /// <summary>
-        /// Builds a <see cref="LogItem" /> from a <see cref="LogEntry"/>.
-        /// </summary>
-        /// <param name="logEntry"><see cref="Its.Log" /> entry to log.</param>
-        /// <param name="logItemContext">Some context for the logged item.</param>
-        /// <returns>
-        /// The log-item that results from an <see cref="Its.Log"/>
-        /// <see cref="LogEntry"/> and some context about the logged item.
-        /// </returns>
-        protected virtual LogItem BuildLogItemFromLogEntry(
-            LogEntry logEntry,
-            LogItemContext logItemContext)
-        {
-            var logMessage = BuildLogMessageFromLogEntry(logEntry, this.logWriterConfigBase.LogEntryPropertiesToIncludeInLogMessage);
-            var result = new LogItem(logItemContext, logMessage);
-            return result;
-        }
 
         /// <summary>
         /// Builds a log message from a <see cref="LogItem" /> from a <see cref="LogEntry"/>.
@@ -178,5 +101,5 @@ namespace Naos.Logging.Domain
 
             return result;
         }
-    }
+     }
 }

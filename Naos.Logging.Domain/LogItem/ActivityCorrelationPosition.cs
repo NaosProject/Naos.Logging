@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogItemCorrelationPosition.cs" company="Naos">
+// <copyright file="ActivityCorrelationPosition.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -7,9 +7,10 @@
 namespace Naos.Logging.Domain
 {
     /// <summary>
-    /// Determines the position of a log-item within a timeseries of correlated log-items.
+    /// Determines the position of a log-item within a defined
+    /// block of code that explicitly relates those items.
     /// </summary>
-    public enum LogItemCorrelationPosition
+    public enum ActivityCorrelationPosition
     {
         /// <summary>
         /// Unknown (default).

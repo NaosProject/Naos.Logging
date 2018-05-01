@@ -64,7 +64,7 @@ namespace Naos.Logging.Domain
 
             // TODO: Trace.Listeners.Add(new TextWriterTraceListener("Log_TextWriterOutput.log", "myListener"));
             var fileLock = new object();
-            var message = FormattableString.Invariant($"{logItem.Context.TimestampUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Message}");
+            var message = FormattableString.Invariant($"{logItem.Context.TimestampUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Subject.Summary}");
 
             lock (fileLock)
             {

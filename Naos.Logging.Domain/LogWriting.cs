@@ -8,10 +8,19 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
 
     using Its.Log.Instrumentation;
-
+    using Naos.Compression.Domain;
+    using Naos.Diagnostics.Domain;
+    using Naos.Serialization.Domain;
+    using Naos.Serialization.Domain.Extensions;
+    using Naos.Serialization.Json;
+    using Naos.Telemetry.Domain;
+    using OBeautifulCode.Enum.Recipes;
+    using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.TypeRepresentation;
     using static System.FormattableString;
 
     /// <summary>
@@ -19,6 +28,20 @@ namespace Naos.Logging.Domain
     /// </summary>
     public class LogWriting
     {
+        public static readonly SerializationDescription SubjectSerializationDescription = new SerializationDescription(SerializationFormat.Json, SerializationRepresentation.String, SerializationKind.Compact);
+
+        public static readonly TypeMatchStrategy SubjectTypeMatchStrategy = TypeMatchStrategy.NamespaceAndName;
+
+        public static readonly MultipleMatchStrategy SubjectMultipleMatchStrategy = MultipleMatchStrategy.ThrowOnMultiple;
+
+        private static readonly HashSet<LogItemOrigin> ErrorOrigins = new HashSet<LogItemOrigin>(LogItemOrigins.AllErrors.GetIndividualFlags<LogItemOrigins>().Select(_ => (LogItemOrigin)Enum.Parse(typeof(LogItemOrigin), _.ToString())));
+
+        private readonly string machineName;
+
+        private readonly string processName;
+
+        private readonly string processFileVersion;
+
         /// <summary>
         /// Gets the singleton entry point to the code.
         /// </summary>
@@ -32,7 +55,9 @@ namespace Naos.Logging.Domain
 
         private LogWriting()
         {
-            /* no-op to make sure this can only be accessed via instance property */
+            this.machineName = MachineName.GetMachineName();
+            this.processName = ProcessHelpers.GetRunningProcess().Name();
+            this.processFileVersion = ProcessHelpers.GetRunningProcess().FileVersion();
         }
 
         /// <summary>
@@ -123,11 +148,48 @@ namespace Naos.Logging.Domain
             LogItemOrigin logItemOrigin,
             LogEntry logEntry)
         {
+            LogItem logItem;
+
+            try
+            {
+                logItem = this.BuildLogItem(logItemOrigin, logEntry);
+            }
+            catch (Exception ex)
+            {
+                string serializedLogEntry;
+                try
+                {
+                    serializedLogEntry = new NaosJsonSerializer().SerializeToString(logEntry);
+                }
+                catch (Exception failToSerializeLogEntryException)
+                {
+                    serializedLogEntry = Invariant($"Failed to serialize log entry: {failToSerializeLogEntryException.Message}");
+                }
+
+                var updatedSubject = new InvalidLogEntryException(serializedLogEntry, ex);
+                var newLogEntry = new LogEntry(updatedSubject);
+
+                try
+                {
+                    logItem = this.BuildLogItem(LogItemOrigin.ItsLogEntryPostedMalformedLogEntry, newLogEntry);
+                }
+                catch (Exception failedToBuildInvalidLogEntryException)
+                {
+                    var rawSubject = new RawSubject
+                    {
+                        OriginalSubject = Invariant($"Failed to build invalid log entry: {failedToBuildInvalidLogEntryException.Message}"),
+                        Summary = serializedLogEntry,
+                    };
+
+                    logItem = new LogItem(rawSubject.ToSubject(), LogItemKind.Error, new LogItemContext(DateTime.UtcNow, LogItemOrigin.ItsLogEntryPostedMalformedLogEntry));
+                }
+            }
+
             foreach (var logWriter in this.activeLogWriters)
             {
                 try
                 {
-                    logWriter.Log(logItemOrigin, logEntry);
+                    logWriter.Log(logItem);
                 }
                 catch (Exception)
                 {
@@ -155,7 +217,19 @@ namespace Naos.Logging.Domain
             {
                 var logEntry = args.LogEntry ?? new LogEntry(Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(Log)}.{nameof(Log.EntryPosted)}"));
 
-                var logItemOrigin = logEntry.Subject is Exception ? LogItemOrigin.ItsLogEntryPostedException : LogItemOrigin.ItsLogEntryPostedInformation;
+                LogItemOrigin logItemOrigin;
+                switch (logEntry.Subject)
+                {
+                    case Exception ex:
+                        logItemOrigin = LogItemOrigin.ItsLogEntryPostedException;
+                        break;
+                    case IAmTelemetryItem tel:
+                        logItemOrigin = LogItemOrigin.ItsLogEntryPostedTelemetry;
+                        break;
+                    default:
+                        logItemOrigin = LogItemOrigin.ItsLogEntryPostedInformation;
+                        break;
+                }
 
                 this.LogToActiveLogWriters(logItemOrigin, logEntry);
             };
@@ -180,6 +254,222 @@ namespace Naos.Logging.Domain
             string message)
         {
             /* no-op */
+        }
+
+        private static ActivityCorrelationPosition GetActivityCorrelationPositionFromLogEntry(
+            LogEntry logEntry)
+        {
+            ActivityCorrelationPosition result;
+            switch (logEntry.EventType)
+            {
+                case TraceEventType.Verbose:
+                    result = ActivityCorrelationPosition.Middle;
+                    break;
+                case TraceEventType.Start:
+                    result = ActivityCorrelationPosition.First;
+                    break;
+                case TraceEventType.Stop:
+                    result = ActivityCorrelationPosition.Last;
+                    break;
+                default:
+                    result = ActivityCorrelationPosition.Unknown;
+                    break;
+            }
+
+            return result;
+        }
+
+        private static string BuildSummaryFromSubjectObject(
+            object subjectObject,
+            ActivityCorrelationPosition activityCorrelationPosition)
+        {
+            string result;
+            if (subjectObject is Exception ex)
+            {
+                result = Invariant($"{ex.GetType().Name}: {ex.Message}");
+            }
+            else
+            {
+                result = Formatter.Format(subjectObject);
+            }
+
+            if (activityCorrelationPosition != ActivityCorrelationPosition.Unknown)
+            {
+                result = Invariant($"{activityCorrelationPosition}: {result}");
+            }
+
+            return result;
+        }
+
+        private LogItem BuildLogItem(
+            LogItemOrigin logItemOrigin,
+            LogEntry logEntry)
+        {
+            logEntry = logEntry ?? new LogEntry(Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(this.BuildLogItem)}"));
+
+            var activityCorrelationPosition = GetActivityCorrelationPositionFromLogEntry(logEntry);
+
+            object logItemSubjectObject;
+            var correlations = new List<IHaveCorrelationId>(2);
+
+            if (activityCorrelationPosition == ActivityCorrelationPosition.Unknown)
+            {
+                logItemSubjectObject = logEntry.Subject;
+            }
+            else
+            {
+                if ((activityCorrelationPosition == ActivityCorrelationPosition.First) ||
+                    (activityCorrelationPosition == ActivityCorrelationPosition.Last))
+                {
+                    logItemSubjectObject = logEntry.Subject;
+                }
+                else if (activityCorrelationPosition == ActivityCorrelationPosition.Middle)
+                {
+                    if (logEntry.Params.Any())
+                    {
+                        if (logEntry.Params.Count() > 1)
+                        {
+                               throw new InvalidOperationException();
+                        }
+                        else
+                        {
+                            logItemSubjectObject = logEntry.Params.Single();
+                        }
+                    }
+                    else if (logEntry.Message != null)
+                    {
+                        logItemSubjectObject = logEntry.Message;
+                    }
+                    else
+                    {
+                              throw new InvalidOperationException();
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException(Invariant($"This {nameof(ActivityCorrelationPosition)} is not supported: {activityCorrelationPosition}"));
+                }
+
+                var activityCorrelatingSubject = new RawSubject
+                {
+                    OriginalSubject = logEntry.Subject,
+                    Summary = BuildSummaryFromSubjectObject(logEntry.Subject, activityCorrelationPosition),
+                };
+
+                var correlatingId = activityCorrelatingSubject.GetHashCode().ToGuid().ToString();
+                var elapsedMilliseconds = activityCorrelationPosition == ActivityCorrelationPosition.First ? 0 : logEntry.ElapsedMilliseconds ?? throw new InvalidOperationException(Invariant($"{nameof(logEntry)}.{nameof(LogEntry.ElapsedMilliseconds)} is null when there is an {nameof(ActivityCorrelation)}"));
+                var activityCorrelation = new ActivityCorrelation(correlatingId, activityCorrelatingSubject.ToSubject(), elapsedMilliseconds, activityCorrelationPosition);
+                correlations.Add(activityCorrelation);
+            }
+
+            string stackTrace = null;
+            if (logItemSubjectObject is Exception loggedException)
+            {
+                var correlatingException = ExceptionIdBuilder.FindFirstExceptionInChainWithExceptionId(loggedException);
+                if (correlatingException == null)
+                {
+                    ExceptionIdBuilder.GenerateAndWriteExceptionIdIntoExceptionData(loggedException);
+                    correlatingException = loggedException;
+                }
+
+                var correlationId = ExceptionIdBuilder.GetExceptionIdFromExceptionData(correlatingException).ToString();
+
+                var exceptionCorrelatingSubject = new RawSubject
+                {
+                    OriginalSubject = correlatingException,
+                    Summary = BuildSummaryFromSubjectObject(correlatingException, activityCorrelationPosition),
+                };
+
+                var exceptionCorrelation = new ExceptionCorrelation(correlationId, exceptionCorrelatingSubject.ToSubject());
+                correlations.Add(exceptionCorrelation);
+
+                stackTrace = loggedException.StackTrace;
+            }
+
+            var logItemRawSubject = new RawSubject
+            {
+                OriginalSubject = logItemSubjectObject,
+                Summary = BuildSummaryFromSubjectObject(logItemSubjectObject, activityCorrelationPosition),
+            };
+
+            var context = new LogItemContext(logEntry.TimeStamp, logItemOrigin, this.machineName, this.processName, this.processFileVersion, logEntry.CallingMethod, logEntry.CallingType?.ToTypeDescription(), stackTrace);
+
+            var kind = ErrorOrigins.Contains(context.Origin) ? LogItemKind.Error : LogItemKind.Info;
+
+            var comment = (logItemSubjectObject is string logItemSubjectAsString) && (logItemSubjectAsString == logEntry.Message) ? null : logEntry.Message;
+
+            var result = new LogItem(logItemRawSubject.ToSubject(), kind, context, comment, correlations);
+
+            return result;
+        }
+
+        private class RawSubject
+        {
+            public object OriginalSubject { get; set; }
+
+            public string Summary { get; set; }
+
+            public Subject ToSubject()
+            {
+                var describedSerialization = this.OriginalSubject.ToDescribedSerializationUsingSpecificFactory(
+                    SubjectSerializationDescription,
+                    JsonSerializerFactory.Instance,
+                    CompressorFactory.Instance,
+                    SubjectTypeMatchStrategy,
+                    SubjectMultipleMatchStrategy);
+                var result = new Subject(describedSerialization, this.Summary);
+                return result;
+            }
+        }
+
+        private static class ExceptionIdBuilder
+        {
+            private const string ExceptionIdKey = "__Naos_Log_ExceptionID__";
+
+            /// <summary>
+            /// Ensures that the exception id is initialized.
+            /// </summary>
+            public static Exception FindFirstExceptionInChainWithExceptionId(
+                Exception loggedException)
+            {
+                var iteratingException = loggedException;
+
+                while (iteratingException != null)
+                {
+                    if (iteratingException.Data.Contains(ExceptionIdKey))
+                    {
+                        return iteratingException;
+                    }
+
+                    iteratingException = iteratingException.InnerException;
+                }
+
+                return null;
+            }
+
+            public static Guid GenerateAndWriteExceptionIdIntoExceptionData(
+                Exception loggedException)
+            {
+                var result = Guid.NewGuid();
+                loggedException.Data[ExceptionIdKey] = result;
+                return result;
+            }
+
+            public static Guid GetExceptionIdFromExceptionData(
+                Exception correlatingException)
+            {
+                Guid result;
+                if (correlatingException.Data.Contains(ExceptionIdKey))
+                {
+                    result = (Guid)correlatingException.Data[ExceptionIdKey];
+                }
+                else
+                {
+                    result = Guid.Empty;
+                }
+
+                return result;
+            }
         }
     }
 

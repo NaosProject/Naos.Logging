@@ -43,7 +43,7 @@ namespace Naos.Logging.Domain
                 throw new ArgumentNullException(nameof(logItem));
             }
 
-            var message = FormattableString.Invariant($"{logItem.Context.TimestampUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Message}");
+            var message = FormattableString.Invariant($"{logItem.Context.TimestampUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Subject.Summary}");
 
             var origins = logItem.Context.Origin.ToOrigins();
             if (this.consoleConfig.OriginsToLogConsoleOut.HasFlagOverlap(origins))
