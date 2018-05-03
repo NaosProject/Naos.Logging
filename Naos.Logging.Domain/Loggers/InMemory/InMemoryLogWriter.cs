@@ -29,12 +29,7 @@ namespace Naos.Logging.Domain
             InMemoryLogConfig memoryConfig)
             : base(memoryConfig)
         {
-            if (memoryConfig == null)
-            {
-                throw new ArgumentNullException(nameof(memoryConfig));
-            }
-
-            this.memoryLogConfig = memoryConfig;
+            this.memoryLogConfig = memoryConfig ?? throw new ArgumentNullException(nameof(memoryConfig));
         }
 
         /// <inheritdoc  />
@@ -88,7 +83,7 @@ namespace Naos.Logging.Domain
             }
         }
 
-        /// <inheritdoc cref="object" />
+        /// <inheritdoc />
         public override string ToString()
         {
             var ret = FormattableString.Invariant($"{this.GetType().FullName}; {nameof(this.memoryLogConfig.OriginsToLog)}: {this.memoryLogConfig.OriginsToLog}; {nameof(this.memoryLogConfig.MaxLoggedItemCount)}: {this.memoryLogConfig.MaxLoggedItemCount}");

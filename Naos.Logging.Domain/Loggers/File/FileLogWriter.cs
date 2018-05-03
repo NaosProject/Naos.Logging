@@ -7,7 +7,6 @@
 namespace Naos.Logging.Domain
 {
     using System;
-    using System.Globalization;
     using System.IO;
 
     using static System.FormattableString;
@@ -19,7 +18,7 @@ namespace Naos.Logging.Domain
     {
         private readonly FileLogConfig fileLogConfig;
 
-        private readonly bool didCreateDirectory;
+        private readonly string thisToString;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileLogWriter"/> class.
@@ -29,12 +28,7 @@ namespace Naos.Logging.Domain
             FileLogConfig fileLogConfig)
             : base(fileLogConfig)
         {
-            if (fileLogConfig == null)
-            {
-                throw new ArgumentNullException(nameof(fileLogConfig));
-            }
-
-            this.fileLogConfig = fileLogConfig;
+            this.fileLogConfig = fileLogConfig ?? throw new ArgumentNullException(nameof(fileLogConfig));
 
             var directoryPath = Path.GetDirectoryName(this.fileLogConfig.LogFilePath);
             if (string.IsNullOrWhiteSpace(directoryPath))
@@ -42,15 +36,19 @@ namespace Naos.Logging.Domain
                 throw new ArgumentException(Invariant($"directory name from {nameof(this.fileLogConfig)}.{nameof(FileLogConfig.LogFilePath)} is null or white space"));
             }
 
+            bool didCreateDirectory;
             if (this.fileLogConfig.CreateDirectoryStructureIfMissing && !Directory.Exists(directoryPath))
             {
-                Directory.CreateDirectory(directoryPath ?? "won't get here but VS can't figure that out");
-                this.didCreateDirectory = true;
+                Directory.CreateDirectory(directoryPath);
+                didCreateDirectory = true;
             }
             else
             {
-                this.didCreateDirectory = false;
+                didCreateDirectory = false;
             }
+
+            // this is to capture the directory creation info as well as prevent inconsistent syncronization usage of this.fileLogConfig...
+            this.thisToString = FormattableString.Invariant($"{this.GetType().FullName}; {nameof(this.fileLogConfig.OriginsToLog)}: {this.fileLogConfig.OriginsToLog}; {nameof(this.fileLogConfig.LogFilePath)}: {this.fileLogConfig.LogFilePath}; {nameof(this.fileLogConfig.CreateDirectoryStructureIfMissing)}: {this.fileLogConfig.CreateDirectoryStructureIfMissing}; {nameof(didCreateDirectory)}: {didCreateDirectory}");
         }
 
         /// <inheritdoc />
@@ -64,19 +62,18 @@ namespace Naos.Logging.Domain
 
             // TODO: Trace.Listeners.Add(new TextWriterTraceListener("Log_TextWriterOutput.log", "myListener"));
             var fileLock = new object();
-            var message = FormattableString.Invariant($"{logItem.Context.TimestampUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Subject.Summary}");
 
             lock (fileLock)
             {
-                File.AppendAllText(this.fileLogConfig.LogFilePath, message + Environment.NewLine);
+                var logMessage = BuildLogMessageFromLogEntry(logItem, this.fileLogConfig.LogItemPropertiesToIncludeInLogMessage, true);
+                File.AppendAllText(this.fileLogConfig.LogFilePath, logMessage);
             }
         }
 
-        /// <inheritdoc cref="object" />
+        /// <inheritdoc />
         public override string ToString()
         {
-            var ret = FormattableString.Invariant($"{this.GetType().FullName}; {nameof(this.fileLogConfig.OriginsToLog)}: {this.fileLogConfig.OriginsToLog}; {nameof(this.fileLogConfig.LogFilePath)}: {this.fileLogConfig.LogFilePath}; {nameof(this.fileLogConfig.CreateDirectoryStructureIfMissing)}: {this.fileLogConfig.CreateDirectoryStructureIfMissing}; {nameof(this.didCreateDirectory)}: {this.didCreateDirectory}");
-            return ret;
+            return this.thisToString;
         }
     }
 }

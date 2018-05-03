@@ -9,7 +9,7 @@ namespace Naos.Diagnostics.Domain
     /// <summary>
     /// Specifies the kind of machine name.
     /// </summary>
-#if !NaosDiagnosticsDomain
+#if !NaosDiagnosticsRecipes
     [System.CodeDom.Compiler.GeneratedCode("Naos.Diagnostics", "See package version number")]
 #endif
     internal enum MachineNameKind

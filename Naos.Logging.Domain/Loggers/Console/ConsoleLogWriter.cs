@@ -7,7 +7,6 @@
 namespace Naos.Logging.Domain
 {
     using System;
-    using System.Globalization;
 
     using OBeautifulCode.Enum.Recipes;
 
@@ -26,12 +25,7 @@ namespace Naos.Logging.Domain
             ConsoleLogConfig consoleConfig)
             : base(consoleConfig)
         {
-            if (consoleConfig == null)
-            {
-                throw new ArgumentNullException(nameof(consoleConfig));
-            }
-
-            this.consoleConfig = consoleConfig;
+            this.consoleConfig = consoleConfig ?? throw new ArgumentNullException(nameof(consoleConfig));
         }
 
         /// <inheritdoc />
@@ -43,17 +37,17 @@ namespace Naos.Logging.Domain
                 throw new ArgumentNullException(nameof(logItem));
             }
 
-            var message = FormattableString.Invariant($"{logItem.Context.TimestampUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Subject.Summary}");
+            var logMessage = BuildLogMessageFromLogEntry(logItem, this.consoleConfig.LogItemPropertiesToIncludeInLogMessage, true);
 
             var origins = logItem.Context.Origin.ToOrigins();
             if (this.consoleConfig.OriginsToLogConsoleOut.HasFlagOverlap(origins))
             {
-                Console.Out.WriteLine(message);
+                Console.Out.WriteLine(logMessage);
             }
 
             if (this.consoleConfig.OriginsToLogConsoleError.HasFlagOverlap(origins))
             {
-                Console.Error.WriteLine(message);
+                Console.Error.WriteLine(logMessage);
             }
         }
 

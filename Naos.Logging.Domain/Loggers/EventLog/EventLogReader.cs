@@ -25,12 +25,7 @@ namespace Naos.Logging.Domain
             EventLogConfig eventLogConfig)
             : base(eventLogConfig)
         {
-            if (eventLogConfig == null)
-            {
-                throw new ArgumentNullException(nameof(eventLogConfig));
-            }
-
-            this.eventLogConfig = eventLogConfig;
+            this.eventLogConfig = eventLogConfig ?? throw new ArgumentNullException(nameof(eventLogConfig));
         }
 
         /// <inheritdoc cref="LogReaderBase" />
@@ -41,7 +36,7 @@ namespace Naos.Logging.Domain
             {
                 foreach (EventLogEntry entry in eventLog.Entries)
                 {
-                    var logItem = EventLogConfig.LogItemSerializer.Deserialize<LogItem>(entry.Data);
+                    var logItem = EventLogConfig.EventLogRawDataLogItemSerializer.Deserialize<LogItem>(entry.Data);
                     result.Add(logItem);
                 }
             }

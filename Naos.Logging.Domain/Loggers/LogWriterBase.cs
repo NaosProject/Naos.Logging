@@ -7,17 +7,31 @@
 namespace Naos.Logging.Domain
 {
     using System;
+    using System.Globalization;
     using System.Linq;
+    using System.Text;
 
     using Its.Log.Instrumentation;
 
+    using Naos.Serialization.Domain;
+    using Naos.Serialization.Json;
+
+    using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Enum.Recipes;
+
+    using static System.FormattableString;
 
     /// <summary>
     /// Base class for all log writers.
     /// </summary>
     public abstract class LogWriterBase
     {
+        /// <summary>
+        /// Default serializer to use for converting a <see cref="LogItem" /> into a string.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Want a field here.")]
+        protected static readonly IStringSerializeAndDeserialize DefaultLogItemSerializerForLogMessage = new NaosJsonSerializer();
+
         private readonly LogWriterConfigBase logWriterConfigBase;
 
         /// <summary>
@@ -27,12 +41,7 @@ namespace Naos.Logging.Domain
         protected LogWriterBase(
             LogWriterConfigBase logWriterConfigBase)
         {
-            if (logWriterConfigBase == null)
-            {
-                throw new ArgumentNullException(nameof(logWriterConfigBase));
-            }
-
-            this.logWriterConfigBase = logWriterConfigBase;
+            this.logWriterConfigBase = logWriterConfigBase ?? throw new ArgumentNullException(nameof(logWriterConfigBase));
         }
 
         /// <summary>
@@ -62,44 +71,69 @@ namespace Naos.Logging.Domain
             LogItem logItem);
 
         /// <summary>
-        /// Builds a log message from a <see cref="LogItem" /> from a <see cref="LogEntry"/>.
+        /// Builds a log message from a <see cref="LogItem" />.
         /// </summary>
-        /// <param name="logEntry">The log entry.</param>
-        /// <param name="logEntryPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
+        /// <param name="logItem">The log item.</param>
+        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
+        /// <param name="appendTrailingNewLine">Optional value indicating whether or not to append a trailing new line; DEFAULT is false.</param>
         /// <returns>Log message.</returns>
         protected static string BuildLogMessageFromLogEntry(
-            LogEntry logEntry,
-            LogEntryPropertiesToIncludeInLogMessage logEntryPropertiesToIncludeInLogMessage)
+            LogItem logItem,
+            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
+            bool appendTrailingNewLine = false)
         {
-            string result;
-            if (logEntryPropertiesToIncludeInLogMessage == LogEntryPropertiesToIncludeInLogMessage.Default)
+            if (logItem == null)
             {
-                result = logEntry.ToLogString();
-            }
-            else
-            {
-                result = string.Empty;
-
-                if (logEntryPropertiesToIncludeInLogMessage.HasFlag(LogEntryPropertiesToIncludeInLogMessage.Subject))
-                {
-                    result += logEntry.Subject?.ToLogString() ?? "Null Subject Supplied to EntryPosted in " + nameof(LogWriting);
-                }
-
-                if (logEntryPropertiesToIncludeInLogMessage.HasFlag(LogEntryPropertiesToIncludeInLogMessage.Parameters))
-                {
-                    if (logEntry.Params != null && logEntry.Params.Any())
-                    {
-                        foreach (var param in logEntry.Params)
-                        {
-                            result += " - " + param.ToLogString();
-                        }
-                    }
-                }
-
-                result = result.ToLogString();
+                throw new ArgumentNullException(nameof(logItem));
             }
 
-            return result;
+            var stringBuiler = new StringBuilder();
+            var itemsToLog = logItemPropertiesToIncludeInLogMessage.GetIndividualFlags<LogItemPropertiesToIncludeInLogMessage>().OrderBy(_ => (int)_).ToList();
+
+            foreach (var itemToLog in itemsToLog)
+            {
+                switch (itemToLog)
+                {
+                    case LogItemPropertiesToIncludeInLogMessage.None:
+                        /* no - op */
+                        break;
+                    case LogItemPropertiesToIncludeInLogMessage.Timestamp:
+                        stringBuiler.Append(logItem.Context.TimestampUtc.ToString("u", CultureInfo.InvariantCulture));
+                        stringBuiler.Append("|");
+                        break;
+                    case LogItemPropertiesToIncludeInLogMessage.CorrelationTypeAndIds:
+                        var correlationEntries = logItem.Correlations.Select(_ => Invariant($"{_.GetType().Name}={_.CorrelationId}")).ToList();
+                        stringBuiler.Append(correlationEntries.Any() ? correlationEntries.ToCsv() : "No Correlations");
+                        stringBuiler.Append("|");
+                        break;
+                    case LogItemPropertiesToIncludeInLogMessage.Origin:
+                        stringBuiler.Append(logItem.Context.Origin);
+                        stringBuiler.Append("|");
+                        break;
+                    case LogItemPropertiesToIncludeInLogMessage.SubjectSummary:
+                        stringBuiler.Append(logItem.Subject.Summary);
+                        stringBuiler.Append("|");
+                        break;
+                    case LogItemPropertiesToIncludeInLogMessage.StackTrace:
+                        stringBuiler.AppendLine();
+                        stringBuiler.AppendLine(logItem.Context.StackTrace);
+                        break;
+                    case LogItemPropertiesToIncludeInLogMessage.LogItemSerialization:
+                        var serializedLogItem = DefaultLogItemSerializerForLogMessage.SerializeToString(logItem);
+                        stringBuiler.AppendLine();
+                        stringBuiler.AppendLine(serializedLogItem);
+                        break;
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+
+            if (appendTrailingNewLine)
+            {
+                stringBuiler.AppendLine();
+            }
+
+            return stringBuiler.ToString();
         }
      }
 }

@@ -20,13 +20,13 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="LogWriterConfigBase"/> class.
         /// </summary>
         /// <param name="originsToLog">The log-item origins to log for.</param>
-        /// <param name="logEntryPropertiesToIncludeInLogMessage">The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
+        /// <param name="logItemPropertiesToIncludeInLogMessage">The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         protected LogWriterConfigBase(
             LogItemOrigins originsToLog,
-            LogEntryPropertiesToIncludeInLogMessage logEntryPropertiesToIncludeInLogMessage)
+            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage)
         {
             this.OriginsToLog = originsToLog;
-            this.LogEntryPropertiesToIncludeInLogMessage = logEntryPropertiesToIncludeInLogMessage;
+            this.LogItemPropertiesToIncludeInLogMessage = logItemPropertiesToIncludeInLogMessage;
         }
 
         /// <summary>
@@ -38,6 +38,6 @@ namespace Naos.Logging.Domain
         /// Gets the properties/aspects of an <see cref="Its.Log"/>
         /// <see cref="LogEntry"/> to include when building a log message.
         /// </summary>
-        public LogEntryPropertiesToIncludeInLogMessage LogEntryPropertiesToIncludeInLogMessage { get; private set; }
+        public LogItemPropertiesToIncludeInLogMessage LogItemPropertiesToIncludeInLogMessage { get; private set; }
     }
 }

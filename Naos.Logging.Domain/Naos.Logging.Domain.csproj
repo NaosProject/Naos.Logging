@@ -81,7 +81,7 @@
     <Compile Include=".recipes\Spritely.MustValidation\Rules.cs" />
     <Compile Include=".recipes\Spritely.MustValidation\ValidatedNotNullAttribute.cs" />
     <Compile Include="Loggers\InvalidLogEntryException.cs" />
-    <Compile Include="Loggers\LogEntryPropertiesToIncludeInLogMessage.cs" />
+    <Compile Include="Loggers\LogItemPropertiesToIncludeInLogMessage.cs" />
     <Compile Include="LogItem\ExceptionCorrelation.cs" />
     <Compile Include="LogItem\IHaveCorrelationId.cs" />
     <Compile Include="LogItem\IHaveCorrelatingSubject.cs" />

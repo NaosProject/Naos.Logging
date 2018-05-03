@@ -12,7 +12,7 @@ namespace Naos.Diagnostics.Domain
     /// <summary>
     /// Various helper methods related to a processes.
     /// </summary>
-#if !NaosDiagnosticsDomain
+#if !NaosDiagnosticsRecipes
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     [System.CodeDom.Compiler.GeneratedCode("Naos.Diagnostics", "See package version number")]
 #endif

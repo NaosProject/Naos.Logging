@@ -28,11 +28,11 @@ namespace Naos.Logging.Domain
     /// </summary>
     public class LogWriting
     {
+        /// <summary>
+        /// <see cref="SerializationDescription" /> to use for serializing the subject object.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Want a field here.")]
         public static readonly SerializationDescription SubjectSerializationDescription = new SerializationDescription(SerializationFormat.Json, SerializationRepresentation.String, SerializationKind.Compact);
-
-        public static readonly TypeMatchStrategy SubjectTypeMatchStrategy = TypeMatchStrategy.NamespaceAndName;
-
-        public static readonly MultipleMatchStrategy SubjectMultipleMatchStrategy = MultipleMatchStrategy.ThrowOnMultiple;
 
         private static readonly HashSet<LogItemOrigin> ErrorOrigins = new HashSet<LogItemOrigin>(LogItemOrigins.AllErrors.GetIndividualFlags<LogItemOrigins>().Select(_ => (LogItemOrigin)Enum.Parse(typeof(LogItemOrigin), _.ToString())));
 
@@ -210,6 +210,8 @@ namespace Naos.Logging.Domain
             announcer(Invariant($"Wired up {nameof(Log)}.{nameof(Log.InternalErrors)} to the {nameof(this.activeLogWriters)}."));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "tel", Justification = "Needed by compiler.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "ex", Justification = "Needed by compiler.")]
         private void WireUpItsLogEntryPostedToActiveLogWriters(
             Action<string> announcer)
         {
@@ -414,9 +416,7 @@ namespace Naos.Logging.Domain
                 var describedSerialization = this.OriginalSubject.ToDescribedSerializationUsingSpecificFactory(
                     SubjectSerializationDescription,
                     JsonSerializerFactory.Instance,
-                    CompressorFactory.Instance,
-                    SubjectTypeMatchStrategy,
-                    SubjectMultipleMatchStrategy);
+                    CompressorFactory.Instance);
                 var result = new Subject(describedSerialization, this.Summary);
                 return result;
             }

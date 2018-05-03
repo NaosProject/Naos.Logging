@@ -7,8 +7,9 @@
 namespace Naos.Logging.Domain
 {
     using System;
-    using System.Globalization;
     using System.IO;
+
+    using static System.FormattableString;
 
     /// <summary>
     /// <see cref="File"/> focused implementation of <see cref="LogWriterBase" />.
@@ -27,16 +28,17 @@ namespace Naos.Logging.Domain
             TimeSlicedFilesLogConfig timeSlicedFilesLogConfig)
             : base(timeSlicedFilesLogConfig)
         {
-            if (timeSlicedFilesLogConfig == null)
+            this.timeSlicedFilesLogConfig = timeSlicedFilesLogConfig ?? throw new ArgumentNullException(nameof(timeSlicedFilesLogConfig));
+
+            var directoryPath = this.timeSlicedFilesLogConfig.LogFileDirectoryPath;
+            if (string.IsNullOrWhiteSpace(directoryPath))
             {
-                throw new ArgumentNullException(nameof(timeSlicedFilesLogConfig));
+                throw new ArgumentException(Invariant($"directory path from {nameof(this.timeSlicedFilesLogConfig)}.{nameof(TimeSlicedFilesLogConfig.LogFileDirectoryPath)} is null or white space"));
             }
 
-            this.timeSlicedFilesLogConfig = timeSlicedFilesLogConfig;
-
-            if (this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing && !Directory.Exists(this.timeSlicedFilesLogConfig.LogFileDirectoryPath))
+            if (this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing && !Directory.Exists(directoryPath))
             {
-                Directory.CreateDirectory(this.timeSlicedFilesLogConfig.LogFileDirectoryPath ?? "won't get here but VS can't figure that out");
+                Directory.CreateDirectory(directoryPath);
                 this.didCreateDirectory = true;
             }
             else
@@ -55,16 +57,16 @@ namespace Naos.Logging.Domain
             }
 
             var fileLock = new object();
-            var message = FormattableString.Invariant($"TimeSliced|{logItem.Context.TimestampUtc.ToString("o", CultureInfo.InvariantCulture)}|{logItem.Context}|{logItem.Subject.Summary}");
+            var logMessage = BuildLogMessageFromLogEntry(logItem, this.timeSlicedFilesLogConfig.LogItemPropertiesToIncludeInLogMessage, true);
 
             lock (fileLock)
             {
                 var filePath = this.timeSlicedFilesLogConfig.ComputeFilePath();
-                File.AppendAllText(filePath, message + Environment.NewLine);
+                File.AppendAllText(filePath, logMessage);
             }
         }
 
-        /// <inheritdoc cref="object" />
+        /// <inheritdoc />
         public override string ToString()
         {
             var ret = FormattableString.Invariant($"{this.GetType().FullName}; {nameof(this.timeSlicedFilesLogConfig.OriginsToLog)}: {this.timeSlicedFilesLogConfig.OriginsToLog}; {nameof(this.timeSlicedFilesLogConfig.LogFileDirectoryPath)}: {this.timeSlicedFilesLogConfig.LogFileDirectoryPath}; {nameof(this.timeSlicedFilesLogConfig.FileNamePrefix)}: {this.timeSlicedFilesLogConfig.FileNamePrefix}; {nameof(this.timeSlicedFilesLogConfig.TimeSlicePerFile)}: {this.timeSlicedFilesLogConfig.TimeSlicePerFile}; {nameof(this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing)}: {this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing}; {nameof(this.didCreateDirectory)}: {this.didCreateDirectory}");

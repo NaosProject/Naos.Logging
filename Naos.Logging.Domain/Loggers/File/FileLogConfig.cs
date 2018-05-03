@@ -24,15 +24,15 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="FileLogConfig"/> class.
         /// </summary>
         /// <param name="originsToLog">The log-item origins to log for.</param>
-        /// <param name="logEntryPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
+        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         /// <param name="logFilePath">File path to write logs to.</param>
         /// <param name="createDirectoryStructureIfMissing">Optional value indicating whether to create the directory structure if it's missing; DEFAULT is true.</param>
         public FileLogConfig(
             LogItemOrigins originsToLog,
-            LogEntryPropertiesToIncludeInLogMessage logEntryPropertiesToIncludeInLogMessage,
+            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
             string logFilePath,
             bool createDirectoryStructureIfMissing = true)
-            : base(originsToLog, logEntryPropertiesToIncludeInLogMessage)
+            : base(originsToLog, logItemPropertiesToIncludeInLogMessage)
         {
             if (string.IsNullOrWhiteSpace(logFilePath))
             {
@@ -72,7 +72,7 @@ namespace Naos.Logging.Domain
             }
 
             var result = (first.OriginsToLog == second.OriginsToLog) &&
-                         (first.LogEntryPropertiesToIncludeInLogMessage == second.LogEntryPropertiesToIncludeInLogMessage) &&
+                         (first.LogItemPropertiesToIncludeInLogMessage == second.LogItemPropertiesToIncludeInLogMessage) &&
                          (first.LogFilePath == second.LogFilePath) &&
                          (first.CreateDirectoryStructureIfMissing == second.CreateDirectoryStructureIfMissing);
             return result;
@@ -101,7 +101,7 @@ namespace Naos.Logging.Domain
             HashCodeHelper
                 .Initialize()
                 .Hash(this.OriginsToLog)
-                .Hash(this.LogEntryPropertiesToIncludeInLogMessage)
+                .Hash(this.LogItemPropertiesToIncludeInLogMessage)
                 .Hash(this.LogFilePath)
                 .Hash(this.CreateDirectoryStructureIfMissing)
                 .Value;

@@ -23,6 +23,7 @@ namespace Naos.Logging.Domain
 
         private readonly object syncEventId = new object();
 
+        // ReSharper disable once RedundantDefaultMemberInitializer - prefer explicit assignment here.
         private int eventId = 0;
 
         /// <summary>
@@ -33,12 +34,7 @@ namespace Naos.Logging.Domain
             EventLogConfig eventLogConfig)
             : base(eventLogConfig)
         {
-            if (eventLogConfig == null)
-            {
-                throw new ArgumentNullException(nameof(eventLogConfig));
-            }
-
-            this.eventLogConfig = eventLogConfig;
+            this.eventLogConfig = eventLogConfig ?? throw new ArgumentNullException(nameof(eventLogConfig));
 
             if (this.eventLogConfig.ShouldCreateSourceIfMissing)
             {
@@ -75,8 +71,9 @@ namespace Naos.Logging.Domain
                         EventLogEntryType.Error :
                         EventLogEntryType.Information;
 
-                var bytes = EventLogConfig.LogItemSerializer.SerializeToBytes(logItem);
-                eventLog.WriteEntry(logItem.Subject.Summary, eventLogEntryType, this.eventId, (short)logItem.Context.Origin, bytes);
+                var bytes = EventLogConfig.EventLogRawDataLogItemSerializer.SerializeToBytes(logItem);
+                var logMessage = BuildLogMessageFromLogEntry(logItem, this.eventLogConfig.LogItemPropertiesToIncludeInLogMessage);
+                eventLog.WriteEntry(logMessage, eventLogEntryType, this.eventId, (short)logItem.Context.Origin, bytes);
             }
         }
 

@@ -31,7 +31,7 @@ namespace Naos.Logging.Domain
         {
             if (config == null)
             {
-                throw new ArgumentException(nameof(config));
+                throw new ArgumentException("Config cannot be null.", nameof(config));
             }
 
             var now = nowUtc == default(DateTime) ? DateTime.UtcNow : nowUtc;

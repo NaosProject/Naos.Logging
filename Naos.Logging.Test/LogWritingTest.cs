@@ -18,13 +18,15 @@ namespace Naos.Logging.Test
 
     public static class LogWritingTest
     {
+        private static InMemoryLogWriter memoryLogWriter;
+
         [Fact]
         public static void LogWrite___Should_create_LogItem___When_logging_string_subject_without_comment()
         {
             // Arrange
             var memoryLogWriter = BuildAndConfigureMemoryLogWriter();
             var logItemSubject = "this is a string subject";
-            var logItemSubjectDescribedSerialization = logItemSubject.ToDescribedSerializationUsingSpecificFactory(LogWriting.SubjectSerializationDescription, JsonSerializerFactory.Instance, CompressorFactory.Instance, LogWriting.SubjectTypeMatchStrategy, LogWriting.SubjectMultipleMatchStrategy);
+            var logItemSubjectDescribedSerialization = logItemSubject.ToDescribedSerializationUsingSpecificFactory(LogWriting.SubjectSerializationDescription, JsonSerializerFactory.Instance, CompressorFactory.Instance);
 
             // Act
             Log.Write(logItemSubject);
@@ -42,9 +44,6 @@ namespace Naos.Logging.Test
         [Fact]
         public static void Test()
         {
-            var settings = new LogWritingSettings();
-            LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] { new InMemoryLogWriter(new InMemoryLogConfig(LogItemOrigins.All, LogEntryPropertiesToIncludeInLogMessage.SubjectAndParameters)) });
-
             try
             {
                 TestMethod();
@@ -53,7 +52,6 @@ namespace Naos.Logging.Test
             {
                 Log.Write(() => ex);
             }
-
 
             Log.Write(() => "I made a mistake", "comment");
             Log.Write(() => new MyTestObj2());
@@ -65,7 +63,7 @@ namespace Naos.Logging.Test
 
             using (var log = Log.Enter(() => new { ContextItem1 = "some context" }))
             {
-                log.Trace(() => new InvalidOperationException("some exception occured"));
+                log.Trace(() => new InvalidOperationException("some exception occurred"));
                 log.Trace("some trace");
                 log.Trace(() => "some trace 2");
                 log.Trace(() => new MyTestObj2());
@@ -83,7 +81,8 @@ namespace Naos.Logging.Test
 
         private class MyTestObj
         {
-            string Test => "abcd";
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing.")]
+            public string Test => "abcd";
 
             public override string ToString()
             {
@@ -93,16 +92,25 @@ namespace Naos.Logging.Test
 
         private class MyTestObj2
         {
-            string Test => "abcd";
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing.")]
+            public string Test => "abcd";
         }
 
         private static InMemoryLogWriter BuildAndConfigureMemoryLogWriter()
         {
-            var memoryLogConfig = new InMemoryLogConfig(LogItemOrigins.All, LogEntryPropertiesToIncludeInLogMessage.SubjectAndParameters);
-            var result = new InMemoryLogWriter(memoryLogConfig);
-            var settings = new LogWritingSettings();
-            LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] { result });
-            return result;
+            if (memoryLogWriter == null)
+            {
+                var memoryLogConfig = new InMemoryLogConfig(LogItemOrigins.All, LogItemPropertiesToIncludeInLogMessage.SubjectSummary);
+                memoryLogWriter = new InMemoryLogWriter(memoryLogConfig);
+                var settings = new LogWritingSettings();
+                LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] { memoryLogWriter });
+            }
+            else
+            {
+                memoryLogWriter.PurgeAllLoggedItems();
+            }
+
+            return memoryLogWriter;
         }
     }
 }
