@@ -181,7 +181,7 @@ namespace Naos.Logging.Domain
                         Summary = serializedLogEntry,
                     };
 
-                    logItem = new LogItem(rawSubject.ToSubject(), LogItemKind.Error, new LogItemContext(DateTime.UtcNow, LogItemOrigin.ItsLogEntryPostedMalformedLogEntry));
+                    logItem = new LogItem(rawSubject.ToSubject(), LogItemKind.Error, new LogItemContext(DateTime.UtcNow, LogItemOrigin.ItsLogEntryPostedFailedToBuildInvalidLogEntry));
                 }
             }
 
@@ -303,7 +303,13 @@ namespace Naos.Logging.Domain
             return result;
         }
 
-        private LogItem BuildLogItem(
+        /// <summary>
+        /// Build a <see cref="LogItem" /> from a <see cref="LogEntry" />.
+        /// </summary>
+        /// <param name="logItemOrigin"><see cref="LogItemOrigin" /> of the <see cref="LogEntry" />.</param>
+        /// <param name="logEntry"><see cref="LogEntry" /> to convert.</param>
+        /// <returns>Correct <see cref="LogItem" />.</returns>
+        public LogItem BuildLogItem(
             LogItemOrigin logItemOrigin,
             LogEntry logEntry)
         {

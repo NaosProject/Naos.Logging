@@ -34,26 +34,36 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Origin of the entry.
         /// </summary>
-        Origin = 3,
+        Origin = 4,
 
         /// <summary>
         /// Include the subject summary.
         /// </summary>
-        SubjectSummary = 4,
+        SubjectSummary = 8,
+
+        /// <summary>
+        /// Include the comment.
+        /// </summary>
+        Comment = 16,
 
         /// <summary>
         /// Include stack trace.
         /// </summary>
-        StackTrace = 5,
+        StackTrace = 32,
 
         /// <summary>
         /// Include the serialization correlations.
         /// </summary>
-        LogItemSerialization = 6,
+        LogItemSerialization = 64,
 
         /// <summary>
-        /// Default configuration.
+        /// Include the default items.
         /// </summary>
-        Default = Timestamp | CorrelationTypeAndIds | SubjectSummary | StackTrace,
+        Default = Timestamp | CorrelationTypeAndIds | SubjectSummary | Comment | Origin | StackTrace,
+
+        /// <summary>
+        /// Include all items.
+        /// </summary>
+        All = Timestamp | CorrelationTypeAndIds | Origin | SubjectSummary | Comment | StackTrace | LogItemSerialization,
     }
 }

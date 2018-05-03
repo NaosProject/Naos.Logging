@@ -26,7 +26,7 @@ namespace Naos.Logging.Test
         public static void EventLogConfigurationConstructor___Valid___Works()
         {
             // Arrange
-            var contextsToLog = LogItemOrigins.EntryPostedInformation;
+            var contextsToLog = LogItemOrigins.ItsLogEntryPostedInformation;
 
             // Act
             var actual = new EventLogConfig(contextsToLog);
@@ -43,7 +43,7 @@ namespace Naos.Logging.Test
         public static void EventLogConfigurationConstructor___Valid_override_defaults___Works()
         {
             // Arrange
-            var contextsToLog = LogItemOrigins.EntryPostedInformation;
+            var contextsToLog = LogItemOrigins.ItsLogEntryPostedInformation;
             var logName = A.Dummy<string>();
             var machineName = A.Dummy<string>();
             var source = A.Dummy<string>();
@@ -72,7 +72,7 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentNullException>();
-            exception.Message.Should().Be("\r\nParameter name: logConfigurationBase");
+            exception.Message.Should().Be("Value cannot be null.\r\nParameter name: logWriterConfigBase");
         }
 
         [Fact]
@@ -96,7 +96,7 @@ namespace Naos.Logging.Test
         public static void EventLogConfiguration___EqualityLogic___Should_be_valid___When_different_data()
         {
             // Arrange
-            var logContexts = LogItemOrigins.EntryPosted;
+            var logContexts = LogItemOrigins.ItsLogEntryPosted;
             var logName = A.Dummy<string>();
             var machineName = A.Dummy<string>();
             var source = A.Dummy<string>();
@@ -105,7 +105,7 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new EventLogConfig(LogItemOrigins.EntryPosted, source: source, logName: logName, machineName: machineName),
+                                                First = new EventLogConfig(LogItemOrigins.ItsLogEntryPosted, source: source, logName: logName, machineName: machineName),
                                                 Second = new EventLogConfig(LogItemOrigins.ItsLogInternalErrors, source: source, logName: logName, machineName: machineName),
                                             },
                                         new

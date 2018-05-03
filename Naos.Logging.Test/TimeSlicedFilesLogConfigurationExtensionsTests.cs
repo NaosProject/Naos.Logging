@@ -34,7 +34,7 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentOutOfRangeException>();
-            exception.Message.Should().Be("Value must be greater than or equal to 00:01:00.\r\nParameter name: sliceSize\r\nActual value was 00:00:59.9990000.");
+            exception.Message.Should().Be("Specified argument was out of the range of valid values.\r\nParameter name: sliceSize is < 00:01:00");
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentOutOfRangeException>();
-            exception.Message.Should().Be("Value must be less than or equal to 1.00:00:00.\r\nParameter name: sliceSize\r\nActual value was 1.00:00:00.0010000.");
+            exception.Message.Should().Be("Specified argument was out of the range of valid values.\r\nParameter name: sliceSize is > 1.00:00:00");
         }
 
         [Fact]

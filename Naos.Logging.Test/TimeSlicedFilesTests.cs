@@ -28,13 +28,14 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var input = @"
-                {
-                    ""contextsToLog"": ""all"",
-                    ""timeSlicePerFile"": ""00:01:00"",
-                    ""fileNamePrefix"": ""Log"",
-                    ""logFileDirectoryPath"": ""D:\\Logs"",
-                    ""createDirectoryStructureIfMissing"": true
-                }";
+                 {
+                     ""timeSlicePerFile"": ""00:01:00"",
+                     ""fileNamePrefix"": ""Log"",
+                     ""logFileDirectoryPath"": ""D:\\Logs"",
+                     ""createDirectoryStructureIfMissing"": true,
+                     ""originsToLog"": ""all"",
+                     ""logItemPropertiesToIncludeInLogMessage"": ""default""
+                 }";
 
             var serializer = new NaosJsonSerializer();
 
@@ -60,8 +61,8 @@ namespace Naos.Logging.Test
 
             // Assert
             exception.Should().NotBeNull();
-            exception.Should().BeOfType<ArgumentNullException>();
-            exception.Message.Should().Be("\r\nParameter name: fileNamePrefix");
+            exception.Should().BeOfType<ArgumentException>();
+            exception.Message.Should().Be("fileNamePrefix is null or white space");
         }
 
         [Fact]
@@ -76,7 +77,7 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentException>();
-            exception.Message.Should().Be("Argument cannot be null or white space.\r\nParameter name: fileNamePrefix");
+            exception.Message.Should().Be("fileNamePrefix is null or white space");
         }
 
         [Fact]
@@ -91,14 +92,14 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentException>();
-            exception.Message.Should().Be("Argument cannot be null or white space.\r\nParameter name: fileNamePrefix");
+            exception.Message.Should().Be("fileNamePrefix is null or white space");
         }
 
         [Fact]
         public static void LogConfigurationFileConstructor___Valid___Works()
         {
             // Arrange
-            var contextsToLog = LogItemOrigins.EntryPostedInformation;
+            var contextsToLog = LogItemOrigins.ItsLogEntryPostedInformation;
             var directoryPath = Path.GetTempPath();
             var filePrefix = Guid.NewGuid().ToString();
             var timeSlice = TimeSpan.FromHours(1);
@@ -126,7 +127,7 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentNullException>();
-            exception.Message.Should().Be("\r\nParameter name: logConfigurationBase");
+            exception.Message.Should().Be("Value cannot be null.\r\nParameter name: logWriterConfigBase");
         }
 
         [Fact]
@@ -144,8 +145,8 @@ namespace Naos.Logging.Test
                 var errorCanary = A.Dummy<string>();
 
                 // Act
-                processor.Log(LogItemOrigins.EntryPostedInformation, infoCanary);
-                processor.Log(LogItemOrigins.EntryPostedException, errorCanary);
+                processor.Log(infoCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
+                processor.Log(errorCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedException));
 
                 // Assert
                 var files = Directory.GetFiles(tempDirectory);
@@ -181,7 +182,7 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_different_data()
         {
             // Arrange
-            var logContexts = LogItemOrigins.EntryPosted;
+            var logContexts = LogItemOrigins.ItsLogEntryPosted;
             var filePrefix = A.Dummy<string>();
             var directoryPath = A.Dummy<string>();
             var timeSlice = TimeSpan.FromMinutes(10);
@@ -190,7 +191,7 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new TimeSlicedFilesLogConfig(LogItemOrigins.EntryPosted, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
+                                                First = new TimeSlicedFilesLogConfig(LogItemOrigins.ItsLogEntryPosted, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
                                                 Second = new TimeSlicedFilesLogConfig(LogItemOrigins.ItsLogInternalErrors, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
                                             },
                                         new
@@ -235,7 +236,7 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_same_data()
         {
             // Arrange
-            var logContexts = LogItemOrigins.EntryPosted;
+            var logContexts = LogItemOrigins.ItsLogEntryPosted;
             var filePrefix = A.Dummy<string>();
             var directoryPath = A.Dummy<string>();
             var timeSlice = TimeSpan.FromMinutes(10);

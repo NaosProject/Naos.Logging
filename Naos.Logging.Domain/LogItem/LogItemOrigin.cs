@@ -47,6 +47,12 @@ namespace Naos.Logging.Domain
         ItsLogEntryPostedMalformedLogEntry,
 
         /// <summary>
+        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> where there was a <see cref="ItsLogEntryPostedMalformedLogEntry" />
+        /// and a failure building the message around the incident.
+        /// </summary>
+        ItsLogEntryPostedFailedToBuildInvalidLogEntry,
+
+        /// <summary>
         /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject related to telemetry.
         /// </summary>
         ItsLogEntryPostedTelemetry,
@@ -90,19 +96,25 @@ namespace Naos.Logging.Domain
         ItsLogEntryPostedMalformedLogEntry = 16,
 
         /// <summary>
+        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> where there was a <see cref="ItsLogEntryPostedMalformedLogEntry" />
+        /// and a failure building the message around the incident.
+        /// </summary>
+        ItsLogEntryPostedFailedToBuildInvalidLogEntry = 32,
+
+        /// <summary>
         /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject related to telemetry.
         /// </summary>
-        ItsLogEntryPostedTelemetry = 32,
+        ItsLogEntryPostedTelemetry = 64,
 
         /// <summary>
         /// All entry posted events.
         /// </summary>
-        ItsLogEntryPosted = ItsLogEntryPostedInformation | ItsLogEntryPostedException,
+        ItsLogEntryPosted = ItsLogEntryPostedInformation | ItsLogEntryPostedException | ItsLogEntryPostedMalformedLogEntry | ItsLogEntryPostedFailedToBuildInvalidLogEntry | ItsLogEntryPostedTelemetry,
 
         /// <summary>
         /// All unexpected errors.
         /// </summary>
-        UnexpectedErrors = AppDomainUnhandledException | ItsLogInternalErrors | ItsLogEntryPostedMalformedLogEntry,
+        UnexpectedErrors = AppDomainUnhandledException | ItsLogInternalErrors | ItsLogEntryPostedMalformedLogEntry | ItsLogEntryPostedFailedToBuildInvalidLogEntry,
 
         /// <summary>
         /// All errors.
@@ -112,6 +124,6 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Log all.
         /// </summary>
-        All = UnexpectedErrors | ItsLogEntryPosted | ItsLogEntryPostedTelemetry,
+        All = UnexpectedErrors | ItsLogEntryPosted,
     }
 }

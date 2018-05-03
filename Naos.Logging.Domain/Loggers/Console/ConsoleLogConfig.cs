@@ -8,8 +8,6 @@ namespace Naos.Logging.Domain
 {
     using System;
 
-    using Its.Log.Instrumentation;
-
     using OBeautifulCode.Math.Recipes;
 
     /// <summary>
@@ -20,13 +18,13 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsoleLogConfig"/> class.
         /// </summary>
-        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         /// <param name="originsToLogConsoleOut">The log-item origins to log to <see cref="Console.Out" />.</param>
         /// <param name="originsToLogConsoleError">The log-item origins to log to <see cref="Console.Error" />.</param>
+        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         public ConsoleLogConfig(
-            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
             LogItemOrigins originsToLogConsoleOut,
-            LogItemOrigins originsToLogConsoleError)
+            LogItemOrigins originsToLogConsoleError,
+            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage = LogItemPropertiesToIncludeInLogMessage.Default)
             : base(originsToLogConsoleOut | originsToLogConsoleError, logItemPropertiesToIncludeInLogMessage)
         {
             this.OriginsToLogConsoleOut = originsToLogConsoleOut;

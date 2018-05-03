@@ -74,7 +74,7 @@ namespace Naos.Logging.Domain
         /// Builds a log message from a <see cref="LogItem" />.
         /// </summary>
         /// <param name="logItem">The log item.</param>
-        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
+        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         /// <param name="appendTrailingNewLine">Optional value indicating whether or not to append a trailing new line; DEFAULT is false.</param>
         /// <returns>Log message.</returns>
         protected static string BuildLogMessageFromLogEntry(
@@ -88,7 +88,7 @@ namespace Naos.Logging.Domain
             }
 
             var stringBuiler = new StringBuilder();
-            var itemsToLog = logItemPropertiesToIncludeInLogMessage.GetIndividualFlags<LogItemPropertiesToIncludeInLogMessage>().OrderBy(_ => (int)_).ToList();
+            var itemsToLog = logItemPropertiesToIncludeInLogMessage.GetIndividualFlags<LogItemPropertiesToIncludeInLogMessage>().Where(_ => _.GetIndividualFlags().Count == 1).OrderBy(_ => (int)_).ToList();
 
             foreach (var itemToLog in itemsToLog)
             {
@@ -114,6 +114,10 @@ namespace Naos.Logging.Domain
                         stringBuiler.Append(logItem.Subject.Summary);
                         stringBuiler.Append("|");
                         break;
+                    case LogItemPropertiesToIncludeInLogMessage.Comment:
+                        stringBuiler.Append(string.IsNullOrWhiteSpace(logItem.Comment) ? "No Comment" : logItem.Comment);
+                        stringBuiler.Append("|");
+                        break;
                     case LogItemPropertiesToIncludeInLogMessage.StackTrace:
                         stringBuiler.AppendLine();
                         stringBuiler.AppendLine(logItem.Context.StackTrace);
@@ -124,7 +128,7 @@ namespace Naos.Logging.Domain
                         stringBuiler.AppendLine(serializedLogItem);
                         break;
                     default:
-                        throw new NotSupportedException();
+                        throw new NotSupportedException(Invariant($"Unsupported {nameof(LogItemPropertiesToIncludeInLogMessage)}: {itemToLog}."));
                 }
             }
 

@@ -9,8 +9,6 @@ namespace Naos.Logging.Domain
     using System;
     using System.Diagnostics;
 
-    using Its.Log.Instrumentation;
-
     using Naos.Diagnostics.Domain;
     using Naos.Serialization.Domain;
     using Naos.Serialization.Json;
@@ -42,18 +40,18 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="EventLogConfig"/> class.
         /// </summary>
         /// <param name="originsToLog">The log-item origins to log for.</param>
-        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         /// <param name="source">Optional event log source; DEFAULT is running process' name.</param>
         /// <param name="shouldCreateSourceIfMissing">Value indicating whether or not to create the source if missing.</param>
         /// <param name="logName">Optional log name; DEFAULT is <see cref="DefaultLogName" />.</param>
         /// <param name="machineName">Optional machine name; DEFAULT is <see cref="DefaultMachineName" />.</param>
+        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         public EventLogConfig(
             LogItemOrigins originsToLog,
-            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
             string source = null,
             string logName = DefaultLogName,
             string machineName = DefaultMachineName,
-            bool shouldCreateSourceIfMissing = false)
+            bool shouldCreateSourceIfMissing = false,
+            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage = LogItemPropertiesToIncludeInLogMessage.Default)
             : base(originsToLog, logItemPropertiesToIncludeInLogMessage)
         {
             this.Source = string.IsNullOrWhiteSpace(source) ? ProcessHelpers.GetRunningProcess().Name() : source;

@@ -9,8 +9,6 @@ namespace Naos.Logging.Domain
     using System;
     using System.IO;
 
-    using Its.Log.Instrumentation;
-
     using OBeautifulCode.Math.Recipes;
 
     using static System.FormattableString;
@@ -24,14 +22,14 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="FileLogConfig"/> class.
         /// </summary>
         /// <param name="originsToLog">The log-item origins to log for.</param>
-        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         /// <param name="logFilePath">File path to write logs to.</param>
         /// <param name="createDirectoryStructureIfMissing">Optional value indicating whether to create the directory structure if it's missing; DEFAULT is true.</param>
+        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         public FileLogConfig(
             LogItemOrigins originsToLog,
-            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
             string logFilePath,
-            bool createDirectoryStructureIfMissing = true)
+            bool createDirectoryStructureIfMissing = true,
+            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage = LogItemPropertiesToIncludeInLogMessage.Default)
             : base(originsToLog, logItemPropertiesToIncludeInLogMessage)
         {
             if (string.IsNullOrWhiteSpace(logFilePath))

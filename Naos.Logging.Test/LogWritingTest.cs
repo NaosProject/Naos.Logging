@@ -100,7 +100,7 @@ namespace Naos.Logging.Test
         {
             if (memoryLogWriter == null)
             {
-                var memoryLogConfig = new InMemoryLogConfig(LogItemOrigins.All, LogItemPropertiesToIncludeInLogMessage.SubjectSummary);
+                var memoryLogConfig = new InMemoryLogConfig(LogItemOrigins.All);
                 memoryLogWriter = new InMemoryLogWriter(memoryLogConfig);
                 var settings = new LogWritingSettings();
                 LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] { memoryLogWriter });

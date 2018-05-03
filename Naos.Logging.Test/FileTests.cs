@@ -33,8 +33,8 @@ namespace Naos.Logging.Test
 
             // Assert
             exception.Should().NotBeNull();
-            exception.Should().BeOfType<ArgumentNullException>();
-            exception.Message.Should().Be("\r\nParameter name: logFilePath");
+            exception.Should().BeOfType<ArgumentException>();
+            exception.Message.Should().Be("logFilePath is null or white space");
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentException>();
-            exception.Message.Should().Be("Argument cannot be null or white space.\r\nParameter name: logFilePath");
+            exception.Message.Should().Be("logFilePath is null or white space");
         }
 
         [Fact]
@@ -64,14 +64,14 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentException>();
-            exception.Message.Should().Be("Argument cannot be null or white space.\r\nParameter name: logFilePath");
+            exception.Message.Should().Be("logFilePath is null or white space");
         }
 
         [Fact]
         public static void LogConfigurationFileConstructor___Valid___Works()
         {
             // Arrange
-            var contextsToLog = LogItemOrigins.EntryPostedInformation;
+            var contextsToLog = LogItemOrigins.ItsLogEntryPostedInformation;
             var filePath = Path.GetTempFileName();
 
             // Act
@@ -94,7 +94,7 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentNullException>();
-            exception.Message.Should().Be("\r\nParameter name: logConfigurationBase");
+            exception.Message.Should().Be("Value cannot be null.\r\nParameter name: logWriterConfigBase");
         }
 
         [Fact]
@@ -112,8 +112,8 @@ namespace Naos.Logging.Test
                 var errorCanary = A.Dummy<string>();
 
                 // Act
-                processor.Log(LogItemOrigins.EntryPostedInformation, infoCanary);
-                processor.Log(LogItemOrigins.EntryPostedException, errorCanary);
+                processor.Log(infoCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
+                processor.Log(errorCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedException));
 
                 // Assert
                 var fileContents = File.ReadAllText(tempFileName);
@@ -150,14 +150,14 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_different_data()
         {
             // Arrange
-            var logContexts = LogItemOrigins.EntryPosted;
+            var logContexts = LogItemOrigins.ItsLogEntryPosted;
             var logFilePath = A.Dummy<string>();
             var createDirectoryStructureIfMissing = true;
             var notEqualTests = new[]
                                     {
                                         new
                                             {
-                                                First = new FileLogConfig(LogItemOrigins.EntryPosted, logFilePath, createDirectoryStructureIfMissing),
+                                                First = new FileLogConfig(LogItemOrigins.ItsLogEntryPosted, logFilePath, createDirectoryStructureIfMissing),
                                                 Second = new FileLogConfig(LogItemOrigins.ItsLogInternalErrors, logFilePath, createDirectoryStructureIfMissing),
                                             },
                                         new

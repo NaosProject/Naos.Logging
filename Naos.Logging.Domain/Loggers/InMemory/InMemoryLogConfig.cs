@@ -8,8 +8,6 @@ namespace Naos.Logging.Domain
 {
     using System;
 
-    using Its.Log.Instrumentation;
-
     using OBeautifulCode.Math.Recipes;
 
     using static System.FormattableString;
@@ -23,12 +21,12 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="InMemoryLogConfig"/> class.
         /// </summary>
         /// <param name="originsToLog">The log-item origins to log for.</param>
-        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         /// <param name="maxLoggedItemCount">Optional maximum number of elements to keep internally before removing the oldest items; DEFAULT is -1 which is infinite.</param>
+        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         public InMemoryLogConfig(
             LogItemOrigins originsToLog,
-            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
-            int maxLoggedItemCount = -1)
+            int maxLoggedItemCount = -1,
+            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage = LogItemPropertiesToIncludeInLogMessage.Default)
             : base(originsToLog, logItemPropertiesToIncludeInLogMessage)
         {
             if (maxLoggedItemCount < -1)

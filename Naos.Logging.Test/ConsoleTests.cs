@@ -26,7 +26,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationConsoleConstructor___Valid___Works()
         {
             // Arrange
-            var contextsToLogConsoleOut = LogItemOrigins.EntryPostedInformation;
+            var contextsToLogConsoleOut = LogItemOrigins.ItsLogEntryPostedInformation;
             var contextsToLogConsoleError = LogItemOrigins.AllErrors;
 
             // Act
@@ -48,7 +48,7 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentNullException>();
-            exception.Message.Should().Be("\r\nParameter name: logConfigurationBase");
+            exception.Message.Should().Be("Value cannot be null.\r\nParameter name: logWriterConfigBase");
         }
 
         [Fact]
@@ -66,8 +66,8 @@ namespace Naos.Logging.Test
                     Console.SetError(consoleError);
 
                     // Act
-                    logProcessor.Log(LogItemOrigins.EntryPostedInformation, infoCanary);
-                    logProcessor.Log(LogItemOrigins.EntryPostedException, errorCanary);
+                    logProcessor.Log(infoCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
+                    logProcessor.Log(errorCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedException));
 
                     var consoleOutOutput = consoleOut.ToString();
                     var consoleErrorOutput = consoleError.ToString();
@@ -105,18 +105,18 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new ConsoleLogConfig(LogItemOrigins.EntryPostedException, LogItemOrigins.EntryPostedInformation),
-                                                Second = new ConsoleLogConfig(LogItemOrigins.EntryPostedException, LogItemOrigins.AppDomainUnhandledException),
+                                                First = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPostedException, LogItemOrigins.ItsLogEntryPostedInformation),
+                                                Second = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPostedException, LogItemOrigins.AppDomainUnhandledException),
                                             },
                                         new
                                             {
-                                                First = new ConsoleLogConfig(LogItemOrigins.EntryPostedException, LogItemOrigins.EntryPostedInformation),
-                                                Second = new ConsoleLogConfig(LogItemOrigins.AppDomainUnhandledException, LogItemOrigins.EntryPostedInformation),
+                                                First = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPostedException, LogItemOrigins.ItsLogEntryPostedInformation),
+                                                Second = new ConsoleLogConfig(LogItemOrigins.AppDomainUnhandledException, LogItemOrigins.ItsLogEntryPostedInformation),
                                             },
                                         new
                                             {
-                                                First = new ConsoleLogConfig(LogItemOrigins.EntryPostedException, LogItemOrigins.EntryPosted),
-                                                Second = new ConsoleLogConfig(LogItemOrigins.EntryPostedException, LogItemOrigins.EntryPostedInformation),
+                                                First = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPostedException, LogItemOrigins.ItsLogEntryPosted),
+                                                Second = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPostedException, LogItemOrigins.ItsLogEntryPostedInformation),
                                             },
                                     }.ToList();
 
@@ -144,8 +144,8 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new ConsoleLogConfig(LogItemOrigins.EntryPosted, LogItemOrigins.AllErrors),
-                                                Second = new ConsoleLogConfig(LogItemOrigins.EntryPosted, LogItemOrigins.AllErrors),
+                                                First = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPosted, LogItemOrigins.AllErrors),
+                                                Second = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPosted, LogItemOrigins.AllErrors),
                                             },
                                     }.ToList();
 

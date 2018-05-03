@@ -13,6 +13,8 @@ namespace Naos.Logging.Test
 
     using FluentAssertions;
 
+    using Its.Log.Instrumentation;
+
     using Naos.Logging.Domain;
 
     using Xunit;
@@ -33,7 +35,7 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentOutOfRangeException>();
-            exception.Message.Should().Be("Value must be greater than or equal to -1.\r\nParameter name: maxLoggedItemCount\r\nActual value was -2.");
+            exception.Message.Should().Be("Specified argument was out of the range of valid values.\r\nParameter name: maxLoggedItemCount is <= -1; value is -2");
         }
 
         [Fact]
@@ -48,7 +50,7 @@ namespace Naos.Logging.Test
             // Assert
             exception.Should().NotBeNull();
             exception.Should().BeOfType<ArgumentNullException>();
-            exception.Message.Should().Be("\r\nParameter name: logConfigurationBase");
+            exception.Message.Should().Be("Value cannot be null.\r\nParameter name: logWriterConfigBase");
         }
 
         [Fact]
@@ -62,15 +64,13 @@ namespace Naos.Logging.Test
             var errorCanary = A.Dummy<string>();
 
             // Act
-            processor.Log(LogItemOrigins.EntryPostedInformation, infoCanary);
-            processor.Log(LogItemOrigins.EntryPostedException, errorCanary);
+            processor.Log(infoCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
+            processor.Log(errorCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedException));
 
             // Assert
             processor.LoggedItems.Count.Should().Be(2);
-            processor.LoggedItems.Single(_ => _.Context == LogItemOrigins.EntryPostedInformation).Message.Should().Contain("Message = " + infoCanary);
-            processor.LoggedItems.Single(_ => _.Context == LogItemOrigins.EntryPostedInformation).Message.Should().Contain("Subject = " + infoCanary);
-            processor.LoggedItems.Single(_ => _.Context == LogItemOrigins.EntryPostedException).Message.Should().Contain("Message = " + errorCanary);
-            processor.LoggedItems.Single(_ => _.Context == LogItemOrigins.EntryPostedException).Message.Should().Contain("Subject = " + errorCanary);
+            processor.LoggedItems.Single(_ => _.Context.Origin == LogItemOrigin.ItsLogEntryPostedInformation).Subject.Summary.Should().Contain(infoCanary);
+            processor.LoggedItems.Single(_ => _.Context.Origin == LogItemOrigin.ItsLogEntryPostedException).Subject.Summary.Should().Contain(errorCanary);
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace Naos.Logging.Test
             var logCallCount = 1000;
 
             // Act
-            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogItemOrigins.EntryPostedInformation, "Hello"));
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log("Hello".ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation)));
 
             // Assert
             processor.LoggedItems.Count.Should().Be(logCallCount);
@@ -98,7 +98,7 @@ namespace Naos.Logging.Test
             var logCallCount = 1000;
 
             // Act
-            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogItemOrigins.EntryPostedInformation, "Hello"));
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log("Hello".ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation)));
 
             // Assert
             processor.LoggedItems.Count.Should().Be(maxLoggedItemCount);
@@ -114,7 +114,7 @@ namespace Naos.Logging.Test
             var logCallCount = 1000;
 
             // Act
-            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogItemOrigins.EntryPostedInformation, "Hello"));
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log("Hello".ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation)));
 
             // Assert
             processor.LoggedItems.Count.Should().Be(maxLoggedItemCount);
@@ -130,7 +130,7 @@ namespace Naos.Logging.Test
             var logCallCount = 1000;
 
             // Act
-            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogItemOrigins.EntryPostedInformation, "Hello"));
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log("Hello".ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation)));
 
             // Assert
             processor.LoggedItems.Count.Should().Be(maxLoggedItemCount);
@@ -143,7 +143,7 @@ namespace Naos.Logging.Test
             var configuration = new InMemoryLogConfig(LogItemOrigins.All);
             var processor = new InMemoryLogWriter(configuration);
             var logCallCount = 10;
-            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log(LogItemOrigins.EntryPostedInformation, "Hello"));
+            Enumerable.Range(0, logCallCount).ToList().ForEach(_ => processor.Log("Hello".ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation)));
 
             // Act
             processor.PurgeAllLoggedItems();
@@ -177,13 +177,13 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new InMemoryLogConfig(LogItemOrigins.EntryPosted, 1),
+                                                First = new InMemoryLogConfig(LogItemOrigins.ItsLogEntryPosted, 1),
                                                 Second = new InMemoryLogConfig(LogItemOrigins.ItsLogInternalErrors, 1),
                                             },
                                         new
                                             {
-                                                First = new InMemoryLogConfig(LogItemOrigins.EntryPosted, 1),
-                                                Second = new InMemoryLogConfig(LogItemOrigins.EntryPosted, 0),
+                                                First = new InMemoryLogConfig(LogItemOrigins.ItsLogEntryPosted, 1),
+                                                Second = new InMemoryLogConfig(LogItemOrigins.ItsLogEntryPosted, 0),
                                             },
                                     }.ToList();
 

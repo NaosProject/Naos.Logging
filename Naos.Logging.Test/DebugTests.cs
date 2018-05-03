@@ -6,19 +6,9 @@
 
 namespace Naos.Logging.Test
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
-
-    using FakeItEasy;
-
     using FluentAssertions;
 
     using Naos.Logging.Domain;
-    using Naos.Serialization.Bson;
-    using Naos.Serialization.Domain;
-    using Naos.Serialization.Json;
 
     using Xunit;
 
@@ -32,7 +22,7 @@ namespace Naos.Logging.Test
             var logger = new EventLogWriter(config);
 
             // Act
-            logger.Log(LogItemOrigins.EntryPostedInformation, "MessageShouldntBeThere", "SubjectShouldntBeThere");
+            logger.Log("Subject".ToLogEntry("Comment").ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
 
             // Assert
             /* Confirm no entry - by hand */
@@ -46,7 +36,7 @@ namespace Naos.Logging.Test
             var logger = new EventLogWriter(config);
 
             // Act
-            logger.Log(LogItemOrigins.ItsLogInternalErrors, "Message", "Subject");
+            logger.Log("Subject".ToLogEntry("Comment").ToLogItem(LogItemOrigin.ItsLogInternalErrors));
 
             // Assert
             /* Confirm entry - by hand */
@@ -60,7 +50,7 @@ namespace Naos.Logging.Test
             var logger = new EventLogWriter(config);
 
             // Act
-            logger.Log(LogItemOrigins.EntryPostedInformation, "MessageShouldntBeThere", "SubjectShouldntBeThere");
+            logger.Log("Subject".ToLogEntry("Comment").ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
 
             // Assert
             /* Confirm no entry - by hand */
@@ -70,11 +60,11 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Logging_context_information()
         {
             // Arrange
-            var config = new EventLogConfig(LogItemOrigins.EntryPosted, "MySource", "MyLog", "Laptop", true);
+            var config = new EventLogConfig(LogItemOrigins.ItsLogEntryPosted, "MySource", "MyLog", "Laptop", true);
             var logger = new EventLogWriter(config);
 
             // Act
-            logger.Log(LogItemOrigins.EntryPostedInformation, "Message Information", "Subject");
+            logger.Log("Subject".ToLogEntry("Comment").ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
 
             // Assert
             /* Confirm entry - by hand */
@@ -88,7 +78,7 @@ namespace Naos.Logging.Test
             var logger = new EventLogWriter(config);
 
             // Act
-            logger.Log(LogItemOrigins.ItsLogInternalErrors, "Message Error", "Subject");
+            logger.Log("Subject".ToLogEntry("Comment").ToLogItem(LogItemOrigin.ItsLogInternalErrors));
 
             // Assert
             /* Confirm entry - by hand */

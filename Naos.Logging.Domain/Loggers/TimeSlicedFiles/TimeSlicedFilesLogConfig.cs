@@ -10,8 +10,6 @@ namespace Naos.Logging.Domain
     using System.Collections.Generic;
     using System.IO;
 
-    using Its.Log.Instrumentation;
-
     using OBeautifulCode.Math.Recipes;
 
     using static System.FormattableString;
@@ -32,18 +30,18 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="TimeSlicedFilesLogConfig"/> class.
         /// </summary>
         /// <param name="originsToLog">The log-item origins to log for.</param>
-        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of an <see cref="Its.Log"/> <see cref="LogEntry"/> to include when building a log message.</param>
         /// <param name="logFileDirectoryPath">Directory path to write log files to.</param>
         /// <param name="fileNamePrefix">File name to use for each log file as a prefix and a unique time slice hash will be used as the suffix.</param>
         /// <param name="timeSlicePerFile">Amount of time to store in each file.</param>
         /// <param name="createDirectoryStructureIfMissing">Optional value indicating whether to create the directory structure if it's missing; DEFAULT is true.</param>
+        /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         public TimeSlicedFilesLogConfig(
             LogItemOrigins originsToLog,
-            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
             string logFileDirectoryPath,
             string fileNamePrefix,
             TimeSpan timeSlicePerFile,
-            bool createDirectoryStructureIfMissing = true)
+            bool createDirectoryStructureIfMissing = true,
+            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage = LogItemPropertiesToIncludeInLogMessage.Default)
             : base(originsToLog, logItemPropertiesToIncludeInLogMessage)
         {
             if (string.IsNullOrWhiteSpace(logFileDirectoryPath))
