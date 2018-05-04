@@ -11,8 +11,6 @@ namespace Naos.Logging.Domain
     using System.Linq;
     using System.Text;
 
-    using Its.Log.Instrumentation;
-
     using Naos.Serialization.Domain;
     using Naos.Serialization.Json;
 
@@ -30,7 +28,7 @@ namespace Naos.Logging.Domain
         /// Default serializer to use for converting a <see cref="LogItem" /> into a string.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Want a field here.")]
-        protected static readonly IStringSerializeAndDeserialize DefaultLogItemSerializerForLogMessage = new NaosJsonSerializer();
+        public static readonly IStringSerializeAndDeserialize DefaultLogItemSerializer = new NaosJsonSerializer();
 
         private readonly LogWriterConfigBase logWriterConfigBase;
 
@@ -77,7 +75,7 @@ namespace Naos.Logging.Domain
         /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         /// <param name="appendTrailingNewLine">Optional value indicating whether or not to append a trailing new line; DEFAULT is false.</param>
         /// <returns>Log message.</returns>
-        protected static string BuildLogMessageFromLogEntry(
+        protected static string BuildLogMessageFromLogItem(
             LogItem logItem,
             LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
             bool appendTrailingNewLine = false)
@@ -123,9 +121,10 @@ namespace Naos.Logging.Domain
                         stringBuiler.AppendLine(logItem.Context.StackTrace);
                         break;
                     case LogItemPropertiesToIncludeInLogMessage.LogItemSerialization:
-                        var serializedLogItem = DefaultLogItemSerializerForLogMessage.SerializeToString(logItem);
+                        var serializedLogItem = DefaultLogItemSerializer.SerializeToString(logItem);
                         stringBuiler.AppendLine();
-                        stringBuiler.AppendLine(serializedLogItem);
+                        stringBuiler.Append(serializedLogItem);
+                        stringBuiler.Append(",");
                         break;
                     default:
                         throw new NotSupportedException(Invariant($"Unsupported {nameof(LogItemPropertiesToIncludeInLogMessage)}: {itemToLog}."));

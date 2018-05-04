@@ -20,6 +20,8 @@ namespace Naos.Logging.Domain
 
         private readonly string thisToString;
 
+        private readonly object fileLock = new object();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="FileLogWriter"/> class.
         /// </summary>
@@ -60,12 +62,9 @@ namespace Naos.Logging.Domain
                 throw new ArgumentNullException(nameof(logItem));
             }
 
-            // TODO: Trace.Listeners.Add(new TextWriterTraceListener("Log_TextWriterOutput.log", "myListener"));
-            var fileLock = new object();
-
-            lock (fileLock)
+            lock (this.fileLock)
             {
-                var logMessage = BuildLogMessageFromLogEntry(logItem, this.fileLogConfig.LogItemPropertiesToIncludeInLogMessage, true);
+                var logMessage = BuildLogMessageFromLogItem(logItem, this.fileLogConfig.LogItemPropertiesToIncludeInLogMessage, true);
                 File.AppendAllText(this.fileLogConfig.LogFilePath, logMessage);
             }
         }

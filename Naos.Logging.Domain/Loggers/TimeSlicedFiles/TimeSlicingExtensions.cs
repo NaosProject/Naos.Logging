@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TimeSlicedFilesLogConfigExtensions.cs" company="Naos">
+// <copyright file="TimeSlicingExtensions.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -8,41 +8,15 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
     using System.Linq;
 
     using static System.FormattableString;
 
     /// <summary>
-    /// Extensions for use with <see cref="TimeSlicedFilesLogConfig" />.
+    /// Extension methods for time slicing.
     /// </summary>
-    public static class TimeSlicedFilesLogConfigExtensions
+    public static class TimeSlicingExtensions
     {
-        /// <summary>
-        /// Compute the file path to log to right now using <see cref="DateTime" />.<see cref="DateTime.UtcNow" />.
-        /// </summary>
-        /// <param name="config">The configuration object.</param>
-        /// <param name="nowUtc">Optionally override "now".</param>
-        /// <returns>Correct file path to log to.</returns>
-        public static string ComputeFilePath(
-            this TimeSlicedFilesLogConfig config,
-            DateTime nowUtc = default(DateTime))
-        {
-            if (config == null)
-            {
-                throw new ArgumentException("Config cannot be null.", nameof(config));
-            }
-
-            var now = nowUtc == default(DateTime) ? DateTime.UtcNow : nowUtc;
-            var date = now.ToString("yyyy-dd-MM", CultureInfo.InvariantCulture);
-            var offsets = config.GetSliceOffsets().FindOffsetRange(now);
-
-            var file = Invariant($"{config.FileNamePrefix}--{date}--{offsets.Item1.ToString("hhmm", CultureInfo.InvariantCulture)}Z-{offsets.Item2.ToString("hhmm", CultureInfo.InvariantCulture)}Z.{TimeSlicedFilesLogConfig.FileExtensionWithoutDot}");
-            var path = Path.Combine(config.LogFileDirectoryPath, file);
-            return path;
-        }
-
         /// <summary>
         /// Divide a day EQUALLY into slices using the slice size <see cref="TimeSpan" /> provided.
         /// </summary>

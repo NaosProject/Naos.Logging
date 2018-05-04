@@ -72,7 +72,7 @@ namespace Naos.Logging.Domain
                         EventLogEntryType.Information;
 
                 var bytes = EventLogConfig.EventLogRawDataLogItemSerializer.SerializeToBytes(logItem);
-                var logMessage = BuildLogMessageFromLogEntry(logItem, this.eventLogConfig.LogItemPropertiesToIncludeInLogMessage);
+                var logMessage = BuildLogMessageFromLogItem(logItem, this.eventLogConfig.LogItemPropertiesToIncludeInLogMessage);
                 eventLog.WriteEntry(logMessage, eventLogEntryType, this.eventId, (short)logItem.Context.Origin, bytes);
             }
         }

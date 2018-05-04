@@ -8,6 +8,7 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
 
     using OBeautifulCode.Math.Recipes;
@@ -88,6 +89,23 @@ namespace Naos.Logging.Domain
         public bool CreateDirectoryStructureIfMissing { get; private set; }
 
         /// <summary>
+        /// Compute the file path to log to right now using <see cref="DateTime" />.<see cref="DateTime.UtcNow" />.
+        /// </summary>
+        /// <param name="nowUtc">Optionally override "now".</param>
+        /// <returns>Correct file path to log to.</returns>
+        public string ComputeFilePath(
+            DateTime nowUtc = default(DateTime))
+        {
+            var now = nowUtc == default(DateTime) ? DateTime.UtcNow : nowUtc;
+            var date = now.ToString("yyyy-dd-MM", CultureInfo.InvariantCulture);
+            var offsets = this.sliceOffsets.FindOffsetRange(now);
+
+            var file = Invariant($"{this.FileNamePrefix}--{date}--{offsets.Item1.ToString("hhmm", CultureInfo.InvariantCulture)}Z-{offsets.Item2.ToString("hhmm", CultureInfo.InvariantCulture)}Z.{FileExtensionWithoutDot}");
+            var path = Path.Combine(this.LogFileDirectoryPath, file);
+            return path;
+        }
+
+        /// <summary>
         /// Equality operator.
         /// </summary>
         /// <param name="first">First parameter.</param>
@@ -146,14 +164,5 @@ namespace Naos.Logging.Domain
                 .Hash(this.TimeSlicePerFile)
                 .Hash(this.CreateDirectoryStructureIfMissing)
                 .Value;
-
-        /// <summary>
-        /// Gets the offsets of the slices in the day.
-        /// </summary>
-        /// <returns>Offset collection.</returns>
-        public IReadOnlyCollection<TimeSpan> GetSliceOffsets()
-        {
-            return this.sliceOffsets;
-        }
     }
 }

@@ -37,7 +37,7 @@ namespace Naos.Logging.Domain
                 throw new ArgumentNullException(nameof(logItem));
             }
 
-            var logMessage = BuildLogMessageFromLogEntry(logItem, this.consoleConfig.LogItemPropertiesToIncludeInLogMessage, true);
+            var logMessage = BuildLogMessageFromLogItem(logItem, this.consoleConfig.LogItemPropertiesToIncludeInLogMessage, true);
 
             var origins = logItem.Context.Origin.ToOrigins();
             if (this.consoleConfig.OriginsToLogConsoleOut.HasFlagOverlap(origins))

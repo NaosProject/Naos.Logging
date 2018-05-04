@@ -20,6 +20,8 @@ namespace Naos.Logging.Domain
 
         private readonly bool didCreateDirectory;
 
+        private readonly object fileLock = new object();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TimeSlicedFilesLogWriter"/> class.
         /// </summary>
@@ -56,10 +58,9 @@ namespace Naos.Logging.Domain
                 throw new ArgumentNullException(nameof(logItem));
             }
 
-            var fileLock = new object();
-            var logMessage = BuildLogMessageFromLogEntry(logItem, this.timeSlicedFilesLogConfig.LogItemPropertiesToIncludeInLogMessage, true);
+            var logMessage = BuildLogMessageFromLogItem(logItem, this.timeSlicedFilesLogConfig.LogItemPropertiesToIncludeInLogMessage, true);
 
-            lock (fileLock)
+            lock (this.fileLock)
             {
                 var filePath = this.timeSlicedFilesLogConfig.ComputeFilePath();
                 File.AppendAllText(filePath, logMessage);
@@ -69,7 +70,7 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public override string ToString()
         {
-            var ret = FormattableString.Invariant($"{this.GetType().FullName}; {nameof(this.timeSlicedFilesLogConfig.OriginsToLog)}: {this.timeSlicedFilesLogConfig.OriginsToLog}; {nameof(this.timeSlicedFilesLogConfig.LogFileDirectoryPath)}: {this.timeSlicedFilesLogConfig.LogFileDirectoryPath}; {nameof(this.timeSlicedFilesLogConfig.FileNamePrefix)}: {this.timeSlicedFilesLogConfig.FileNamePrefix}; {nameof(this.timeSlicedFilesLogConfig.TimeSlicePerFile)}: {this.timeSlicedFilesLogConfig.TimeSlicePerFile}; {nameof(this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing)}: {this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing}; {nameof(this.didCreateDirectory)}: {this.didCreateDirectory}");
+            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.timeSlicedFilesLogConfig.OriginsToLog)}: {this.timeSlicedFilesLogConfig.OriginsToLog}; {nameof(this.timeSlicedFilesLogConfig.LogFileDirectoryPath)}: {this.timeSlicedFilesLogConfig.LogFileDirectoryPath}; {nameof(this.timeSlicedFilesLogConfig.FileNamePrefix)}: {this.timeSlicedFilesLogConfig.FileNamePrefix}; {nameof(this.timeSlicedFilesLogConfig.TimeSlicePerFile)}: {this.timeSlicedFilesLogConfig.TimeSlicePerFile}; {nameof(this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing)}: {this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing}; {nameof(this.didCreateDirectory)}: {this.didCreateDirectory}");
             return ret;
         }
     }
