@@ -25,10 +25,16 @@ namespace Naos.Logging.Domain
     public abstract class LogWriterBase
     {
         /// <summary>
+        /// Default serializer description to use for converting a <see cref="LogItem" /> into a string.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Is immuatable.")]
+        public static readonly SerializationDescription DefaultLogItemSerializationDescription = new SerializationDescription(SerializationFormat.Json, SerializationRepresentation.String);
+
+        /// <summary>
         /// Default serializer to use for converting a <see cref="LogItem" /> into a string.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Want a field here.")]
-        public static readonly IStringSerializeAndDeserialize DefaultLogItemSerializer = new NaosJsonSerializer();
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Is immuatable.")]
+        public static readonly ISerializeAndDeserialize DefaultLogItemSerializer = JsonSerializerFactory.Instance.BuildSerializer(DefaultLogItemSerializationDescription);
 
         private readonly LogWriterConfigBase logWriterConfigBase;
 

@@ -9,12 +9,15 @@ namespace Naos.Logging.Test
     using System;
     using System.IO;
     using System.Linq;
+    using System.Threading;
 
     using FakeItEasy;
 
     using FluentAssertions;
 
+    using Naos.Compression.Domain;
     using Naos.Logging.Domain;
+    using Naos.Serialization.Domain.Extensions;
     using Naos.Serialization.Json;
 
     using Xunit;
@@ -265,6 +268,48 @@ namespace Naos.Logging.Test
                         (_.First == _.Second).Should().BeTrue(Invariant($"First: {_.First}; Second: {_.Second}"));
                         (_.First != _.Second).Should().BeFalse(Invariant($"First: {_.First}; Second: {_.Second}"));
                     });
+        }
+
+        [Fact]
+        public static void Writer_reader___Roundtrip___Test()
+        {
+            var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString().ToUpperInvariant());
+
+            try
+            {
+                // Arrange
+                var config = new TimeSlicedFilesLogConfig(
+                    LogItemOrigins.All,
+                    directory,
+                    "TestingTimeSliced",
+                    TimeSpan.FromMinutes(1),
+                    true,
+                    LogItemPropertiesToIncludeInLogMessage.LogItemSerialization);
+
+                var writer = new TimeSlicedFilesLogWriter(config);
+                var reader = new TimeSlicedFilesLogReader(config);
+
+                var orgin = LogItemOrigin.ItsLogEntryPostedInformation;
+                var subjectOne = "Hello";
+                var subjectTwo = "Goodbye";
+
+                // Act
+                writer.Log(subjectOne.ToLogEntry().ToLogItem(orgin));
+                writer.Log(subjectTwo.ToLogEntry().ToLogItem(orgin));
+                var all = reader.ReadAll();
+
+                // Assert
+                all.Count.Should().Be(2);
+                all.First().Subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(JsonSerializerFactory.Instance, CompressorFactory.Instance).Should().Be(subjectOne);
+                all.Last().Subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(JsonSerializerFactory.Instance, CompressorFactory.Instance).Should().Be(subjectTwo);
+            }
+            finally
+            {
+                if (Directory.Exists(directory))
+                {
+                    Directory.Delete(directory, true);
+                }
+            }
         }
     }
 }

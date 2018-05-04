@@ -45,7 +45,7 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public override IReadOnlyCollection<LogItem> ReadAll()
         {
-            return this.ReadRange(DateTime.MinValue, DateTime.MaxValue);
+            return this.ReadRange(DateTime.MinValue.ToUniversalTime(), DateTime.MaxValue.ToUniversalTime());
         }
 
         /// <inheritdoc />
