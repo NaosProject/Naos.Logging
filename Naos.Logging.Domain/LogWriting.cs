@@ -18,6 +18,8 @@ namespace Naos.Logging.Domain
     using Naos.Serialization.Domain.Extensions;
     using Naos.Serialization.Json;
     using Naos.Telemetry.Domain;
+
+    using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Enum.Recipes;
     using OBeautifulCode.Math.Recipes;
     using OBeautifulCode.TypeRepresentation;
@@ -309,13 +311,24 @@ namespace Naos.Logging.Domain
         /// <param name="logItemOrigin"><see cref="LogItemOrigin" /> of the <see cref="LogEntry" />.</param>
         /// <param name="logEntry"><see cref="LogEntry" /> to convert.</param>
         /// <returns>Correct <see cref="LogItem" />.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Acceptable complexity.")]
         public LogItem BuildLogItem(
             LogItemOrigin logItemOrigin,
             LogEntry logEntry)
         {
-            logEntry = logEntry ?? new LogEntry(Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(this.BuildLogItem)}"));
+            logEntry = logEntry ?? throw new ArgumentNullException(nameof(logEntry));
 
             var activityCorrelationPosition = GetActivityCorrelationPositionFromLogEntry(logEntry);
+
+            if (!string.IsNullOrWhiteSpace(logEntry.Category))
+            {
+                throw new ArgumentException(Invariant($"{nameof(LogEntry)} cannot have the property {nameof(LogEntry.Category)} set; found: {logEntry.Category}."));
+            }
+
+            if (activityCorrelationPosition != ActivityCorrelationPosition.Middle && (logEntry.Params?.Any() ?? false))
+            {
+                throw new ArgumentException(Invariant($"{nameof(LogEntry)} cannot have the property {nameof(LogEntry.Params)} set unless it's part of the {nameof(LogActivity.Trace)} scenario; found: {logEntry.Params.Select(_ => _.ToString()).ToCsv()}"));
+            }
 
             object logItemSubjectObject;
             var correlations = new List<IHaveCorrelationId>(2);
@@ -333,11 +346,11 @@ namespace Naos.Logging.Domain
                 }
                 else if (activityCorrelationPosition == ActivityCorrelationPosition.Middle)
                 {
-                    if (logEntry.Params.Any())
+                    if (logEntry.Params?.Any() ?? false)
                     {
                         if (logEntry.Params.Count() > 1)
                         {
-                               throw new InvalidOperationException();
+                            throw new InvalidOperationException(Invariant($"{nameof(LogEntry)} cannot have the property {nameof(LogEntry.Params)} set with more than one value as part of the {nameof(LogActivity.Trace)} scenario; found: {logEntry.Params.Select(_ => _.ToString()).ToCsv()}"));
                         }
                         else
                         {
@@ -350,7 +363,7 @@ namespace Naos.Logging.Domain
                     }
                     else
                     {
-                              throw new InvalidOperationException();
+                        throw new InvalidOperationException(Invariant($"{nameof(LogEntry)} should have the property {nameof(LogEntry.Params)} or {nameof(LogEntry.Message)} set when part of the {nameof(LogActivity.Trace)} scenario."));
                     }
                 }
                 else

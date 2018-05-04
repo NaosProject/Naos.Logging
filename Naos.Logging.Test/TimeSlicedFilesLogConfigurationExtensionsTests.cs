@@ -10,15 +10,11 @@ namespace Naos.Logging.Test
     using System.IO;
     using System.Linq;
 
-    using FakeItEasy;
-
     using FluentAssertions;
 
     using Naos.Logging.Domain;
 
     using Xunit;
-
-    using static System.FormattableString;
 
     public static class TimeSlicedFilesLogConfigurationExtensionsTests
     {
