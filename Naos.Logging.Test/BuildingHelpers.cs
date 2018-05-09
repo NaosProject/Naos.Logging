@@ -10,7 +10,10 @@ namespace Naos.Logging.Test
 
     using Its.Log.Instrumentation;
 
+    using Naos.Compression.Domain;
     using Naos.Logging.Domain;
+    using Naos.Serialization.Domain.Extensions;
+    using Naos.Serialization.Json;
 
     public static class BuildingHelpers
     {
@@ -42,6 +45,16 @@ namespace Naos.Logging.Test
             }
 
             return LogWriting.Instance.BuildLogItem(logItemOrigin, logEntry);
+        }
+
+        public static object DeserializeSubject(this Subject subject)
+        {
+            return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(JsonSerializerFactory.Instance, CompressorFactory.Instance);
+        }
+
+        public static T DeserializeSubject<T>(this Subject subject)
+        {
+            return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory<T>(JsonSerializerFactory.Instance, CompressorFactory.Instance);
         }
     }
 }

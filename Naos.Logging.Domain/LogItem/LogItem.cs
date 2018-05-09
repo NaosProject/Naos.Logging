@@ -74,5 +74,11 @@ namespace Naos.Logging.Domain
         /// Gets information about how this log-item is correlated with other/related log-items.
         /// </summary>
         public IReadOnlyCollection<IHaveCorrelationId> Correlations { get; private set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.Subject.Summary;
+        }
     }
 }

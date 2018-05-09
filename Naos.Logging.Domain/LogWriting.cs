@@ -386,14 +386,14 @@ namespace Naos.Logging.Domain
             string stackTrace = null;
             if (logItemSubjectObject is Exception loggedException)
             {
-                var correlatingException = ExceptionIdBuilder.FindFirstExceptionInChainWithExceptionId(loggedException);
+                var correlatingException = loggedException.FindFirstExceptionInChainWithExceptionId();
                 if (correlatingException == null)
                 {
-                    ExceptionIdBuilder.GenerateAndWriteExceptionIdIntoExceptionData(loggedException);
+                    loggedException.GenerateAndWriteExceptionIdIntoExceptionData();
                     correlatingException = loggedException;
                 }
 
-                var correlationId = ExceptionIdBuilder.GetExceptionIdFromExceptionData(correlatingException).ToString();
+                var correlationId = correlatingException.GetExceptionIdFromExceptionData().ToString();
 
                 var exceptionCorrelatingSubject = new RawSubject
                 {
@@ -437,56 +437,6 @@ namespace Naos.Logging.Domain
                     JsonSerializerFactory.Instance,
                     CompressorFactory.Instance);
                 var result = new Subject(describedSerialization, this.Summary);
-                return result;
-            }
-        }
-
-        private static class ExceptionIdBuilder
-        {
-            private const string ExceptionIdKey = "__Naos_Log_ExceptionID__";
-
-            /// <summary>
-            /// Ensures that the exception id is initialized.
-            /// </summary>
-            public static Exception FindFirstExceptionInChainWithExceptionId(
-                Exception loggedException)
-            {
-                var iteratingException = loggedException;
-
-                while (iteratingException != null)
-                {
-                    if (iteratingException.Data.Contains(ExceptionIdKey))
-                    {
-                        return iteratingException;
-                    }
-
-                    iteratingException = iteratingException.InnerException;
-                }
-
-                return null;
-            }
-
-            public static Guid GenerateAndWriteExceptionIdIntoExceptionData(
-                Exception loggedException)
-            {
-                var result = Guid.NewGuid();
-                loggedException.Data[ExceptionIdKey] = result;
-                return result;
-            }
-
-            public static Guid GetExceptionIdFromExceptionData(
-                Exception correlatingException)
-            {
-                Guid result;
-                if (correlatingException.Data.Contains(ExceptionIdKey))
-                {
-                    result = (Guid)correlatingException.Data[ExceptionIdKey];
-                }
-                else
-                {
-                    result = Guid.Empty;
-                }
-
                 return result;
             }
         }

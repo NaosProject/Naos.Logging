@@ -80,6 +80,7 @@
     <Compile Include=".recipes\Spritely.MustValidation\RuleExtensions.cs" />
     <Compile Include=".recipes\Spritely.MustValidation\Rules.cs" />
     <Compile Include=".recipes\Spritely.MustValidation\ValidatedNotNullAttribute.cs" />
+    <Compile Include="ExceptionIdHelper.cs" />
     <Compile Include="Loggers\TimeSlicedFiles\TimeSlicedFilesLogReader.cs" />
     <Compile Include="Loggers\TimeSlicedFiles\TimeSlicingExtensions.cs" />
     <Compile Include="Loggers\InvalidLogEntryException.cs" />

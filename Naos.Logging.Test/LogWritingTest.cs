@@ -8,13 +8,17 @@ namespace Naos.Logging.Test
 {
     using System;
     using System.Linq;
+
+    using FakeItEasy;
+
     using FluentAssertions;
     using Its.Log.Instrumentation;
-    using Naos.Compression.Domain;
+
     using Naos.Logging.Domain;
-    using Naos.Serialization.Domain.Extensions;
-    using Naos.Serialization.Json;
+
     using Xunit;
+
+    using static System.FormattableString;
 
     public static class LogWritingTest
     {
@@ -24,65 +28,484 @@ namespace Naos.Logging.Test
         public static void LogWrite___Should_create_LogItem___When_logging_string_subject_without_comment()
         {
             // Arrange
-            var memoryLogWriter = BuildAndConfigureMemoryLogWriter();
-            var logItemSubject = "this is a string subject";
-            var logItemSubjectDescribedSerialization = logItemSubject.ToDescribedSerializationUsingSpecificFactory(LogWriting.SubjectSerializationDescription, JsonSerializerFactory.Instance, CompressorFactory.Instance);
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var subject = "this is a string subject " + A.Dummy<string>();
 
             // Act
-            Log.Write(logItemSubject);
+            Log.Write(subject);
 
             // Assert
-            var actual = memoryLogWriter.LoggedItems.Single();
-            actual.Comment.Should().BeNull();
-            actual.Context.Should().NotBeNull();
-            actual.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedInformation);
-            actual.Correlations.Should().BeEmpty();
-            actual.Kind.Should().Be(LogItemKind.Info);
-            actual.Subject.DescribedSerialization.Should().Be(logItemSubjectDescribedSerialization);
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<string>();
+
+            logItem.Subject.Summary.Should().Be(subject);
+            actualSubject.Should().Be(subject);
+            logItem.Kind.Should().Be(LogItemKind.Info);
+            logItem.Comment.Should().BeNull();
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().BeNull();
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedInformation);
+            logItem.Context.CallingMethod.Should().BeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().BeNull();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            logItem.Correlations.Should().BeEmpty();
         }
 
         [Fact]
-        public static void Test()
+        public static void LogWrite___Should_create_LogItem___When_logging_string_subject_with_comment()
         {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var subject = "this is a string subject " + A.Dummy<string>();
+            var comment = "this is a comment " + A.Dummy<string>();
+
+            // Act
+            Log.Write(subject, comment);
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<string>();
+
+            logItem.Subject.Summary.Should().Be(subject);
+            actualSubject.Should().Be(subject);
+            logItem.Kind.Should().Be(LogItemKind.Info);
+            logItem.Comment.Should().Be(comment);
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().BeNull();
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedInformation);
+            logItem.Context.CallingMethod.Should().BeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().BeNull();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            logItem.Correlations.Should().BeEmpty();
+        }
+
+        [Fact]
+        public static void LogWrite___Should_create_LogItem___When_logging_string_subject_via_lambda_without_comment()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var subject = "this is a string subject " + A.Dummy<string>();
+
+            // Act
+            Log.Write(() => subject);
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<string>();
+
+            logItem.Subject.Summary.Should().Be(subject);
+            actualSubject.Should().Be(subject);
+            logItem.Kind.Should().Be(LogItemKind.Info);
+            logItem.Comment.Should().BeNull();
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().BeNull();
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedInformation);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().NotBeNull();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            logItem.Correlations.Should().BeEmpty();
+        }
+
+        [Fact]
+        public static void LogWrite___Should_create_LogItem___When_logging_real_object_subject_via_lambda_with_comment()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var subject = new TestObjectWithToString();
+            var comment = "this is a comment " + A.Dummy<string>();
+
+            // Act
+            Log.Write(() => subject, comment);
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<TestObjectWithToString>();
+
+            logItem.Subject.Summary.Should().Be(subject.ToString());
+            actualSubject.ToString().Should().Be(subject.ToString());
+            logItem.Kind.Should().Be(LogItemKind.Info);
+            logItem.Comment.Should().Be(comment);
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().BeNull();
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedInformation);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().NotBeNull();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            logItem.Correlations.Should().BeEmpty();
+        }
+
+        [Fact]
+        public static void LogWrite___Should_create_LogItem___When_logging_real_object_subject_via_lambda_without_comment()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var subject = new TestObjectWithToString();
+
+            // Act
+            Log.Write(() => subject);
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<TestObjectWithToString>();
+
+            logItem.Subject.Summary.Should().Be(subject.ToString());
+            actualSubject.ToString().Should().Be(subject.ToString());
+            logItem.Kind.Should().Be(LogItemKind.Info);
+            logItem.Comment.Should().BeNull();
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().BeNull();
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedInformation);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().NotBeNull();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            logItem.Correlations.Should().BeEmpty();
+        }
+
+        [Fact]
+        public static void LogWrite___Should_create_LogItem___When_logging_anonymous_object_subject_via_lambda_with_comment()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var subject = new { Message = "hello" };
+            var comment = "this is a comment " + A.Dummy<string>();
+
+            // Act
+            Log.Write(() => subject, comment);
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            dynamic actualSubject = logItem.Subject.DeserializeSubject();
+
+            logItem.Subject.Summary.Should().Be(subject.ToString());
+            ((string)actualSubject.Message).Should().Be(subject.Message);
+            logItem.Kind.Should().Be(LogItemKind.Info);
+            logItem.Comment.Should().Be(comment);
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().BeNull();
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedInformation);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().NotBeNull();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            logItem.Correlations.Should().BeEmpty();
+        }
+
+        [Fact]
+        public static void LogWrite___Should_create_LogItem___When_logging_anonymous_object_subject_via_lambda_without_comment()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var subject = new { Message = "hello" };
+
+            // Act
+            Log.Write(() => subject);
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            dynamic actualSubject = logItem.Subject.DeserializeSubject();
+
+            logItem.Subject.Summary.Should().Be(subject.ToString());
+            ((string)actualSubject.Message).Should().Be(subject.Message);
+            logItem.Kind.Should().Be(LogItemKind.Info);
+            logItem.Comment.Should().BeNull();
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().BeNull();
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedInformation);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().NotBeNull();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            logItem.Correlations.Should().BeEmpty();
+        }
+
+        [Fact]
+        public static void LogWrite___Should_create_LogItem___When_logging_string_subject_via_lambda_with_comment()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var subject = "this is a string subject " + A.Dummy<string>();
+            var comment = "this is a comment " + A.Dummy<string>();
+
+            // Act
+            Log.Write(() => subject, comment);
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<string>();
+
+            logItem.Subject.Summary.Should().Be(subject);
+            actualSubject.Should().Be(subject);
+            logItem.Kind.Should().Be(LogItemKind.Info);
+            logItem.Comment.Should().Be(comment);
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().BeNull();
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedInformation);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().NotBeNull();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            logItem.Correlations.Should().BeEmpty();
+        }
+
+        [Fact]
+        public static void Log_Write___Records_details_correctly___With_exception_and_no_comment()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var exceptionMessage = "Exception " + A.Dummy<string>();
+
+            // Act
             try
             {
-                TestMethod();
+                throw new InvalidOperationException(exceptionMessage);
             }
             catch (Exception ex)
             {
                 Log.Write(() => ex);
             }
 
-            Log.Write(() => "I made a mistake", "comment");
-            Log.Write(() => new MyTestObj2());
-            Log.Write(new MyTestObj());
-            Log.Write(() => new MyTestObj(), "some comment");
-            Log.Write(new MyTestObj(), "some comment");
-            Log.Write(() => new { Whatever = "whatever", TestObj = new MyTestObj(), TestObj2 = new MyTestObj2() });
-            Log.Write(new { Whatever = "whatever" });
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
 
-            using (var log = Log.Enter(() => new { ContextItem1 = "some context" }))
+            logItem.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {exceptionMessage}"));
+            actualSubject.Message.Should().Be(exceptionMessage);
+
+            logItem.Kind.Should().Be(LogItemKind.Error);
+            logItem.Comment.Should().BeNull();
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedException);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            var exceptionCorrelation = (ExceptionCorrelation)logItem.Correlations.Single();
+            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            var correlatingException = exceptionCorrelation.CorrelatingSubject.DeserializeSubject<InvalidOperationException>();
+            correlatingException.Message.Should().Be(actualSubject.Message);
+            correlatingException.StackTrace.Should().Be(actualSubject.StackTrace);
+        }
+
+        [Fact]
+        public static void Log_Write___Records_details_correctly___With_exception_and_comment()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var exceptionMessage = "Exception " + A.Dummy<string>();
+            var comment = "this is a comment " + A.Dummy<string>();
+
+            // Act
+            try
             {
-                log.Trace(() => new InvalidOperationException("some exception occurred"));
-                log.Trace("some trace");
-                log.Trace(() => "some trace 2");
-                log.Trace(() => new MyTestObj2());
-                using (var log2 = Log.Enter(() => new { ContextItem2 = "some context" }))
+                throw new InvalidOperationException(exceptionMessage);
+            }
+            catch (Exception ex)
+            {
+                Log.Write(() => ex, comment);
+            }
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
+
+            logItem.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {exceptionMessage}"));
+            actualSubject.Message.Should().Be(exceptionMessage);
+
+            logItem.Kind.Should().Be(LogItemKind.Error);
+            logItem.Comment.Should().Be(comment);
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPostedException);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            var exceptionCorrelation = (ExceptionCorrelation)logItem.Correlations.Single();
+            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            var correlatingException = exceptionCorrelation.CorrelatingSubject.DeserializeSubject<InvalidOperationException>();
+            correlatingException.Message.Should().Be(actualSubject.Message);
+            correlatingException.StackTrace.Should().Be(actualSubject.StackTrace);
+        }
+
+        [Fact]
+        public static void Log_Write___Records_details_correctly___With_exception_and_inner_exception()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var exceptionMessage = "Exception " + A.Dummy<string>();
+            var innerExceptionMessage = "Exception to inner " + A.Dummy<string>();
+
+            // Act
+            try
+            {
+                try
                 {
-                    log2.Trace("some trace");
+                    throw new InvalidOperationException(innerExceptionMessage);
+                }
+                catch (Exception innerException)
+                {
+                    Log.Write(() => innerException);
+                    throw new InvalidOperationException(exceptionMessage, innerException);
                 }
             }
+            catch (Exception exception)
+            {
+                Log.Write(() => exception);
+            }
+
+            // Assert
+            var timeOrderedItems = logWriter.LoggedItems.OrderBy(_ => _.Context.TimestampUtc).ToList();
+            timeOrderedItems.Count.Should().Be(2);
+            var logItemInner = logWriter.LoggedItems.First();
+            var logItem = logWriter.LoggedItems.Last();
+
+            var innerSubject = logItemInner.Subject.DeserializeSubject<InvalidOperationException>();
+            var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
+
+            logItemInner.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {innerExceptionMessage}"));
+            logItem.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {exceptionMessage}"));
+
+            innerSubject.Message.Should().Be(innerExceptionMessage);
+            innerSubject.InnerException.Should().BeNull();
+
+            actualSubject.Message.Should().Be(exceptionMessage);
+            actualSubject.InnerException.Should().NotBeNull();
+            actualSubject.InnerException.Message.Should().Be(innerExceptionMessage);
+
+            logItemInner.Kind.Should().Be(LogItemKind.Error);
+            logItemInner.Comment.Should().BeNull();
+
+            logItem.Kind.Should().Be(LogItemKind.Error);
+            logItem.Comment.Should().BeNull();
+
+            var innerCorrelation = (ExceptionCorrelation)logItemInner.Correlations.Single();
+            var exceptionCorrelation = (ExceptionCorrelation)logItem.Correlations.Single();
+
+            innerCorrelation.CorrelationId.Should().Be(innerSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+
+            innerCorrelation.CorrelationId.Should().Be(exceptionCorrelation.CorrelationId);
+
+            var innerCorrelatingException = innerCorrelation.CorrelatingSubject.DeserializeSubject<InvalidOperationException>();
+            innerCorrelatingException.Message.Should().Be(innerSubject.Message);
+            innerCorrelatingException.StackTrace.Should().Be(innerSubject.StackTrace);
+
+            var correlatingException = exceptionCorrelation.CorrelatingSubject.DeserializeSubject<InvalidOperationException>();
+            correlatingException.Message.Should().Be(innerSubject.Message);
+            correlatingException.StackTrace.Should().Be(innerSubject.StackTrace);
         }
 
-        private static void TestMethod()
+        [Fact]
+        public static void Log_Enter_Activity_Trace___Records_details_correctly___With_exception_and_comment()
         {
-            throw new InvalidOperationException("BAD!!");
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+
+            var enterSubject = new TestObjectWithToString();
+            var stringTraceWithoutLambda = "some trace without a lambda" + A.Dummy<string>();
+            var stringTraceWithLambda = "some trace with a lambda" + A.Dummy<string>();
+            var traceObjectWithLambda = new DifferentTestObjectWithToString();
+            var exceptionToThrow = new InvalidOperationException("Oh no.");
+
+            // Act
+            using (var log = Log.Enter(() => enterSubject))
+            {
+                try
+                {
+                    throw exceptionToThrow;
+                }
+                catch (Exception exception)
+                {
+                    log.Trace(() => exception);
+                }
+
+                log.Trace(stringTraceWithoutLambda);
+                log.Trace(() => stringTraceWithLambda);
+                log.Trace(() => traceObjectWithLambda);
+            }
+
+            // Assert
+            logWriter.LoggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is ActivityCorrelation).Should().NotBeNull());
+            logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is ActivityCorrelation).CorrelationId).Distinct().Count().Should()
+                .Be(logWriter.LoggedItems.Count);
+            logWriter.LoggedItems.ToList().ForEach(
+                _ => ((ActivityCorrelation)_.Correlations.Single(c => c is ActivityCorrelation)).CorrelatingSubject
+                    .DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test));
+
+            var enterItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(ActivityCorrelationPosition.First.ToString(), StringComparison.CurrentCulture));
+            enterItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
+            var enterCorelation = (ActivityCorrelation)enterItem.Correlations.Single(_ => _ is ActivityCorrelation);
+            enterCorelation.ElapsedMillisecondsFromFirst.Should().Be(0);
+            enterCorelation.CorrelationPosition.Should().Be(ActivityCorrelationPosition.First);
+
+            var middleItems = logWriter.LoggedItems.Where(
+                _ => new[] { exceptionToThrow.Message, stringTraceWithLambda, stringTraceWithoutLambda, traceObjectWithLambda.ToString() }.Any(
+                    a => _.Subject.Summary.EndsWith(a, StringComparison.CurrentCulture))).ToList();
+            middleItems.ForEach(_ =>
+                {
+                    _.Subject.Summary.Should().StartWith(ActivityCorrelationPosition.Middle.ToString());
+                    var middleCorrelation = (ActivityCorrelation)_.Correlations.Single(s => s is ActivityCorrelation);
+                    middleCorrelation.CorrelationPosition.Should().Be(ActivityCorrelationPosition.Middle);
+                    middleCorrelation.ElapsedMillisecondsFromFirst.Should().BeGreaterThan(0);
+                });
+
+            var exitItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(ActivityCorrelationPosition.Last.ToString(), StringComparison.CurrentCulture));
+            exitItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
+            var exitCorelation = (ActivityCorrelation)exitItem.Correlations.Single(_ => _ is ActivityCorrelation);
+            exitCorelation.ElapsedMillisecondsFromFirst.Should().BeGreaterThan(0);
+            exitCorelation.CorrelationPosition.Should().Be(ActivityCorrelationPosition.Last);
         }
 
-        private class MyTestObj
+        private class TestObjectWithToString
         {
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing.")]
-            public string Test => "abcd";
+            public string Test { get; set; } = Guid.NewGuid().ToString().ToUpperInvariant();
 
             public override string ToString()
             {
@@ -90,10 +513,15 @@ namespace Naos.Logging.Test
             }
         }
 
-        private class MyTestObj2
+        private class DifferentTestObjectWithToString
         {
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing.")]
-            public string Test => "abcd";
+            public string Test { get; set; } = Guid.NewGuid().ToString().ToUpperInvariant();
+
+            public override string ToString()
+            {
+                return "hjhjhjhjhjhjhjhjhj";
+            }
         }
 
         private static InMemoryLogWriter BuildAndConfigureMemoryLogWriter()
