@@ -111,20 +111,5 @@ namespace Naos.Logging.Test
             exception.Should().BeOfType<InvalidOperationException>();
             exception.Message.Should().Be(Invariant($"logEntry.ElapsedMilliseconds is null when there is an ActivityCorrelation"));
         }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Params", Justification = "Name/spelling is correct.")]
-        [Fact]
-        public static void Params_or_message_property_not_set___Should_throw___When_in_LogActivity_trace()
-        {
-            // Arrange
-            var badLogEntry = new LogEntry(null) { EventType = TraceEventType.Verbose };
-
-            // Act
-            var exception = Record.Exception(() => badLogEntry.ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
-
-            // Assert
-            exception.Should().BeOfType<InvalidOperationException>();
-            exception.Message.Should().Be(Invariant($"LogEntry should have the property Params or Message set when part of the Trace scenario."));
-        }
     }
 }

@@ -357,13 +357,9 @@ namespace Naos.Logging.Domain
                             logItemSubjectObject = logEntry.Params.Single();
                         }
                     }
-                    else if (logEntry.Message != null)
-                    {
-                        logItemSubjectObject = logEntry.Message;
-                    }
                     else
                     {
-                        throw new InvalidOperationException(Invariant($"{nameof(LogEntry)} should have the property {nameof(LogEntry.Params)} or {nameof(LogEntry.Message)} set when part of the {nameof(LogActivity.Trace)} scenario."));
+                        logItemSubjectObject = logEntry.Message;
                     }
                 }
                 else

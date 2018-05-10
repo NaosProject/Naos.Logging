@@ -502,6 +502,37 @@ namespace Naos.Logging.Test
             exitCorelation.CorrelationPosition.Should().Be(ActivityCorrelationPosition.Last);
         }
 
+        [Fact]
+        public static void Log_Write___Should_make_null_subject_LogItem___When_nulls_written()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+
+            // Act
+            Log.Write((string)null);
+            Log.Write(() => (string)null);
+            Log.Write(() => (DifferentTestObjectWithToString)null);
+            Log.Write(() => (Exception)null);
+
+            using (var log = Log.Enter(() => (TestObjectWithToString)null))
+            {
+                log.Trace(null);
+                log.Trace(() => (string)null);
+                log.Trace(() => (DifferentTestObjectWithToString)null);
+                log.Trace(() => (Exception)null);
+            }
+
+            // Assert
+            logWriter.LoggedItems.Count.Should().Be(10);
+            logWriter.LoggedItems.Count(_ => _.Subject.Summary == "[null]").Should().Be(4);
+            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.First)}: [null]")).Should().Be(1);
+            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.Last)}: [null]")).Should().Be(1);
+            var middleItems = logWriter.LoggedItems.Where(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.Middle)}: [null]")).ToList();
+            middleItems.Count.Should().Be(4);
+            middleItems.Count(_ => _.Context.CallingMethod != null).Should().Be(4, "We have this on everything because the correlating subject has it.");
+            middleItems.Count(_ => _.Correlations.Any(c => c is ExceptionCorrelation)).Should().Be(0, "Can't know if null is an exception or not.");
+        }
+
         private class TestObjectWithToString
         {
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing.")]
