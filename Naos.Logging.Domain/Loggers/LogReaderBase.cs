@@ -24,12 +24,7 @@ namespace Naos.Logging.Domain
         protected LogReaderBase(
             LogWriterConfigBase logConfigBase)
         {
-            if (logConfigBase == null)
-            {
-                throw new ArgumentNullException(nameof(logConfigBase));
-            }
-
-            this.logConfigBase = logConfigBase;
+            this.logConfigBase = logConfigBase ?? throw new ArgumentNullException(nameof(logConfigBase));
         }
 
         /// <summary>

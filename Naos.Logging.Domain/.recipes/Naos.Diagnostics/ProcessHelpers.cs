@@ -4,20 +4,36 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Naos.Diagnostics.Domain
+namespace Naos.Diagnostics.Recipes
 {
     using System;
     using System.Diagnostics;
+    using System.Security.Principal;
 
     /// <summary>
     /// Various helper methods related to a processes.
     /// </summary>
-#if !NaosDiagnosticsRecipes
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+#if NaosDiagnosticsRecipes
+    public
+#else
     [System.CodeDom.Compiler.GeneratedCode("Naos.Diagnostics", "See package version number")]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    internal
 #endif
-    internal static class ProcessHelpers
+    static class ProcessHelpers
     {
+        /// <summary>
+        /// Gets a value indicating whether or not the executing process is running as administrator.
+        /// </summary>
+        /// <remarks>I'm not certain if this works on a thread that is impersonating or not.</remarks>
+        /// <returns>Value indicating whether or not the executing process is running as administrator.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "The caller will be the consumer of this recipe.")]
+        public static bool IsCurrentlyRunningAsAdmin()
+        {
+            var result = WindowsIdentity.GetCurrent().Owner?.IsWellKnown(WellKnownSidType.BuiltinAdministratorsSid) ?? false;
+            return result;
+        }
+
         /// <summary>
         /// Gets the currently running process.
         /// </summary>
@@ -39,7 +55,7 @@ namespace Naos.Diagnostics.Domain
         /// The process' name.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "The caller will be the consumer of this recipe.")]
-        public static string Name(
+        public static string GetName(
             this Process process)
         {
             if (process == null)
@@ -59,7 +75,7 @@ namespace Naos.Diagnostics.Domain
         /// The file path of the a process.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "The caller will be the consumer of this recipe.")]
-        public static string FilePath(
+        public static string GetFilePath(
             this Process process)
         {
             if (process == null)
@@ -79,7 +95,7 @@ namespace Naos.Diagnostics.Domain
         /// The file version of a process.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "The caller will be the consumer of this recipe.")]
-        public static string FileVersion(
+        public static string GetFileVersion(
             this Process process)
         {
             if (process == null)
@@ -99,7 +115,7 @@ namespace Naos.Diagnostics.Domain
         /// The product version of a process.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "The caller will be the consumer of this recipe.")]
-        public static string ProductVersion(
+        public static string GetProductVersion(
             this Process process)
         {
             if (process == null)

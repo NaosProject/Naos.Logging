@@ -13,7 +13,7 @@ namespace Naos.Logging.Domain
 
     using Its.Log.Instrumentation;
     using Naos.Compression.Domain;
-    using Naos.Diagnostics.Domain;
+    using Naos.Diagnostics.Recipes;
     using Naos.Serialization.Domain;
     using Naos.Serialization.Domain.Extensions;
     using Naos.Serialization.Json;
@@ -58,8 +58,8 @@ namespace Naos.Logging.Domain
         private LogWriting()
         {
             this.machineName = MachineName.GetMachineName();
-            this.processName = ProcessHelpers.GetRunningProcess().Name();
-            this.processFileVersion = ProcessHelpers.GetRunningProcess().FileVersion();
+            this.processName = ProcessHelpers.GetRunningProcess().GetName();
+            this.processFileVersion = ProcessHelpers.GetRunningProcess().GetFileVersion();
         }
 
         /// <summary>

@@ -9,7 +9,7 @@ namespace Naos.Logging.Domain
     using System;
     using System.Diagnostics;
 
-    using Naos.Diagnostics.Domain;
+    using Naos.Diagnostics.Recipes;
     using Naos.Serialization.Domain;
     using Naos.Serialization.Json;
 
@@ -54,7 +54,7 @@ namespace Naos.Logging.Domain
             LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage = LogItemPropertiesToIncludeInLogMessage.Default)
             : base(originsToLog, logItemPropertiesToIncludeInLogMessage)
         {
-            this.Source = string.IsNullOrWhiteSpace(source) ? ProcessHelpers.GetRunningProcess().Name() : source;
+            this.Source = string.IsNullOrWhiteSpace(source) ? ProcessHelpers.GetRunningProcess().GetName() : source;
             this.ShouldCreateSourceIfMissing = shouldCreateSourceIfMissing;
             this.LogName = string.IsNullOrWhiteSpace(logName) ? DefaultLogName : logName;
             this.MachineName = string.IsNullOrWhiteSpace(machineName) ? DefaultMachineName : machineName;
