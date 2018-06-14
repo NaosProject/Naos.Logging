@@ -1,0 +1,6 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <description>Its.Log processing logic and multiple writers/readers; Console, Serialized Files, Text Files, Event Log, and In-Memory for testing.</description>
+  </metadata>
+</package>
