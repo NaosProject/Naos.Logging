@@ -97,7 +97,7 @@ namespace Naos.Logging.Domain
             DateTime nowUtc = default(DateTime))
         {
             var now = nowUtc == default(DateTime) ? DateTime.UtcNow : nowUtc;
-            var date = now.ToString("yyyy-dd-MM", CultureInfo.InvariantCulture);
+            var date = now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
             var offsets = this.sliceOffsets.FindOffsetRange(now);
 
             var file = Invariant($"{this.FileNamePrefix}--{date}--{offsets.Item1.ToString("hhmm", CultureInfo.InvariantCulture)}Z-{offsets.Item2.ToString("hhmm", CultureInfo.InvariantCulture)}Z.{FileExtensionWithoutDot}");
