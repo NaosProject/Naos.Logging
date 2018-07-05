@@ -165,7 +165,7 @@ namespace Naos.Logging.Domain
                 }
                 catch (Exception failToSerializeLogEntryException)
                 {
-                    serializedLogEntry = Invariant($"Failed to serialize log entry: {failToSerializeLogEntryException.Message}");
+                    serializedLogEntry = Invariant($"Failed to serialize log entry: {logEntry.Subject} with error: {failToSerializeLogEntryException.Message}");
                 }
 
                 var updatedSubject = new InvalidLogEntryException(serializedLogEntry, ex);
