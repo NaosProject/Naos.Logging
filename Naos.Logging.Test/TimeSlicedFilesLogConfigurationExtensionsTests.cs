@@ -100,7 +100,7 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var rootPath = Path.GetTempPath();
-            var config = new TimeSlicedFilesLogConfig(LogItemOrigins.All, rootPath, "Application", TimeSpan.FromMinutes(90));
+            var config = new TimeSlicedFilesLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, rootPath, "Application", TimeSpan.FromMinutes(90));
             var timeOne = new DateTime(2000, 10, 10, 04, 20, 42, DateTimeKind.Utc);
             var expectedOne = Path.Combine(rootPath, "Application--2000-10-10--0300Z-0430Z.log");
             var timeTwo = new DateTime(2010, 10, 10, 16, 20, 42, DateTimeKind.Utc);

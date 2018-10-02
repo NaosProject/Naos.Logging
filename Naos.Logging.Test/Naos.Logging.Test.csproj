@@ -134,6 +134,7 @@
     <Compile Include="BuildingHelpers.cs" />
     <Compile Include="EnumerationTest.cs" />
     <Compile Include="InvalidLogEntryTests.cs" />
+    <Compile Include="LogInclusionKindToOriginsMaps.cs" />
     <Compile Include="TimeSlicedFilesLogConfigurationExtensionsTests.cs" />
     <Compile Include="TimeSlicedFilesTests.cs" />
     <Compile Include="InMemoryTests.cs" />

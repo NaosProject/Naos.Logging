@@ -10,7 +10,7 @@ namespace Naos.Logging.Domain
     using System.Diagnostics;
     using System.Threading;
 
-    using OBeautifulCode.Enum.Recipes;
+    using static System.FormattableString;
 
     /// <summary>
     /// <see cref="EventLog"/> focused implementation of <see cref="LogWriterBase" />.
@@ -63,13 +63,11 @@ namespace Naos.Logging.Domain
                 }
             }
 
-            var origins = logItem.Context.Origin.ToOrigins();
             using (var eventLog = this.eventLogConfig.NewEventLogObject())
             {
-                var eventLogEntryType =
-                    LogItemOrigins.AllErrors.HasFlagOverlap(origins) ?
-                        EventLogEntryType.Error :
-                        EventLogEntryType.Information;
+                var eventLogEntryType = logItem.Kind == LogItemKind.Exception
+                    ? EventLogEntryType.Error
+                    : EventLogEntryType.Information;
 
                 var bytes = EventLogConfig.EventLogRawDataLogItemSerializer.SerializeToBytes(logItem);
                 var logMessage = BuildLogMessageFromLogItem(logItem, this.eventLogConfig.LogItemPropertiesToIncludeInLogMessage);
@@ -80,7 +78,7 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public override string ToString()
         {
-            var ret = FormattableString.Invariant($"{this.GetType().FullName}; {nameof(this.eventLogConfig.OriginsToLog)}: {this.eventLogConfig.OriginsToLog}; {nameof(this.eventLogConfig.Source)}: {this.eventLogConfig.Source}; {nameof(this.eventLogConfig.ShouldCreateSourceIfMissing)}: {this.eventLogConfig.ShouldCreateSourceIfMissing}");
+            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.eventLogConfig.LogInclusionKindToOriginsMap)}: {this.eventLogConfig.LogInclusionKindToOriginsMapFriendlyString}; {nameof(this.eventLogConfig.Source)}: {this.eventLogConfig.Source}; {nameof(this.eventLogConfig.ShouldCreateSourceIfMissing)}: {this.eventLogConfig.ShouldCreateSourceIfMissing}");
             return ret;
         }
     }

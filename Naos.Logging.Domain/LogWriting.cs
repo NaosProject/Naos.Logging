@@ -36,8 +36,6 @@ namespace Naos.Logging.Domain
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Want a field here.")]
         public static readonly SerializationDescription SubjectSerializationDescription = new SerializationDescription(SerializationFormat.Json, SerializationRepresentation.String, SerializationKind.Compact);
 
-        private static readonly HashSet<LogItemOrigin> ErrorOrigins = new HashSet<LogItemOrigin>(LogItemOrigins.AllErrors.GetIndividualFlags<LogItemOrigins>().Select(_ => (LogItemOrigin)Enum.Parse(typeof(LogItemOrigin), _.ToString())));
-
         private readonly string machineName;
 
         private readonly string processName;
@@ -173,17 +171,17 @@ namespace Naos.Logging.Domain
 
                 try
                 {
-                    logItem = this.BuildLogItem(LogItemOrigin.ItsLogEntryPostedMalformedLogEntry, newLogEntry);
+                    logItem = this.BuildLogItem(LogItemOrigin.NaosLoggingLogWriting, newLogEntry);
                 }
                 catch (Exception failedToBuildInvalidLogEntryException)
                 {
                     var rawSubject = new RawSubject
                     {
-                        OriginalSubject = Invariant($"Failed to build invalid log entry: {failedToBuildInvalidLogEntryException.Message}"),
+                        OriginalSubject = new FailedToBuildInvalidLogEntryException("Failed to build invalid log entry.", failedToBuildInvalidLogEntryException),
                         Summary = serializedLogEntry,
                     };
 
-                    logItem = new LogItem(rawSubject.ToSubject(), LogItemKind.Error, new LogItemContext(DateTime.UtcNow, LogItemOrigin.ItsLogEntryPostedFailedToBuildInvalidLogEntry));
+                    logItem = new LogItem(rawSubject.ToSubject(), LogItemKind.Exception, new LogItemContext(DateTime.UtcNow, LogItemOrigin.NaosLoggingLogWriting));
                 }
             }
 
@@ -221,21 +219,7 @@ namespace Naos.Logging.Domain
             {
                 var logEntry = args.LogEntry ?? new LogEntry(Invariant($"Null {nameof(LogEntry)} Supplied to {nameof(Log)}.{nameof(Log.EntryPosted)}"));
 
-                LogItemOrigin logItemOrigin;
-                switch (logEntry.Subject)
-                {
-                    case Exception ex:
-                        logItemOrigin = LogItemOrigin.ItsLogEntryPostedException;
-                        break;
-                    case IAmTelemetryItem tel:
-                        logItemOrigin = LogItemOrigin.ItsLogEntryPostedTelemetry;
-                        break;
-                    default:
-                        logItemOrigin = LogItemOrigin.ItsLogEntryPostedInformation;
-                        break;
-                }
-
-                this.LogToActiveLogWriters(logItemOrigin, logEntry);
+                this.LogToActiveLogWriters(LogItemOrigin.ItsLogEntryPosted, logEntry);
             };
 
             announcer(Invariant($"Wired up {nameof(Log)}.{nameof(Log.EntryPosted)} to the {nameof(this.activeLogWriters)}."));
@@ -380,6 +364,8 @@ namespace Naos.Logging.Domain
             }
 
             string stackTrace = null;
+            var kind = DetermineKindFromSubject(logItemSubjectObject);
+
             if (logItemSubjectObject is Exception loggedException)
             {
                 var correlatingException = loggedException.FindFirstExceptionInChainWithExceptionId();
@@ -411,11 +397,32 @@ namespace Naos.Logging.Domain
 
             var context = new LogItemContext(logEntry.TimeStamp, logItemOrigin, this.machineName, this.processName, this.processFileVersion, logEntry.CallingMethod, logEntry.CallingType?.ToTypeDescription(), stackTrace);
 
-            var kind = ErrorOrigins.Contains(context.Origin) ? LogItemKind.Error : LogItemKind.Info;
-
             var comment = (logItemSubjectObject is string logItemSubjectAsString) && (logItemSubjectAsString == logEntry.Message) ? null : logEntry.Message;
 
             var result = new LogItem(logItemRawSubject.ToSubject(), kind, context, comment, correlations);
+
+            return result;
+        }
+
+        private static LogItemKind DetermineKindFromSubject(object logItemSubjectObject)
+        {
+            LogItemKind result;
+            if (logItemSubjectObject is string)
+            {
+                result = LogItemKind.String;
+            }
+            else if (logItemSubjectObject is IAmTelemetryItem)
+            {
+                result = LogItemKind.Telemetry;
+            }
+            else if (logItemSubjectObject is Exception)
+            {
+                result = LogItemKind.Exception;
+            }
+            else
+            {
+                result = LogItemKind.Object;
+            }
 
             return result;
         }

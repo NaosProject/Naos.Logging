@@ -96,6 +96,7 @@
     <Compile Include=".recipes\Spritely.MustValidation\Rules.cs" />
     <Compile Include=".recipes\Spritely.MustValidation\ValidatedNotNullAttribute.cs" />
     <Compile Include="ExceptionIdHelper.cs" />
+    <Compile Include="Loggers\FailedToBuildInvalidLogEntryException.cs" />
     <Compile Include="Loggers\TimeSlicedFiles\TimeSlicedFilesLogReader.cs" />
     <Compile Include="Loggers\TimeSlicedFiles\TimeSlicingExtensions.cs" />
     <Compile Include="Loggers\InvalidLogEntryException.cs" />
@@ -108,7 +109,6 @@
     <Compile Include="LogItem\LogItem.cs" />
     <Compile Include="LogItem\ActivityCorrelation.cs" />
     <Compile Include="LogItem\LogItemKind.cs" />
-    <Compile Include="LogItem\LogItemOriginExtensions.cs" />
     <Compile Include="Loggers\Console\ConsoleLogWriter.cs" />
     <Compile Include="Loggers\EventLog\EventLogConfig.cs" />
     <Compile Include="Loggers\EventLog\EventLogWriter.cs" />

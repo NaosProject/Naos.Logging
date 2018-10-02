@@ -25,12 +25,8 @@ namespace Naos.Logging.Test
         [Fact]
         public static void LogConfigurationConsoleConstructor___Valid___Works()
         {
-            // Arrange
-            var contextsToLogConsoleOut = LogItemOrigins.ItsLogEntryPostedInformation;
-            var contextsToLogConsoleError = LogItemOrigins.AllErrors;
-
-            // Act
-            var actual = new ConsoleLogConfig(contextsToLogConsoleOut, contextsToLogConsoleError);
+            // Arrange & Act
+            var actual = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted, LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere);
 
             // Assert
             actual.Should().NotBeNull();
@@ -60,22 +56,23 @@ namespace Naos.Logging.Test
                 {
                     // Arrange
                     var infoCanary = A.Dummy<string>();
-                    var errorCanary = A.Dummy<string>();
-                    var logProcessor = new ConsoleLogWriter(new ConsoleLogConfig(LogItemOrigins.All, LogItemOrigins.AllErrors));
+                    var errorCanary = new ArgumentException(A.Dummy<string>());
+                    var logProcessor = new ConsoleLogWriter(new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted, LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere));
                     Console.SetOut(consoleOut);
                     Console.SetError(consoleError);
 
                     // Act
-                    logProcessor.Log(infoCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
-                    logProcessor.Log(errorCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedException));
+                    logProcessor.Log(infoCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPosted));
+                    logProcessor.Log(errorCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPosted));
 
                     var consoleOutOutput = consoleOut.ToString();
                     var consoleErrorOutput = consoleError.ToString();
 
                     // Assert
                     consoleOutOutput.Should().Contain(infoCanary);
-                    consoleOutOutput.Should().Contain(errorCanary);
-                    consoleErrorOutput.Should().Contain(errorCanary);
+                    consoleOutOutput.Should().NotContain(errorCanary.Message);
+                    consoleErrorOutput.Should().Contain(errorCanary.Message);
+                    consoleErrorOutput.Should().NotContain(infoCanary);
                 }
             }
         }
@@ -101,22 +98,24 @@ namespace Naos.Logging.Test
         public static void ConsoleConfiguration___EqualityLogic___Should_be_valid___When_different_data()
         {
             // Arrange
+            var logInclusionKindToOriginsMapForConsoleOut = LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted;
+            var logInclusionKindToOriginsMapForConsoleError = LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere;
             var notEqualTests = new[]
                                     {
                                         new
                                             {
-                                                First = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPostedException, LogItemOrigins.ItsLogEntryPostedInformation),
-                                                Second = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPostedException, LogItemOrigins.AppDomainUnhandledException),
+                                                First = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, logInclusionKindToOriginsMapForConsoleOut, LogInclusionKindToOriginsMaps.TelemetryFromAnywhere),
+                                                Second = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, logInclusionKindToOriginsMapForConsoleOut, LogInclusionKindToOriginsMaps.TelemetryFromNowhere),
                                             },
                                         new
                                             {
-                                                First = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPostedException, LogItemOrigins.ItsLogEntryPostedInformation),
-                                                Second = new ConsoleLogConfig(LogItemOrigins.AppDomainUnhandledException, LogItemOrigins.ItsLogEntryPostedInformation),
+                                                First = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.TelemetryFromAnywhere, logInclusionKindToOriginsMapForConsoleOut),
+                                                Second = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.TelemetryFromNowhere, logInclusionKindToOriginsMapForConsoleOut),
                                             },
                                         new
                                             {
-                                                First = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPostedException, LogItemOrigins.ItsLogEntryPosted),
-                                                Second = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPostedException, LogItemOrigins.ItsLogEntryPostedInformation),
+                                                First = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, logInclusionKindToOriginsMapForConsoleOut, LogInclusionKindToOriginsMaps.TelemetryFromAnywhere),
+                                                Second = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.TelemetryFromNowhere, logInclusionKindToOriginsMapForConsoleError),
                                             },
                                     }.ToList();
 
@@ -144,8 +143,13 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPosted, LogItemOrigins.AllErrors),
-                                                Second = new ConsoleLogConfig(LogItemOrigins.ItsLogEntryPosted, LogItemOrigins.AllErrors),
+                                                First = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.TelemetryFromNowhere, LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere),
+                                                Second = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.TelemetryFromNowhere, LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere),
+                                            },
+                                        new
+                                            {
+                                                First = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere, LogInclusionKindToOriginsMaps.TelemetryFromAnywhere),
+                                                Second = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere, LogInclusionKindToOriginsMaps.TelemetryFromAnywhere),
                                             },
                                     }.ToList();
 

@@ -50,7 +50,7 @@ namespace Naos.Logging.Domain
             }
 
             // this is to capture the directory creation info as well as prevent inconsistent syncronization usage of this.fileLogConfig...
-            this.thisToString = FormattableString.Invariant($"{this.GetType().FullName}; {nameof(this.fileLogConfig.OriginsToLog)}: {this.fileLogConfig.OriginsToLog}; {nameof(this.fileLogConfig.LogFilePath)}: {this.fileLogConfig.LogFilePath}; {nameof(this.fileLogConfig.CreateDirectoryStructureIfMissing)}: {this.fileLogConfig.CreateDirectoryStructureIfMissing}; {nameof(didCreateDirectory)}: {didCreateDirectory}");
+            this.thisToString = Invariant($"{this.GetType().FullName}; {nameof(this.fileLogConfig.LogInclusionKindToOriginsMap)}: {this.fileLogConfig.LogInclusionKindToOriginsMapFriendlyString}; {nameof(this.fileLogConfig.LogFilePath)}: {this.fileLogConfig.LogFilePath}; {nameof(this.fileLogConfig.CreateDirectoryStructureIfMissing)}: {this.fileLogConfig.CreateDirectoryStructureIfMissing}; {nameof(didCreateDirectory)}: {didCreateDirectory}");
         }
 
         /// <inheritdoc />

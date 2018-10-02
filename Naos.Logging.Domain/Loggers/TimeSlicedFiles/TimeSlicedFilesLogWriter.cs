@@ -70,7 +70,7 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public override string ToString()
         {
-            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.timeSlicedFilesLogConfig.OriginsToLog)}: {this.timeSlicedFilesLogConfig.OriginsToLog}; {nameof(this.timeSlicedFilesLogConfig.LogFileDirectoryPath)}: {this.timeSlicedFilesLogConfig.LogFileDirectoryPath}; {nameof(this.timeSlicedFilesLogConfig.FileNamePrefix)}: {this.timeSlicedFilesLogConfig.FileNamePrefix}; {nameof(this.timeSlicedFilesLogConfig.TimeSlicePerFile)}: {this.timeSlicedFilesLogConfig.TimeSlicePerFile}; {nameof(this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing)}: {this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing}; {nameof(this.didCreateDirectory)}: {this.didCreateDirectory}");
+            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.timeSlicedFilesLogConfig.LogInclusionKindToOriginsMap)}: {this.timeSlicedFilesLogConfig.LogInclusionKindToOriginsMapFriendlyString}; {nameof(this.timeSlicedFilesLogConfig.LogFileDirectoryPath)}: {this.timeSlicedFilesLogConfig.LogFileDirectoryPath}; {nameof(this.timeSlicedFilesLogConfig.FileNamePrefix)}: {this.timeSlicedFilesLogConfig.FileNamePrefix}; {nameof(this.timeSlicedFilesLogConfig.TimeSlicePerFile)}: {this.timeSlicedFilesLogConfig.TimeSlicePerFile}; {nameof(this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing)}: {this.timeSlicedFilesLogConfig.CreateDirectoryStructureIfMissing}; {nameof(this.didCreateDirectory)}: {this.didCreateDirectory}");
             return ret;
         }
     }

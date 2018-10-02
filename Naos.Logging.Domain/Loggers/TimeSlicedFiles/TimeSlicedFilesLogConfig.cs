@@ -10,7 +10,7 @@ namespace Naos.Logging.Domain
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
-
+    using System.Linq;
     using OBeautifulCode.Math.Recipes;
 
     using static System.FormattableString;
@@ -30,20 +30,20 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Initializes a new instance of the <see cref="TimeSlicedFilesLogConfig"/> class.
         /// </summary>
-        /// <param name="originsToLog">The log-item origins to log for.</param>
+        /// <param name="logInclusionKindToOriginsMap">The log-item origins to log for.</param>
         /// <param name="logFileDirectoryPath">Directory path to write log files to.</param>
         /// <param name="fileNamePrefix">File name to use for each log file as a prefix and a unique time slice hash will be used as the suffix.</param>
         /// <param name="timeSlicePerFile">Amount of time to store in each file.</param>
         /// <param name="createDirectoryStructureIfMissing">Optional value indicating whether to create the directory structure if it's missing; DEFAULT is true.</param>
         /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         public TimeSlicedFilesLogConfig(
-            LogItemOrigins originsToLog,
+            IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>> logInclusionKindToOriginsMap,
             string logFileDirectoryPath,
             string fileNamePrefix,
             TimeSpan timeSlicePerFile,
             bool createDirectoryStructureIfMissing = true,
             LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage = LogItemPropertiesToIncludeInLogMessage.Default)
-            : base(originsToLog, logItemPropertiesToIncludeInLogMessage)
+            : base(logInclusionKindToOriginsMap, logItemPropertiesToIncludeInLogMessage)
         {
             if (string.IsNullOrWhiteSpace(logFileDirectoryPath))
             {
@@ -126,8 +126,8 @@ namespace Naos.Logging.Domain
             }
 
             var result =
-                (first.OriginsToLog == second.OriginsToLog) &&
                 (first.LogItemPropertiesToIncludeInLogMessage == second.LogItemPropertiesToIncludeInLogMessage) &&
+                (first.LogInclusionKindToOriginsMapFriendlyString == second.LogInclusionKindToOriginsMapFriendlyString) &&
                 (first.LogFileDirectoryPath == second.LogFileDirectoryPath) &&
                 (first.FileNamePrefix == second.FileNamePrefix) &&
                 (first.TimeSlicePerFile == second.TimeSlicePerFile) &&
@@ -157,8 +157,8 @@ namespace Naos.Logging.Domain
         public override int GetHashCode() =>
             HashCodeHelper
                 .Initialize()
-                .Hash(this.OriginsToLog)
                 .Hash(this.LogItemPropertiesToIncludeInLogMessage)
+                .Hash(this.LogInclusionKindToOriginsMapFriendlyString)
                 .Hash(this.LogFileDirectoryPath)
                 .Hash(this.FileNamePrefix)
                 .Hash(this.TimeSlicePerFile)

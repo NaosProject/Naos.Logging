@@ -7,6 +7,7 @@
 namespace Naos.Logging.Test
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
 
@@ -25,11 +26,8 @@ namespace Naos.Logging.Test
         [Fact]
         public static void EventLogConfigurationConstructor___Valid___Works()
         {
-            // Arrange
-            var contextsToLog = LogItemOrigins.ItsLogEntryPostedInformation;
-
-            // Act
-            var actual = new EventLogConfig(contextsToLog);
+            // Arrange && Act
+            var actual = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>());
 
             // Assert
             actual.Should().NotBeNull();
@@ -43,7 +41,7 @@ namespace Naos.Logging.Test
         public static void EventLogConfigurationConstructor___Valid_override_defaults___Works()
         {
             // Arrange
-            var contextsToLog = LogItemOrigins.ItsLogEntryPostedInformation;
+            var contextsToLog = new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>();
             var logName = A.Dummy<string>();
             var machineName = A.Dummy<string>();
             var source = A.Dummy<string>();
@@ -96,7 +94,7 @@ namespace Naos.Logging.Test
         public static void EventLogConfiguration___EqualityLogic___Should_be_valid___When_different_data()
         {
             // Arrange
-            var logContexts = LogItemOrigins.ItsLogEntryPosted;
+            var logContexts = LogInclusionKindToOriginsMaps.TelemetryFromAnywhere;
             var logName = A.Dummy<string>();
             var machineName = A.Dummy<string>();
             var source = A.Dummy<string>();
@@ -105,8 +103,8 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new EventLogConfig(LogItemOrigins.ItsLogEntryPosted, source: source, logName: logName, machineName: machineName),
-                                                Second = new EventLogConfig(LogItemOrigins.ItsLogInternalErrors, source: source, logName: logName, machineName: machineName),
+                                                First = new EventLogConfig(LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted, source: source, logName: logName, machineName: machineName),
+                                                Second = new EventLogConfig(LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere, source: source, logName: logName, machineName: machineName),
                                             },
                                         new
                                             {
@@ -150,7 +148,7 @@ namespace Naos.Logging.Test
         public static void EventLogConfiguration___EqualityLogic___Should_be_valid___When_same_data()
         {
             // Arrange
-            var logContexts = LogItemOrigins.All;
+            var logContexts = LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere;
             var logName = A.Dummy<string>();
             var machineName = A.Dummy<string>();
             var source = A.Dummy<string>();

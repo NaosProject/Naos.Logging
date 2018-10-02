@@ -26,7 +26,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Null_path___Throws()
         {
             // Arrange
-            Action action = () => new FileLogConfig(LogItemOrigins.All, null);
+            Action action = () => new FileLogConfig(LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted, null);
 
             // Act
             var exception = Record.Exception(action);
@@ -41,7 +41,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Empty_string_path___Throws()
         {
             // Arrange
-            Action action = () => new FileLogConfig(LogItemOrigins.All, string.Empty);
+            Action action = () => new FileLogConfig(LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted, string.Empty);
 
             // Act
             var exception = Record.Exception(action);
@@ -56,7 +56,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___WhiteSpace_path___Throws()
         {
             // Arrange
-            Action action = () => new FileLogConfig(LogItemOrigins.All, '\t'.ToString());
+            Action action = () => new FileLogConfig(LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted, '\t'.ToString());
 
             // Act
             var exception = Record.Exception(action);
@@ -71,7 +71,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Valid___Works()
         {
             // Arrange
-            var contextsToLog = LogItemOrigins.ItsLogEntryPostedInformation;
+            var contextsToLog = LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted;
             var filePath = Path.GetTempFileName();
 
             // Act
@@ -105,20 +105,20 @@ namespace Naos.Logging.Test
             try
             {
                 // Arrange
-                var configuration = new FileLogConfig(LogItemOrigins.AllErrors, tempFileName);
+                var configuration = new FileLogConfig(LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere, tempFileName);
                 var processor = new FileLogWriter(configuration);
 
                 var infoCanary = A.Dummy<string>();
-                var errorCanary = A.Dummy<string>();
+                var errorCanary = new ArgumentException(A.Dummy<string>());
 
                 // Act
-                processor.Log(infoCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
-                processor.Log(errorCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedException));
+                processor.Log(infoCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPosted));
+                processor.Log(errorCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPosted));
 
                 // Assert
                 var fileContents = File.ReadAllText(tempFileName);
                 fileContents.Should().NotContain(infoCanary);
-                fileContents.Should().Contain(errorCanary);
+                fileContents.Should().Contain(errorCanary.Message);
             }
             finally
             {
@@ -150,15 +150,15 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_different_data()
         {
             // Arrange
-            var logContexts = LogItemOrigins.ItsLogEntryPosted;
+            var logContexts = LogInclusionKindToOriginsMaps.TelemetryFromAnywhere;
             var logFilePath = A.Dummy<string>();
             var createDirectoryStructureIfMissing = true;
             var notEqualTests = new[]
                                     {
                                         new
                                             {
-                                                First = new FileLogConfig(LogItemOrigins.ItsLogEntryPosted, logFilePath, createDirectoryStructureIfMissing),
-                                                Second = new FileLogConfig(LogItemOrigins.ItsLogInternalErrors, logFilePath, createDirectoryStructureIfMissing),
+                                                First = new FileLogConfig(LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted, logFilePath, createDirectoryStructureIfMissing),
+                                                Second = new FileLogConfig(LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere, logFilePath, createDirectoryStructureIfMissing),
                                             },
                                         new
                                             {
@@ -192,7 +192,7 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_same_data()
         {
             // Arrange
-            var logContexts = LogItemOrigins.All;
+            var logContexts = LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted;
             var logFilePath = A.Dummy<string>();
             var createDirectoryStructureIfMissing = true;
 

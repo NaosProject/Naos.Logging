@@ -7,8 +7,9 @@
 namespace Naos.Logging.Domain
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
-
+    using System.Linq;
     using OBeautifulCode.Math.Recipes;
 
     using static System.FormattableString;
@@ -21,16 +22,16 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Initializes a new instance of the <see cref="FileLogConfig"/> class.
         /// </summary>
-        /// <param name="originsToLog">The log-item origins to log for.</param>
+        /// <param name="logInclusionKindToOriginsMap">The log-item origins to log for.</param>
         /// <param name="logFilePath">File path to write logs to.</param>
         /// <param name="createDirectoryStructureIfMissing">Optional value indicating whether to create the directory structure if it's missing; DEFAULT is true.</param>
         /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         public FileLogConfig(
-            LogItemOrigins originsToLog,
+            IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>> logInclusionKindToOriginsMap,
             string logFilePath,
             bool createDirectoryStructureIfMissing = true,
             LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage = LogItemPropertiesToIncludeInLogMessage.Default)
-            : base(originsToLog, logItemPropertiesToIncludeInLogMessage)
+            : base(logInclusionKindToOriginsMap, logItemPropertiesToIncludeInLogMessage)
         {
             if (string.IsNullOrWhiteSpace(logFilePath))
             {
@@ -69,8 +70,8 @@ namespace Naos.Logging.Domain
                 return false;
             }
 
-            var result = (first.OriginsToLog == second.OriginsToLog) &&
-                         (first.LogItemPropertiesToIncludeInLogMessage == second.LogItemPropertiesToIncludeInLogMessage) &&
+            var result = (first.LogItemPropertiesToIncludeInLogMessage == second.LogItemPropertiesToIncludeInLogMessage) &&
+                         (first.LogInclusionKindToOriginsMapFriendlyString == second.LogInclusionKindToOriginsMapFriendlyString) &&
                          (first.LogFilePath == second.LogFilePath) &&
                          (first.CreateDirectoryStructureIfMissing == second.CreateDirectoryStructureIfMissing);
             return result;
@@ -98,8 +99,8 @@ namespace Naos.Logging.Domain
         public override int GetHashCode() =>
             HashCodeHelper
                 .Initialize()
-                .Hash(this.OriginsToLog)
                 .Hash(this.LogItemPropertiesToIncludeInLogMessage)
+                .Hash(this.LogInclusionKindToOriginsMapFriendlyString)
                 .Hash(this.LogFilePath)
                 .Hash(this.CreateDirectoryStructureIfMissing)
                 .Value;

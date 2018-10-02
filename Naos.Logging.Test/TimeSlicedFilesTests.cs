@@ -36,7 +36,11 @@ namespace Naos.Logging.Test
                      ""fileNamePrefix"": ""Log"",
                      ""logFileDirectoryPath"": ""D:\\Logs"",
                      ""createDirectoryStructureIfMissing"": true,
-                     ""originsToLog"": ""all"",
+                     ""logInclusionKindToOriginsMap"": {
+                          ""String"": null,
+                          ""Object"": null,
+                          ""Exception"": null,
+                     },
                      ""logItemPropertiesToIncludeInLogMessage"": ""default""
                  }";
 
@@ -51,13 +55,14 @@ namespace Naos.Logging.Test
             typed.TimeSlicePerFile.Should().Be(TimeSpan.FromMinutes(1));
             typed.FileNamePrefix.Should().Be("Log");
             typed.CreateDirectoryStructureIfMissing.Should().BeTrue();
+            typed.LogInclusionKindToOriginsMapFriendlyString.Should().Be("String=NULL,Object=NULL,Exception=NULL");
         }
 
         [Fact]
         public static void LogConfigurationFileConstructor___Null_prefix___Throws()
         {
             // Arrange
-            Action action = () => new TimeSlicedFilesLogConfig(LogItemOrigins.All, Path.GetTempPath(), null, TimeSpan.FromMinutes(10));
+            Action action = () => new TimeSlicedFilesLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, Path.GetTempPath(), null, TimeSpan.FromMinutes(10));
 
             // Act
             var exception = Record.Exception(action);
@@ -72,7 +77,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Empty_string_prefix___Throws()
         {
             // Arrange
-            Action action = () => new TimeSlicedFilesLogConfig(LogItemOrigins.All, Path.GetTempPath(), string.Empty, TimeSpan.FromMinutes(10));
+            Action action = () => new TimeSlicedFilesLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, Path.GetTempPath(), string.Empty, TimeSpan.FromMinutes(10));
 
             // Act
             var exception = Record.Exception(action);
@@ -87,7 +92,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___WhiteSpace_prefix___Throws()
         {
             // Arrange
-            Action action = () => new TimeSlicedFilesLogConfig(LogItemOrigins.All, Path.GetTempPath(), '\t'.ToString(), TimeSpan.FromMinutes(10));
+            Action action = () => new TimeSlicedFilesLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, Path.GetTempPath(), '\t'.ToString(), TimeSpan.FromMinutes(10));
 
             // Act
             var exception = Record.Exception(action);
@@ -102,7 +107,7 @@ namespace Naos.Logging.Test
         public static void LogConfigurationFileConstructor___Valid___Works()
         {
             // Arrange
-            var contextsToLog = LogItemOrigins.ItsLogEntryPostedInformation;
+            var contextsToLog = LogInclusionKindToOriginsMaps.AnythingFromAnywhere;
             var directoryPath = Path.GetTempPath();
             var filePrefix = Guid.NewGuid().ToString();
             var timeSlice = TimeSpan.FromHours(1);
@@ -141,15 +146,15 @@ namespace Naos.Logging.Test
             try
             {
                 // Arrange
-                var configuration = new TimeSlicedFilesLogConfig(LogItemOrigins.AllErrors, tempDirectory, "TestFile", TimeSpan.FromMinutes(1));
+                var configuration = new TimeSlicedFilesLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, tempDirectory, "TestFile", TimeSpan.FromMinutes(1));
                 var processor = new TimeSlicedFilesLogWriter(configuration);
 
                 var infoCanary = A.Dummy<string>();
-                var errorCanary = A.Dummy<string>();
+                var errorCanary = new ArgumentException(A.Dummy<string>());
 
                 // Act
-                processor.Log(infoCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
-                processor.Log(errorCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPostedException));
+                processor.Log(infoCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPosted));
+                processor.Log(errorCanary.ToLogEntry().ToLogItem(LogItemOrigin.ItsLogEntryPosted));
 
                 // Assert
                 var files = Directory.GetFiles(tempDirectory);
@@ -185,7 +190,7 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_different_data()
         {
             // Arrange
-            var logContexts = LogItemOrigins.ItsLogEntryPosted;
+            var logContexts = LogInclusionKindToOriginsMaps.AnythingFromAnywhere;
             var filePrefix = A.Dummy<string>();
             var directoryPath = A.Dummy<string>();
             var timeSlice = TimeSpan.FromMinutes(10);
@@ -194,8 +199,8 @@ namespace Naos.Logging.Test
                                     {
                                         new
                                             {
-                                                First = new TimeSlicedFilesLogConfig(LogItemOrigins.ItsLogEntryPosted, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
-                                                Second = new TimeSlicedFilesLogConfig(LogItemOrigins.ItsLogInternalErrors, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
+                                                First = new TimeSlicedFilesLogConfig(LogInclusionKindToOriginsMaps.StringAndObjectsFromItsLogEntryPosted, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
+                                                Second = new TimeSlicedFilesLogConfig(LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere, directoryPath, filePrefix, timeSlice, createDirectoryStructureIfMissing),
                                             },
                                         new
                                             {
@@ -239,7 +244,7 @@ namespace Naos.Logging.Test
         public static void FileConfiguration___EqualityLogic___Should_be_valid___When_same_data()
         {
             // Arrange
-            var logContexts = LogItemOrigins.ItsLogEntryPosted;
+            var logContexts = LogInclusionKindToOriginsMaps.AnythingFromAnywhere;
             var filePrefix = A.Dummy<string>();
             var directoryPath = A.Dummy<string>();
             var timeSlice = TimeSpan.FromMinutes(10);
@@ -279,7 +284,7 @@ namespace Naos.Logging.Test
             {
                 // Arrange
                 var config = new TimeSlicedFilesLogConfig(
-                    LogItemOrigins.All,
+                    LogInclusionKindToOriginsMaps.AnythingFromAnywhere,
                     directory,
                     "TestingTimeSliced",
                     TimeSpan.FromMinutes(1),
@@ -289,7 +294,7 @@ namespace Naos.Logging.Test
                 var writer = new TimeSlicedFilesLogWriter(config);
                 var reader = new TimeSlicedFilesLogReader(config);
 
-                var orgin = LogItemOrigin.ItsLogEntryPostedInformation;
+                var orgin = LogItemOrigin.ItsLogEntryPosted;
                 var subjectOne = "Hello";
                 var subjectTwo = "Goodbye";
 

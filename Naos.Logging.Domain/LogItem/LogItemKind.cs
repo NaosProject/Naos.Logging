@@ -7,23 +7,33 @@
 namespace Naos.Logging.Domain
 {
     /// <summary>
-    /// Determines the kind of log-item.
+    /// Determines the kind of log-item based around it's content.
     /// </summary>
     public enum LogItemKind
     {
         /// <summary>
-        /// Unknown (default).
+        /// Unknown (default)
         /// </summary>
         Unknown,
 
         /// <summary>
-        /// An informational log-item.
+        /// A string is the content.
         /// </summary>
-        Info,
+        String,
 
         /// <summary>
-        /// An error occured and is being logged.
+        /// An object is the content.
         /// </summary>
-        Error,
+        Object,
+
+        /// <summary>
+        /// A derivative of <see cref="System.Exception" /> is the content.
+        /// </summary>
+        Exception,
+
+        /// <summary>
+        /// An implementation of Naos.Telemetry.Domain.IAmTelemetryItem is the content.
+        /// </summary>
+        Telemetry,
     }
 }

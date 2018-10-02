@@ -19,7 +19,7 @@ namespace Naos.Logging.Test
 
     public static class ShareSerializationTestLogic
     {
-        private static readonly NaosBsonSerializer BsonSerializerToUse = new NaosBsonSerializer();
+        private static readonly NaosBsonSerializer BsonSerializerToUse = new NaosBsonSerializer(SerializationKind.Custom, typeof(BsonConfigurationForTesting));
 
         private static readonly NaosJsonSerializer JsonSerializerToUse = new NaosJsonSerializer();
 
@@ -27,13 +27,13 @@ namespace Naos.Logging.Test
 
         private static readonly IReadOnlyCollection<IBinarySerializeAndDeserialize> BinarySerializers = new IBinarySerializeAndDeserialize[] { BsonSerializerToUse, JsonSerializerToUse }.ToList();
 
-        internal static readonly FileLogConfig FileConfig = new FileLogConfig(LogItemOrigins.All, "C:\\Temp\\File.log");
+        internal static readonly FileLogConfig FileConfig = new FileLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, "C:\\Temp\\File.log");
 
-        internal static readonly TimeSlicedFilesLogConfig TimeSlicedFilesLogConfig = new TimeSlicedFilesLogConfig(LogItemOrigins.All, "C:\\Temp\\", "LogFile", TimeSpan.FromHours(1));
+        internal static readonly TimeSlicedFilesLogConfig TimeSlicedFilesLogConfig = new TimeSlicedFilesLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, "C:\\Temp\\", "LogFile", TimeSpan.FromHours(1));
 
-        internal static readonly EventLogConfig EventLogConfig = new EventLogConfig(LogItemOrigins.All, "Source", "Application", "Localhost", false);
+        internal static readonly EventLogConfig EventLogConfig = new EventLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, "Source", "Application", "Localhost", false);
 
-        internal static readonly ConsoleLogConfig ConsoleConfig = new ConsoleLogConfig(LogItemOrigins.All, LogItemOrigins.AllErrors);
+        internal static readonly ConsoleLogConfig ConsoleConfig = new ConsoleLogConfig(LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.AnythingFromAnywhere, LogInclusionKindToOriginsMaps.ExceptionsFromAnywhere);
 
         internal static readonly LogWritingSettings LogWritingSettingsAll = new LogWritingSettings(new LogWriterConfigBase[] { FileConfig, EventLogConfig });
 
@@ -69,5 +69,13 @@ namespace Naos.Logging.Test
                 }
             }
         }
+    }
+
+    internal class BsonConfigurationForTesting : BsonConfigurationBase
+    {
+        protected override IReadOnlyCollection<Type> TypesToAutoRegister => new[]
+        {
+            typeof(LogWriterConfigBase),
+        };
     }
 }

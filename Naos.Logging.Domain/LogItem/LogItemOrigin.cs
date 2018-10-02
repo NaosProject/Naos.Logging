@@ -21,6 +21,11 @@ namespace Naos.Logging.Domain
         Unknown,
 
         /// <summary>
+        /// Messages generated internally by <see cref="LogWriting" />.
+        /// </summary>
+        NaosLoggingLogWriting,
+
+        /// <summary>
         /// Messages from the <see cref="AppDomain" /> event <see cref="AppDomain.UnhandledException" />.
         /// </summary>
         AppDomainUnhandledException,
@@ -33,97 +38,12 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that is some information.
         /// </summary>
-        ItsLogEntryPostedInformation,
+        ItsLogEntryPosted,
 
         /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that IS an <see cref="Exception" />.
+        /// Messages from Hangfire (a 3rd party open source message platform).
         /// </summary>
-        ItsLogEntryPostedException,
-
-        /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that are malformed
-        /// (contain data we would not expect like Category, ExceptionId, or Params).
-        /// </summary>
-        ItsLogEntryPostedMalformedLogEntry,
-
-        /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> where there was a <see cref="ItsLogEntryPostedMalformedLogEntry" />
-        /// and a failure building the message around the incident.
-        /// </summary>
-        ItsLogEntryPostedFailedToBuildInvalidLogEntry,
-
-        /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject related to telemetry.
-        /// </summary>
-        ItsLogEntryPostedTelemetry,
-    }
-
-    /// <summary>
-    /// The origins of a logged item that are supported by some log writer.
-    /// </summary>
-    [Flags]
-    public enum LogItemOrigins
-    {
-        /// <summary>
-        /// Log none.
-        /// </summary>
-        None = 0,
-
-        /// <summary>
-        /// Messages from the <see cref="AppDomain" /> event <see cref="AppDomain.UnhandledException" />.
-        /// </summary>
-        AppDomainUnhandledException = 1,
-
-        /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.InternalErrors" />.
-        /// </summary>
-        ItsLogInternalErrors = 2,
-
-        /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that is some information.
-        /// </summary>
-        ItsLogEntryPostedInformation = 4,
-
-        /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that IS an <see cref="Exception" />.
-        /// </summary>
-        ItsLogEntryPostedException = 8,
-
-        /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that are malformed
-        /// (contain data we would not expect like Category, ExceptionId, or Params).
-        /// </summary>
-        ItsLogEntryPostedMalformedLogEntry = 16,
-
-        /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> where there was a <see cref="ItsLogEntryPostedMalformedLogEntry" />
-        /// and a failure building the message around the incident.
-        /// </summary>
-        ItsLogEntryPostedFailedToBuildInvalidLogEntry = 32,
-
-        /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject related to telemetry.
-        /// </summary>
-        ItsLogEntryPostedTelemetry = 64,
-
-        /// <summary>
-        /// All entry posted events.
-        /// </summary>
-        ItsLogEntryPosted = ItsLogEntryPostedInformation | ItsLogEntryPostedException | ItsLogEntryPostedMalformedLogEntry | ItsLogEntryPostedFailedToBuildInvalidLogEntry | ItsLogEntryPostedTelemetry,
-
-        /// <summary>
-        /// All unexpected errors.
-        /// </summary>
-        UnexpectedErrors = AppDomainUnhandledException | ItsLogInternalErrors | ItsLogEntryPostedMalformedLogEntry | ItsLogEntryPostedFailedToBuildInvalidLogEntry,
-
-        /// <summary>
-        /// All errors.
-        /// </summary>
-        AllErrors = UnexpectedErrors | ItsLogEntryPostedException,
-
-        /// <summary>
-        /// Log all.
-        /// </summary>
-        All = UnexpectedErrors | ItsLogEntryPosted,
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Hangfire", Justification = "Spelling/name is correct.")]
+        Hangfire,
     }
 }

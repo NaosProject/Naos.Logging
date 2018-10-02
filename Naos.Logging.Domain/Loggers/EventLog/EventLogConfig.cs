@@ -7,8 +7,9 @@
 namespace Naos.Logging.Domain
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
-
+    using System.Linq;
     using Naos.Diagnostics.Recipes;
     using Naos.Serialization.Domain;
     using Naos.Serialization.Json;
@@ -39,20 +40,20 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Initializes a new instance of the <see cref="EventLogConfig"/> class.
         /// </summary>
-        /// <param name="originsToLog">The log-item origins to log for.</param>
+        /// <param name="logInclusionKindToOriginsMap">The log-item origins to log for.</param>
         /// <param name="source">Optional event log source; DEFAULT is running process' name.</param>
         /// <param name="shouldCreateSourceIfMissing">Value indicating whether or not to create the source if missing.</param>
         /// <param name="logName">Optional log name; DEFAULT is <see cref="DefaultLogName" />.</param>
         /// <param name="machineName">Optional machine name; DEFAULT is <see cref="DefaultMachineName" />.</param>
         /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         public EventLogConfig(
-            LogItemOrigins originsToLog,
+            IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>> logInclusionKindToOriginsMap,
             string source = null,
             string logName = DefaultLogName,
             string machineName = DefaultMachineName,
             bool shouldCreateSourceIfMissing = false,
             LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage = LogItemPropertiesToIncludeInLogMessage.Default)
-            : base(originsToLog, logItemPropertiesToIncludeInLogMessage)
+            : base(logInclusionKindToOriginsMap, logItemPropertiesToIncludeInLogMessage)
         {
             this.Source = string.IsNullOrWhiteSpace(source) ? ProcessHelpers.GetRunningProcess().GetName() : source;
             this.ShouldCreateSourceIfMissing = shouldCreateSourceIfMissing;
@@ -100,8 +101,8 @@ namespace Naos.Logging.Domain
                 return false;
             }
 
-            var result = (first.OriginsToLog == second.OriginsToLog) &&
-                         (first.LogItemPropertiesToIncludeInLogMessage == second.LogItemPropertiesToIncludeInLogMessage) &&
+            var result = (first.LogItemPropertiesToIncludeInLogMessage == second.LogItemPropertiesToIncludeInLogMessage) &&
+                         (first.LogInclusionKindToOriginsMapFriendlyString == second.LogInclusionKindToOriginsMapFriendlyString) &&
                          (first.Source == second.Source) &&
                          (first.ShouldCreateSourceIfMissing == second.ShouldCreateSourceIfMissing) &&
                          (first.LogName == second.LogName) &&
@@ -131,8 +132,8 @@ namespace Naos.Logging.Domain
         public override int GetHashCode() =>
             HashCodeHelper
                 .Initialize()
-                .Hash(this.OriginsToLog)
                 .Hash(this.LogItemPropertiesToIncludeInLogMessage)
+                .Hash(this.LogInclusionKindToOriginsMapFriendlyString)
                 .Hash(this.Source)
                 .Hash(this.ShouldCreateSourceIfMissing)
                 .Hash(this.LogName)

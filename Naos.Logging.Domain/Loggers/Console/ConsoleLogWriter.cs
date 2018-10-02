@@ -8,7 +8,7 @@ namespace Naos.Logging.Domain
 {
     using System;
 
-    using OBeautifulCode.Enum.Recipes;
+    using static System.FormattableString;
 
     /// <summary>
     /// <see cref="Console"/> focused implementation of <see cref="LogWriterBase" />.
@@ -39,13 +39,12 @@ namespace Naos.Logging.Domain
 
             var logMessage = BuildLogMessageFromLogItem(logItem, this.consoleConfig.LogItemPropertiesToIncludeInLogMessage, true);
 
-            var origins = logItem.Context.Origin.ToOrigins();
-            if (this.consoleConfig.OriginsToLogConsoleOut.HasFlagOverlap(origins))
+            if (this.consoleConfig.ShouldLogConsole(logItem.Kind, logItem.Context.Origin))
             {
                 Console.Out.WriteLine(logMessage);
             }
 
-            if (this.consoleConfig.OriginsToLogConsoleError.HasFlagOverlap(origins))
+            if (this.consoleConfig.ShouldLogError(logItem.Kind, logItem.Context.Origin))
             {
                 Console.Error.WriteLine(logMessage);
             }
@@ -54,7 +53,7 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public override string ToString()
         {
-            var ret = FormattableString.Invariant($"{this.GetType().FullName}; {nameof(this.consoleConfig.OriginsToLogConsoleOut)}: {this.consoleConfig.OriginsToLogConsoleOut}; {nameof(this.consoleConfig.OriginsToLogConsoleError)}: {this.consoleConfig.OriginsToLogConsoleError}");
+            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.consoleConfig.LogInclusionKindToOriginsMapForConsoleOut)}: {this.consoleConfig.LogInclusionKindToOriginsMapForConsoleOutFriendlyString}; {nameof(this.consoleConfig.LogInclusionKindToOriginsMapForConsoleError)}: {this.consoleConfig.LogInclusionKindToOriginsMapForConsoleErrorFriendlyString}");
             return ret;
         }
     }

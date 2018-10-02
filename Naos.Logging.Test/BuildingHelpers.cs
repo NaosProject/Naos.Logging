@@ -7,7 +7,6 @@
 namespace Naos.Logging.Test
 {
     using System;
-
     using Its.Log.Instrumentation;
 
     using Naos.Compression.Domain;

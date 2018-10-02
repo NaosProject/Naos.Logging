@@ -60,8 +60,7 @@ namespace Naos.Logging.Domain
                 throw new ArgumentNullException(nameof(logItem));
             }
 
-            var origins = logItem.Context.Origin.ToOrigins();
-            if ((this.logWriterConfigBase.OriginsToLog != LogItemOrigins.None) && this.logWriterConfigBase.OriginsToLog.HasFlagOverlap(origins))
+            if (this.logWriterConfigBase.ShouldLog(logItem.Kind, logItem.Context.Origin))
             {
                 this.LogInternal(logItem);
             }

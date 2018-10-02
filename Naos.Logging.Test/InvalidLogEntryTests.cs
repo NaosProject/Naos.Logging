@@ -34,7 +34,7 @@ namespace Naos.Logging.Test
             var badLogEntry = new LogEntry("Subject") { Category = category, };
 
             // Act
-            var exception = Record.Exception(() => badLogEntry.ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
+            var exception = Record.Exception(() => badLogEntry.ToLogItem(LogItemOrigin.ItsLogEntryPosted));
 
             // Assert
             exception.Should().BeOfType<ArgumentException>();
@@ -54,7 +54,7 @@ namespace Naos.Logging.Test
             badLogEntry.SetExtension(param);
 
             // Act
-            var exception = Record.Exception(() => badLogEntry.ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
+            var exception = Record.Exception(() => badLogEntry.ToLogItem(LogItemOrigin.ItsLogEntryPosted));
 
             // Assert
             exception.Should().BeOfType<ArgumentException>();
@@ -85,7 +85,7 @@ namespace Naos.Logging.Test
             badLogEntry.SetExtension(paramTwo);
 
             // Act
-            var exception = Record.Exception(() => badLogEntry.ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
+            var exception = Record.Exception(() => badLogEntry.ToLogItem(LogItemOrigin.ItsLogEntryPosted));
 
             // Assert
             exception.Should().BeOfType<InvalidOperationException>();
@@ -105,7 +105,7 @@ namespace Naos.Logging.Test
             badLogEntry.SetExtension(param);
 
             // Act
-            var exception = Record.Exception(() => badLogEntry.ToLogItem(LogItemOrigin.ItsLogEntryPostedInformation));
+            var exception = Record.Exception(() => badLogEntry.ToLogItem(LogItemOrigin.ItsLogEntryPosted));
 
             // Assert
             exception.Should().BeOfType<InvalidOperationException>();
