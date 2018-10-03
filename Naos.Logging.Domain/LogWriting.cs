@@ -20,9 +20,9 @@ namespace Naos.Logging.Domain
     using Naos.Telemetry.Domain;
 
     using OBeautifulCode.Collection.Recipes;
-    using OBeautifulCode.Enum.Recipes;
     using OBeautifulCode.Math.Recipes;
     using OBeautifulCode.TypeRepresentation;
+    using OBeautifulCode.Validation.Recipes;
     using static System.FormattableString;
 
     /// <summary>
@@ -144,10 +144,17 @@ namespace Naos.Logging.Domain
             }
         }
 
-        private void LogToActiveLogWriters(
+        /// <summary>
+        /// Log the log item to any configured active log writers.
+        /// </summary>
+        /// <param name="logItemOrigin">Origin of the log entry.</param>
+        /// <param name="logEntry">Log entry to record.</param>
+        public void LogToActiveLogWriters(
             LogItemOrigin logItemOrigin,
             LogEntry logEntry)
         {
+            logEntry = logEntry ?? throw new ArgumentNullException(nameof(logEntry));
+
             LogItem logItem;
 
             try
@@ -184,6 +191,17 @@ namespace Naos.Logging.Domain
                     logItem = new LogItem(rawSubject.ToSubject(), LogItemKind.Exception, new LogItemContext(DateTime.UtcNow, LogItemOrigin.NaosLoggingLogWriting));
                 }
             }
+
+            this.LogToActiveLogWriters(logItem);
+        }
+
+        /// <summary>
+        /// Log the log item to any configured active log writers.
+        /// </summary>
+        /// <param name="logItem">Log item to record.</param>
+        public void LogToActiveLogWriters(LogItem logItem)
+        {
+            logItem = logItem ?? throw new ArgumentNullException(nameof(logItem));
 
             foreach (var logWriter in this.activeLogWriters)
             {
