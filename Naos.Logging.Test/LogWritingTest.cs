@@ -16,7 +16,7 @@ namespace Naos.Logging.Test
     using Its.Log.Instrumentation;
 
     using Naos.Logging.Domain;
-
+    using OBeautifulCode.Error.Recipes;
     using Xunit;
 
     using static System.FormattableString;
@@ -374,6 +374,56 @@ namespace Naos.Logging.Test
             correlatingException.StackTrace.Should().Be(actualSubject.StackTrace);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Need lowercase.")]
+        [Fact]
+        public static void Log_Write___Records_details_correctly___With_exception_and_comment_and_error_code()
+        {
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var exceptionMessage = "Exception " + A.Dummy<string>();
+            var comment = "this is a comment " + A.Dummy<string>();
+            var errorCode = "errorCode" + Guid.NewGuid().ToString().ToLowerInvariant();
+
+            // Act
+            try
+            {
+                throw new InvalidOperationException(exceptionMessage).AddErrorCode(errorCode);
+            }
+            catch (Exception ex)
+            {
+                Log.Write(() => ex, comment);
+            }
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
+
+            logItem.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {exceptionMessage}"));
+            actualSubject.Message.Should().Be(exceptionMessage);
+
+            logItem.Kind.Should().Be(LogItemKind.Exception);
+            logItem.Comment.Should().Be(comment);
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            var errorCodeCorrelation = (ErrorCodeCorrelation)logItem.Correlations.Single(_ => _.GetType() == typeof(ErrorCodeCorrelation));
+            errorCodeCorrelation.ErrorCode.Should().Be(errorCode);
+
+            var exceptionCorrelation = (ExceptionCorrelation)logItem.Correlations.Single(_ => _.GetType() == typeof(ExceptionCorrelation));
+            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            var correlatingException = exceptionCorrelation.CorrelatingSubject.DeserializeSubject<InvalidOperationException>();
+            correlatingException.Message.Should().Be(actualSubject.Message);
+            correlatingException.StackTrace.Should().Be(actualSubject.StackTrace);
+        }
+
         [Fact]
         public static void Log_Write___Records_details_correctly___With_exception_and_inner_exception()
         {
@@ -563,7 +613,7 @@ namespace Naos.Logging.Test
                 var memoryLogConfig = new InMemoryLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>());
                 memoryLogWriter = new InMemoryLogWriter(memoryLogConfig);
                 var settings = new LogWritingSettings();
-                LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] { memoryLogWriter });
+                LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] { memoryLogWriter }, errorCodeKey: Constants.ExceptionDataKeyForErrorCode);
             }
             else
             {

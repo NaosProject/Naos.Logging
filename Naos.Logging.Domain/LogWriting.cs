@@ -20,9 +20,9 @@ namespace Naos.Logging.Domain
     using Naos.Telemetry.Domain;
 
     using OBeautifulCode.Collection.Recipes;
+    using OBeautifulCode.Error.Recipes;
     using OBeautifulCode.Math.Recipes;
     using OBeautifulCode.TypeRepresentation;
-    using OBeautifulCode.Validation.Recipes;
     using static System.FormattableString;
 
     /// <summary>
@@ -53,6 +53,8 @@ namespace Naos.Logging.Domain
 
         private IReadOnlyCollection<LogWriterBase> activeLogWriters;
 
+        private string errorCodeKeyField;
+
         private LogWriting()
         {
             this.machineName = MachineName.GetMachineName();
@@ -67,12 +69,14 @@ namespace Naos.Logging.Domain
         /// <param name="announcer">Optional announcer to communicate setup state; DEFAULT is null.</param>
         /// <param name="configuredAndManagedLogWriters">Optional configured and externally managed log writers; DEFAULT is null.</param>
         /// <param name="multipleCallsToSetupStrategy">Optional strategy to deal with multiple calls to <see cref="Setup" />; DEFAULT is <see cref="MultipleCallsToSetupStrategy.Throw" />.</param>
+        /// <param name="errorCodeKey">Optional error code key to use when extracting from exceptions.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Keeping this way.")]
         public void Setup(
             LogWritingSettings logWritingSettings,
             Action<string> announcer = null,
             IReadOnlyCollection<LogWriterBase> configuredAndManagedLogWriters = null,
-            MultipleCallsToSetupStrategy multipleCallsToSetupStrategy = MultipleCallsToSetupStrategy.Throw)
+            MultipleCallsToSetupStrategy multipleCallsToSetupStrategy = MultipleCallsToSetupStrategy.Throw,
+            string errorCodeKey = null)
         {
             if (logWritingSettings == null)
             {
@@ -84,6 +88,7 @@ namespace Naos.Logging.Domain
                 throw new ArgumentException(Invariant($"{nameof(multipleCallsToSetupStrategy)} == {nameof(MultipleCallsToSetupStrategy.Invalid)}"));
             }
 
+            this.errorCodeKeyField = errorCodeKey;
             var localAnnouncer = announcer ?? NullAnnouncement;
 
             lock (this.sync)
@@ -312,11 +317,14 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <param name="logItemOrigin"><see cref="LogItemOrigin" /> of the <see cref="LogEntry" />.</param>
         /// <param name="logEntry"><see cref="LogEntry" /> to convert.</param>
+        /// <param name="additionalCorrelations">Additional correlations to add.</param>
         /// <returns>Correct <see cref="LogItem" />.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Acceptable coupling.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Acceptable complexity.")]
         public LogItem BuildLogItem(
             LogItemOrigin logItemOrigin,
-            LogEntry logEntry)
+            LogEntry logEntry,
+            IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             logEntry = logEntry ?? throw new ArgumentNullException(nameof(logEntry));
 
@@ -333,7 +341,7 @@ namespace Naos.Logging.Domain
             }
 
             object logItemSubjectObject;
-            var correlations = new List<IHaveCorrelationId>(2);
+            var correlations = new List<IHaveCorrelationId>(additionalCorrelations ?? new IHaveCorrelationId[0]);
 
             if (activityCorrelationPosition == ActivityCorrelationPosition.Unknown)
             {
@@ -403,6 +411,16 @@ namespace Naos.Logging.Domain
 
                 var exceptionCorrelation = new ExceptionCorrelation(correlationId, exceptionCorrelatingSubject.ToSubject());
                 correlations.Add(exceptionCorrelation);
+
+                if (!string.IsNullOrWhiteSpace(this.errorCodeKeyField))
+                {
+                    var errorCode = loggedException.GetErrorCode();
+                    if (!string.IsNullOrWhiteSpace(errorCode))
+                    {
+                        var errorCodeCorrelation = new ErrorCodeCorrelation(this.errorCodeKeyField, errorCode);
+                        correlations.Add(errorCodeCorrelation);
+                    }
+                }
 
                 stackTrace = loggedException.StackTrace;
             }

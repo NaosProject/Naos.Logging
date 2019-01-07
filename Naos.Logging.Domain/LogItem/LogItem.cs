@@ -23,8 +23,8 @@ namespace Naos.Logging.Domain
         /// <param name="subject">The core piece of information being logged.</param>
         /// <param name="kind">The kind of log-item.</param>
         /// <param name="context">The context within which the item was logged.</param>
-        /// <param name="comment">A comment about the logged item.</param>
-        /// <param name="correlations">Information about how this log-item is correlated with other/related log-items.</param>
+        /// <param name="comment">Optional comment about the logged item.</param>
+        /// <param name="correlations">Optional information about how this log-item is correlated with other/related log-items.</param>
         public LogItem(
             Subject subject,
             LogItemKind kind,
