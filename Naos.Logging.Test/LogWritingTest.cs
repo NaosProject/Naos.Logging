@@ -9,21 +9,45 @@ namespace Naos.Logging.Test
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using System.Threading;
     using FakeItEasy;
 
     using FluentAssertions;
-    using Its.Log.Instrumentation;
 
     using Naos.Logging.Domain;
+    using Naos.Logging.Persistence;
+    using Naos.Serialization.Json;
     using OBeautifulCode.Error.Recipes;
     using Xunit;
-
+    using Xunit.Abstractions;
     using static System.FormattableString;
 
-    public static class LogWritingTest
+    public class LogWritingTest
     {
+        private readonly ITestOutputHelper testOutputHelper;
         private static InMemoryLogWriter memoryLogWriter;
+        private static string expectedOrigin = LogItemOrigin.NaosLoggingLogger.ToString();
+
+        public LogWritingTest(ITestOutputHelper testOutputHelper)
+        {
+            this.testOutputHelper = testOutputHelper;
+        }
+
+        [Fact]
+        public void Debug()
+        {
+            var config = new EventLogConfig(
+                new Dictionary<LogItemKind, IReadOnlyCollection<string>>
+                {
+                    { LogItemKind.String, null }, { LogItemKind.Object, null }, { LogItemKind.Exception, null },
+                    { LogItemKind.Unknown, null }, { LogItemKind.Telemetry, null },
+                },
+                shouldCreateSourceIfMissing: true,
+                logName: "CoMetrics",
+                source: "CmLogShipper");
+            var json = new NaosJsonSerializer().SerializeToString(config);
+            this.testOutputHelper.WriteLine(json);
+        }
 
         [Fact]
         public static void LogWrite___Should_create_LogItem___When_logging_string_subject_without_comment()
@@ -46,9 +70,9 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
-            logItem.Context.CallingMethod.Should().BeNullOrWhiteSpace();
-            logItem.Context.CallingType.Should().BeNull();
+            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
@@ -79,9 +103,9 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
-            logItem.Context.CallingMethod.Should().BeNullOrWhiteSpace();
-            logItem.Context.CallingType.Should().BeNull();
+            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
@@ -111,7 +135,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
+            logItem.Context.Origin.Should().Be(expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -144,7 +168,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
+            logItem.Context.Origin.Should().Be(expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -176,7 +200,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
+            logItem.Context.Origin.Should().Be(expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -209,7 +233,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
+            logItem.Context.Origin.Should().Be(expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -241,7 +265,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
+            logItem.Context.Origin.Should().Be(expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -274,7 +298,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
+            logItem.Context.Origin.Should().Be(expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -314,7 +338,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
+            logItem.Context.Origin.Should().Be(expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -359,7 +383,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
+            logItem.Context.Origin.Should().Be(expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -406,7 +430,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
-            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted);
+            logItem.Context.Origin.Should().Be(expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -507,6 +531,8 @@ namespace Naos.Logging.Test
             // Act
             using (var log = Log.Enter(() => enterSubject))
             {
+                // to make sure the next message doesn't come too quickly for the assert later.
+                Thread.Sleep(1);
                 try
                 {
                     throw exceptionToThrow;
@@ -524,7 +550,7 @@ namespace Naos.Logging.Test
             // Assert
             logWriter.LoggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is ActivityCorrelation).Should().NotBeNull());
             logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is ActivityCorrelation).CorrelationId).Distinct().Count().Should()
-                .Be(logWriter.LoggedItems.Count);
+                .Be(1);
             logWriter.LoggedItems.ToList().ForEach(
                 _ => ((ActivityCorrelation)_.Correlations.Single(c => c is ActivityCorrelation)).CorrelatingSubject
                     .DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test));
@@ -567,7 +593,7 @@ namespace Naos.Logging.Test
 
             using (var log = Log.Enter(() => (TestObjectWithToString)null))
             {
-                log.Trace(null);
+                log.Trace((Func<string>)null);
                 log.Trace(() => (string)null);
                 log.Trace(() => (DifferentTestObjectWithToString)null);
                 log.Trace(() => (Exception)null);
@@ -580,7 +606,7 @@ namespace Naos.Logging.Test
             logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.Last)}: [null]")).Should().Be(1);
             var middleItems = logWriter.LoggedItems.Where(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.Middle)}: [null]")).ToList();
             middleItems.Count.Should().Be(4);
-            middleItems.Count(_ => _.Context.CallingMethod != null).Should().Be(4, "We have this on everything because the correlating subject has it.");
+            middleItems.Count(_ => _.Context.CallingMethod != null).Should().Be(3, "We have this on everything except the null lambda.");
             middleItems.Count(_ => _.Correlations.Any(c => c is ExceptionCorrelation)).Should().Be(0, "Can't know if null is an exception or not.");
         }
 
@@ -610,10 +636,10 @@ namespace Naos.Logging.Test
         {
             if (memoryLogWriter == null)
             {
-                var memoryLogConfig = new InMemoryLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>());
+                var memoryLogConfig = new InMemoryLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>());
                 memoryLogWriter = new InMemoryLogWriter(memoryLogConfig);
                 var settings = new LogWritingSettings();
-                LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] { memoryLogWriter }, errorCodeKey: Constants.ExceptionDataKeyForErrorCode);
+                LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] { memoryLogWriter }, errorCodeKeys: new[] { Constants.ExceptionDataKeyForErrorCode });
             }
             else
             {

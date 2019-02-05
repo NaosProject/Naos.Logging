@@ -16,7 +16,7 @@ namespace Naos.Logging.Test
     using FluentAssertions;
 
     using Naos.Logging.Domain;
-
+    using Naos.Logging.Persistence;
     using Xunit;
 
     using static System.FormattableString;
@@ -27,7 +27,7 @@ namespace Naos.Logging.Test
         public static void EventLogConfigurationConstructor___Valid___Works()
         {
             // Arrange && Act
-            var actual = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>());
+            var actual = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>());
 
             // Assert
             actual.Should().NotBeNull();
@@ -41,7 +41,7 @@ namespace Naos.Logging.Test
         public static void EventLogConfigurationConstructor___Valid_override_defaults___Works()
         {
             // Arrange
-            var contextsToLog = new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>();
+            var contextsToLog = new Dictionary<LogItemKind, IReadOnlyCollection<string>>();
             var logName = A.Dummy<string>();
             var machineName = A.Dummy<string>();
             var source = A.Dummy<string>();

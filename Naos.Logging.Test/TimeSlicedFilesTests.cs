@@ -17,6 +17,7 @@ namespace Naos.Logging.Test
 
     using Naos.Compression.Domain;
     using Naos.Logging.Domain;
+    using Naos.Logging.Persistence;
     using Naos.Serialization.Domain.Extensions;
     using Naos.Serialization.Json;
 
@@ -294,13 +295,13 @@ namespace Naos.Logging.Test
                 var writer = new TimeSlicedFilesLogWriter(config);
                 var reader = new TimeSlicedFilesLogReader(config);
 
-                var orgin = LogItemOrigin.ItsLogEntryPosted;
+                var origin = LogItemOrigin.ItsLogEntryPosted;
                 var subjectOne = "Hello";
                 var subjectTwo = "Goodbye";
 
                 // Act
-                writer.Log(subjectOne.ToLogEntry().ToLogItem(orgin));
-                writer.Log(subjectTwo.ToLogEntry().ToLogItem(orgin));
+                writer.Log(subjectOne.ToLogEntry().ToLogItem(origin));
+                writer.Log(subjectTwo.ToLogEntry().ToLogItem(origin));
                 var all = reader.ReadAll();
 
                 // Assert

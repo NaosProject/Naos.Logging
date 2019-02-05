@@ -11,75 +11,75 @@ namespace Naos.Logging.Test
 
     internal static class LogInclusionKindToOriginsMaps
     {
-        public static readonly Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>> StringAndObjectsFromItsLogEntryPosted
-            = new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>
+        public static readonly Dictionary<LogItemKind, IReadOnlyCollection<string>> StringAndObjectsFromItsLogEntryPosted
+            = new Dictionary<LogItemKind, IReadOnlyCollection<string>>
             {
                 {
-                    LogItemKind.String, new[] { LogItemOrigin.ItsLogEntryPosted }
+                    LogItemKind.String, new[] { LogItemOrigin.ItsLogEntryPosted.ToString() }
                 },
                 {
-                    LogItemKind.Object, new[] { LogItemOrigin.ItsLogEntryPosted }
+                    LogItemKind.Object, new[] { LogItemOrigin.ItsLogEntryPosted.ToString() }
                 },
                 {
-                    LogItemKind.Exception, new LogItemOrigin[0]
+                    LogItemKind.Exception, new string[0]
                 },
                 {
-                    LogItemKind.Telemetry, new LogItemOrigin[0]
+                    LogItemKind.Telemetry, new string[0]
                 },
             };
 
-        public static readonly Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>> ExceptionsFromAnywhere =
-            new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>
+        public static readonly Dictionary<LogItemKind, IReadOnlyCollection<string>> ExceptionsFromAnywhere =
+            new Dictionary<LogItemKind, IReadOnlyCollection<string>>
             {
                 {
-                    LogItemKind.String, new LogItemOrigin[0]
+                    LogItemKind.String, new string[0]
                 },
                 {
-                    LogItemKind.Object, new LogItemOrigin[0]
+                    LogItemKind.Object, new string[0]
                 },
                 {
                     LogItemKind.Exception, null
                 },
                 {
-                    LogItemKind.Telemetry, new LogItemOrigin[0]
+                    LogItemKind.Telemetry, new string[0]
                 },
             };
 
-        public static readonly Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>> TelemetryFromNowhere =
-            new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>
+        public static readonly Dictionary<LogItemKind, IReadOnlyCollection<string>> TelemetryFromNowhere =
+            new Dictionary<LogItemKind, IReadOnlyCollection<string>>
             {
                 {
-                    LogItemKind.String, new LogItemOrigin[0]
+                    LogItemKind.String, new string[0]
                 },
                 {
-                    LogItemKind.Object, new LogItemOrigin[0]
+                    LogItemKind.Object, new string[0]
                 },
                 {
-                    LogItemKind.Exception, new LogItemOrigin[0]
+                    LogItemKind.Exception, new string[0]
                 },
                 {
-                    LogItemKind.Telemetry, new LogItemOrigin[0]
+                    LogItemKind.Telemetry, new string[0]
                 },
             };
 
-        public static readonly Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>> TelemetryFromAnywhere =
-            new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>
+        public static readonly Dictionary<LogItemKind, IReadOnlyCollection<string>> TelemetryFromAnywhere =
+            new Dictionary<LogItemKind, IReadOnlyCollection<string>>
             {
                 {
-                    LogItemKind.String, new LogItemOrigin[0]
+                    LogItemKind.String, new string[0]
                 },
                 {
-                    LogItemKind.Object, new LogItemOrigin[0]
+                    LogItemKind.Object, new string[0]
                 },
                 {
-                    LogItemKind.Exception, new LogItemOrigin[0]
+                    LogItemKind.Exception, new string[0]
                 },
                 {
                     LogItemKind.Telemetry, null
                 },
             };
 
-        public static readonly IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>> AnythingFromAnywhere
-            = new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>();
+        public static readonly IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<string>> AnythingFromAnywhere
+            = new Dictionary<LogItemKind, IReadOnlyCollection<string>>();
     }
 }

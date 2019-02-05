@@ -11,6 +11,7 @@ namespace Naos.Logging.Test
     using System.Linq;
 
     using Naos.Logging.Domain;
+    using Naos.Logging.Persistence;
     using Naos.Serialization.Bson;
     using Naos.Serialization.Domain;
     using Naos.Serialization.Json;

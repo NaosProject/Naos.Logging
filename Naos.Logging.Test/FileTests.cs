@@ -15,7 +15,7 @@ namespace Naos.Logging.Test
     using FluentAssertions;
 
     using Naos.Logging.Domain;
-
+    using Naos.Logging.Persistence;
     using Xunit;
 
     using static System.FormattableString;

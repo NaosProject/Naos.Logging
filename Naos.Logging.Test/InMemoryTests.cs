@@ -16,7 +16,7 @@ namespace Naos.Logging.Test
     using Its.Log.Instrumentation;
 
     using Naos.Logging.Domain;
-
+    using Naos.Logging.Persistence;
     using Xunit;
 
     using static System.FormattableString;
@@ -69,8 +69,8 @@ namespace Naos.Logging.Test
 
             // Assert
             processor.LoggedItems.Count.Should().Be(2);
-            processor.LoggedItems.Single(_ => _.Context.Origin == LogItemOrigin.ItsLogEntryPosted && _.Kind == LogItemKind.String).Subject.Summary.Should().Contain(infoCanary);
-            processor.LoggedItems.Single(_ => _.Context.Origin == LogItemOrigin.ItsLogEntryPosted && _.Kind == LogItemKind.Exception).Subject.Summary.Should().Contain(errorCanary.Message);
+            processor.LoggedItems.Single(_ => _.Context.Origin == LogItemOrigin.ItsLogEntryPosted.ToString() && _.Kind == LogItemKind.String).Subject.Summary.Should().Contain(infoCanary);
+            processor.LoggedItems.Single(_ => _.Context.Origin == LogItemOrigin.ItsLogEntryPosted.ToString() && _.Kind == LogItemKind.Exception).Subject.Summary.Should().Contain(errorCanary.Message);
         }
 
         [Fact]

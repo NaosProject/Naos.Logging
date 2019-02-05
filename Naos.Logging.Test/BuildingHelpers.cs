@@ -11,6 +11,7 @@ namespace Naos.Logging.Test
 
     using Naos.Compression.Domain;
     using Naos.Logging.Domain;
+    using Naos.Logging.Persistence;
     using Naos.Serialization.Domain.Extensions;
     using Naos.Serialization.Json;
 
@@ -37,6 +38,17 @@ namespace Naos.Logging.Test
         /// <param name="logItemOrigin">Origin of log entry.</param>
         /// <returns>Constructed <see cref="LogItem" />.</returns>
         public static LogItem ToLogItem(this LogEntry logEntry, LogItemOrigin logItemOrigin)
+        {
+            return logEntry.ToLogItem(logItemOrigin.ToString());
+        }
+
+        /// <summary>
+        /// Build a <see cref="LogItem" /> from a <see cref="LogEntry" />.
+        /// </summary>
+        /// <param name="logEntry">Log entry to use.</param>
+        /// <param name="logItemOrigin">Origin of log entry.</param>
+        /// <returns>Constructed <see cref="LogItem" />.</returns>
+        public static LogItem ToLogItem(this LogEntry logEntry, string logItemOrigin)
         {
             if (logEntry == null)
             {

@@ -8,8 +8,6 @@ namespace Naos.Logging.Domain
 {
     using System;
 
-    using Its.Log.Instrumentation;
-
     /// <summary>
     /// The origin of a logged item.
     /// </summary>
@@ -21,7 +19,17 @@ namespace Naos.Logging.Domain
         Unknown,
 
         /// <summary>
-        /// Messages generated internally by <see cref="LogWriting" />.
+        /// This will be the specific enumeration value for when a custom origin is provided as a string.
+        /// </summary>
+        Custom,
+
+        /// <summary>
+        /// Messages from <see cref="Logger" />.
+        /// </summary>
+        NaosLoggingLogger,
+
+        /// <summary>
+        /// Messages generated internally by LogWriting in Persistence.
         /// </summary>
         NaosLoggingLogWriting,
 
@@ -31,19 +39,13 @@ namespace Naos.Logging.Domain
         AppDomainUnhandledException,
 
         /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.InternalErrors" />.
+        /// Messages from the Its.Log.Instrumentation.Log.InternalErrors.
         /// </summary>
         ItsLogInternalErrors,
 
         /// <summary>
-        /// Messages from the <see cref="Its.Log" /> event <see cref="Log.EntryPosted" /> that have a subject that is some information.
+        /// Messages from the Its.Log.Instrumentation.Log.EntryPosted that have a subject that is some information.
         /// </summary>
         ItsLogEntryPosted,
-
-        /// <summary>
-        /// Messages from Hangfire (a 3rd party open source message platform).
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Hangfire", Justification = "Spelling/name is correct.")]
-        Hangfire,
     }
 }

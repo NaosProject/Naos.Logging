@@ -10,7 +10,7 @@ namespace Naos.Logging.Test
     using FluentAssertions;
 
     using Naos.Logging.Domain;
-
+    using Naos.Logging.Persistence;
     using Xunit;
 
     public static class DebugTests
@@ -19,7 +19,7 @@ namespace Naos.Logging.Test
         public static void EventLog_default_config___Test___Non_logging_context()
         {
             // Arrange
-            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>());
+            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>());
             var logger = new EventLogWriter(config);
 
             // Act
@@ -33,7 +33,7 @@ namespace Naos.Logging.Test
         public static void EventLog_default_config___Test___Logging_context()
         {
             // Arrange
-            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>());
+            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>());
             var logger = new EventLogWriter(config);
 
             // Act
@@ -47,7 +47,7 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Non_logging_context()
         {
             // Arrange
-            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>(), "MySourceLawson", "MyLogLawson", "MyMachine", true);
+            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>(), "MySourceLawson", "MyLogLawson", "MyMachine", true);
             var logger = new EventLogWriter(config);
 
             // Act
@@ -61,7 +61,7 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Logging_context_information()
         {
             // Arrange
-            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>(), "MySource", "MyLog", "Laptop", true);
+            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>(), "MySource", "MyLog", "Laptop", true);
             var logger = new EventLogWriter(config);
 
             // Act
@@ -75,7 +75,7 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Logging_context_error()
         {
             // Arrange
-            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>(), "MySource", "MyLog", "Laptop", true);
+            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>(), "MySource", "MyLog", "Laptop", true);
             var logger = new EventLogWriter(config);
 
             // Act
@@ -89,7 +89,7 @@ namespace Naos.Logging.Test
         public static void EventLog_custom_config___Test___Reading()
         {
             // Arrange
-            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>>(), "MySource", "MyLog", "Laptop", true);
+            var config = new EventLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>(), "MySource", "MyLog", "Laptop", true);
             var logger = new EventLogReader(config);
 
             // Act

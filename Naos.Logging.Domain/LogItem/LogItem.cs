@@ -75,6 +75,25 @@ namespace Naos.Logging.Domain
         /// </summary>
         public IReadOnlyCollection<IHaveCorrelationId> Correlations { get; private set; }
 
+        /// <summary>
+        /// Clones this item, replacing origin in the context with the specified origin.
+        /// </summary>
+        /// <param name="origin">The origin to use in the cloned item's context.</param>
+        /// <returns>
+        /// A clone of this item, with the specified origin replacing the origin in the context.
+        /// </returns>
+        public LogItem CloneWithOrigin(
+            string origin)
+        {
+            if (string.IsNullOrWhiteSpace(origin))
+            {
+                throw new ArgumentException(Invariant($"Cannot have a null or whitespace {nameof(origin)} - was: {origin}."));
+            }
+
+            var result = new LogItem(this.Subject, this.Kind, this.Context.CloneWithOrigin(origin), this.Comment);
+            return result;
+        }
+
         /// <inheritdoc />
         public override string ToString()
         {

@@ -31,7 +31,7 @@ namespace Naos.Logging.Domain
         /// <param name="stackTrace">Optional stack trace.</param>
         public LogItemContext(
             DateTime timestampUtc,
-            LogItemOrigin origin,
+            string origin,
             string machineName = null,
             string processName = null,
             string processFileVersion = null,
@@ -44,9 +44,9 @@ namespace Naos.Logging.Domain
                 throw new ArgumentException(Invariant($"{nameof(timestampUtc)}.{nameof(DateTime.Kind)} != {nameof(DateTimeKind)}.{nameof(DateTimeKind.Utc)}"));
             }
 
-            if (origin == LogItemOrigin.Unknown)
+            if (string.IsNullOrWhiteSpace(origin))
             {
-                throw new ArgumentException(Invariant($"{nameof(origin)} == {nameof(LogItemOrigin)}.{nameof(LogItemOrigin.Unknown)}"));
+                throw new ArgumentException(Invariant($"{nameof(origin)} cannot be null or whitespace."));
             }
 
             this.TimestampUtc = timestampUtc;
@@ -67,7 +67,7 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Gets the origin of the log-item.
         /// </summary>
-        public LogItemOrigin Origin { get; private set; }
+        public string Origin { get; private set; }
 
         /// <summary>
         /// Gets the name of the machine that generated the log-item.
@@ -107,8 +107,13 @@ namespace Naos.Logging.Domain
         /// A clone of this context, with the specified origin replacing the origin.
         /// </returns>
         public LogItemContext CloneWithOrigin(
-            LogItemOrigin origin)
+            string origin)
         {
+            if (string.IsNullOrWhiteSpace(origin))
+            {
+                throw new ArgumentException(Invariant($"Cannot have a null or whitespace {nameof(origin)} - was: {origin}."));
+            }
+
             var result = new LogItemContext(this.TimestampUtc, origin, this.MachineName, this.ProcessName, this.ProcessFileVersion, this.CallingMethod, this.CallingType, this.StackTrace);
             return result;
         }
