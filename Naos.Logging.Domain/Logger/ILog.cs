@@ -7,6 +7,7 @@
 namespace Naos.Logging.Domain
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Interface for a client facing logger.
@@ -19,29 +20,31 @@ namespace Naos.Logging.Domain
         /// <param name="subjectFunc">Function to get the subject.</param>
         /// <param name="comment">Optional comment.</param>
         /// <param name="originOverride">Optional origin override.</param>
-        void Write(Func<object> subjectFunc, string comment = null, string originOverride = null);
+        /// <param name="additionalCorrelations">Optional additional correlations.</param>
+        void Write(Func<object> subjectFunc, string comment = null, string originOverride = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null);
 
         /// <summary>
-        /// Write a message.
-        /// </summary>
-        /// <param name="subject">Subject object.</param>
-        /// <param name="comment">Optional comment.</param>
-        /// <param name="originOverride">Optional origin override.</param>
-        void Write(string subject, string comment = null, string originOverride = null);
-
-        /// <summary>
-        /// Enter into a logged activity.
+        /// GetUsingBlockLogger into a logged activity.
         /// </summary>
         /// <param name="correlatingSubjectFunc">Function to get the correlating subject.</param>
         /// <param name="comment">Optional comment.</param>
         /// <param name="originOverride">Optional origin override.</param>
+        /// <param name="correlationId">Optional correlation ID that will be used for each of the block correlations; DEFAULT is a different one for each.</param>
+        /// <param name="additionalCorrelations">Optional additional correlations.</param>
         /// <returns>A configured <see cref="ICorrelatingActivityLogger" />.</returns>
-        ICorrelatingActivityLogger Enter(Func<object> correlatingSubjectFunc, string comment = null, string originOverride = null);
+        ILogDisposable GetUsingBlockLogger(Func<object> correlatingSubjectFunc, string comment = null, string originOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null);
 
         /// <summary>
-        /// Set the <see cref="LoggerCallback" /> to send logged messages to.
+        /// Set the <see cref="LogItemHandler" /> to send logged messages to.
         /// </summary>
         /// <param name="callback">Call back to send messages to.</param>
-        void SetCallback(LoggerCallback callback);
+        void SetCallback(LogItemHandler callback);
+    }
+
+    /// <summary>
+    /// Interface for a logger that can be disposable to perform any wrap up tasks.
+    /// </summary>
+    public interface ILogDisposable : ILog, IDisposable
+    {
     }
 }

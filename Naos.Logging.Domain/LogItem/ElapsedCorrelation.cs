@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ExceptionCorrelation.cs" company="Naos">
+// <copyright file="ElapsedCorrelation.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -11,39 +11,36 @@ namespace Naos.Logging.Domain
     using static System.FormattableString;
 
     /// <summary>
-    /// Specifies how a <see cref="LogItem"/> is correlated with other
-    /// <see cref="LogItem"/>s with a shared <see cref="Exception"/> in
-    /// the chain of <see cref="Exception.InnerException"/>.
+    /// Specifies how a single <see cref="LogItem"/> is correlated with other
+    /// <see cref="LogItem"/>s within a defined block of code that explicitly
+    /// relates those items.
     /// </summary>
-    public class ExceptionCorrelation : IHaveCorrelatingSubject
+    public class ElapsedCorrelation : IHaveCorrelationId
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExceptionCorrelation"/> class.
+        /// Initializes a new instance of the <see cref="ElapsedCorrelation"/> class.
         /// </summary>
         /// <param name="correlationId">An identifier used to correlate multiple log-items.</param>
-        /// <param name="correlatingSubject">The correlating subject.</param>
-        public ExceptionCorrelation(
+        /// <param name="elapsedTime">The elapsed time during the correlation.</param>
+        public ElapsedCorrelation(
             string correlationId,
-            Subject correlatingSubject)
+            TimeSpan elapsedTime)
         {
             if (string.IsNullOrWhiteSpace(correlationId))
             {
                 throw new ArgumentException(Invariant($"{nameof(correlationId)} is null or white space"));
             }
 
-            if (correlatingSubject == null)
-            {
-                throw new ArgumentNullException(nameof(correlatingSubject));
-            }
-
             this.CorrelationId = correlationId;
-            this.CorrelatingSubject = correlatingSubject;
+            this.ElapsedTime = elapsedTime;
         }
 
         /// <inheritdoc />
         public string CorrelationId { get; private set; }
 
-        /// <inheritdoc />
-        public Subject CorrelatingSubject { get; private set; }
+        /// <summary>
+        /// Gets the elapsed time in the correlation.
+        /// </summary>
+        public TimeSpan ElapsedTime { get; private set; }
     }
 }

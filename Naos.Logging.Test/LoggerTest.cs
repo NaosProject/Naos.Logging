@@ -6,6 +6,7 @@
 
 namespace Naos.Logging.Test
 {
+    using System;
     using System.Linq;
     using System.Reflection;
     using FluentAssertions;
@@ -13,13 +14,20 @@ namespace Naos.Logging.Test
     using Naos.Logging.Domain;
 
     using Xunit;
-
+    using Xunit.Abstractions;
     using static System.FormattableString;
 
-    public static class LoggerTest
+    public class LoggerTest
     {
+        private readonly ITestOutputHelper testOutputHelper;
+
+        public LoggerTest(ITestOutputHelper testOutputHelper)
+        {
+            this.testOutputHelper = testOutputHelper;
+        }
+
         [Fact]
-        public static void Log_and_ILog__Have_same_methods()
+        public void Log_and_ILog__Have_same_methods()
         {
             // Arrange
             var staticClassType = typeof(Log);
@@ -50,6 +58,12 @@ namespace Naos.Logging.Test
 
             var staticLogMethodDescriptors = staticLogMethods.Select(BuildCompareNameFromMethod).ToList();
             var interfaceLogMethodDescriptors = interfaceLogMethods.Select(BuildCompareNameFromMethod).ToList();
+
+            this.testOutputHelper.WriteLine(nameof(Log));
+            staticLogMethodDescriptors.ForEach(this.testOutputHelper.WriteLine);
+            this.testOutputHelper.WriteLine(string.Empty);
+            this.testOutputHelper.WriteLine(nameof(ILog));
+            interfaceLogMethodDescriptors.ForEach(this.testOutputHelper.WriteLine);
 
             // Assert
             staticLogMethods.Count.Should().Be(interfaceLogMethods.Count);

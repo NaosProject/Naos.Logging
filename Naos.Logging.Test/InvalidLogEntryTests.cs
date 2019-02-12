@@ -109,7 +109,7 @@ namespace Naos.Logging.Test
 
             // Assert
             exception.Should().BeOfType<InvalidOperationException>();
-            exception.Message.Should().Be(Invariant($"logEntry.ElapsedMilliseconds is null when there is an ActivityCorrelation"));
+            exception.Message.Should().Be(Invariant($"logEntry.ElapsedMilliseconds is null when there is an ElapsedCorrelation"));
         }
     }
 }

@@ -7,13 +7,42 @@
 namespace Naos.Logging.Domain
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
-    /// Default implementation of <see cref="ILog" />.  Messages will be sent to a configured <see cref="LoggerCallback" /> which can be configured directly or via LogWriting.Setup in Persistence.
+    /// Default implementation of <see cref="ILog" />.  Messages will be sent to a configured <see cref="LogItemHandler" /> which can be configured directly or via LogWriting.Setup in Persistence.
     /// </summary>
     public class Logger : ILog
     {
-        private LoggerCallback logItemHandler = DefaultLogItemHandler;
+        private readonly string defaultComment;
+
+        /// <summary>
+        /// Default origin.
+        /// </summary>
+        protected readonly string defaultOrigin;
+
+        /// <summary>
+        /// Correlation manager.
+        /// </summary>
+        protected readonly IManageCorrelations correlationManager;
+
+        private readonly object syncSetHandler = new object();
+
+        private LogItemHandler logItemHandler;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Logger"/> class.
+        /// </summary>
+        /// <param name="logItemHandler">Optional <see cref="LogItemHandler" /> to process <see cref="LogItem" />'s; DEFAULT is a null handler.</param>
+        /// <param name="correlationManager">Optional correlation manager potentially with active correlations; DEFAULT is a new <see cref="CorrelationManagerr" />.</param>
+        /// <param name="defaultOrigin">Optional default origin to use; DEFAULT is <see cref="LogItemOrigin.NaosLoggingLogger" />.</param>
+        public Logger(LogItemHandler logItemHandler = null, IManageCorrelations correlationManager = null, string defaultOrigin = null, string defaultComment = null)
+        {
+            this.defaultComment = defaultComment;
+            this.defaultOrigin = defaultOrigin ?? LogItemOrigin.NaosLoggingLogger.ToString();
+            this.logItemHandler = logItemHandler ?? DefaultLogItemHandler;
+            this.correlationManager = correlationManager ?? new CorrelationManager();
+        }
 
         private static void DefaultLogItemHandler(LogItem logItem)
         {
@@ -21,30 +50,50 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
-        public virtual void Write(Func<object> subjectFunc, string comment = null, string originOverride = null)
+        public void Write(Func<object> subjectFunc, string comment = null, string originOverride = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
-            var logItem = LogHelper.BuildLogItem(subjectFunc, comment, originOverride ?? LogItemOrigin.NaosLoggingLogger.ToString());
-            this.logItemHandler(logItem);
+            // what do we pass to build log items to build correlations?  just the manager?  do we foreach correlations we havent seen b/c error doesnt work that way?
+            try
+            {
+                // advance all correlations here and pass in?
+                // pass factory and have buildlogitem advance all?
+
+                var logItem = LogHelper.BuildLogItem(this.correlationManager, subjectFunc, comment ?? this.defaultComment, originOverride ?? this.defaultOrigin, additionalCorrelations: additionalCorrelations);
+                this.logItemHandler(logItem);
+            }
+            catch (Exception e)
+            {
+                // what do we log? should we tostring the subject? should we use a more permissive serializer?
+                // could have failed to build log item issue...
+                LastDitchLogger.LogError("");
+            }
         }
 
         /// <inheritdoc />
-        public virtual void Write(string subject, string comment = null, string originOverride = null)
+        public ILogDisposable GetUsingBlockLogger(Func<object> correlatingSubjectFunc, string comment = null, string originOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
-            this.Write(() => subject, comment, originOverride);
-        }
+            var nestedCorrelationManager = this.correlationManager.ShallowClone();
+            nestedCorrelationManager.AddSubjectCorrelation(correlatingSubjectFunc, correlationId);
+            nestedCorrelationManager.AddOrderCorrelation(correlationId: correlationId);
+            nestedCorrelationManager.AddElapsedCorrelation(correlationId);
+            nestedCorrelationManager.AddAdditionalCorrelations(additionalCorrelations);
 
-        /// <inheritdoc />
-        public virtual ICorrelatingActivityLogger Enter(Func<object> correlatingSubjectFunc, string comment = null, string originOverride = null)
-        {
-            var result = new CorrelatingActivityLogger(correlatingSubjectFunc, comment, originOverride ?? LogItemOrigin.NaosLoggingLogger.ToString(), this.logItemHandler);
+            var result = new UsingBlockLogger(
+                nestedCorrelationManager,
+                this.logItemHandler,
+                originOverride ?? this.defaultOrigin,
+                comment ?? this.defaultComment);
 
             return result;
         }
 
         /// <inheritdoc />
-        public void SetCallback(LoggerCallback callback)
+        public void SetCallback(LogItemHandler callback)
         {
-            this.logItemHandler = callback;
+            lock (this.syncSetHandler)
+            {
+                this.logItemHandler = callback;
+            }
         }
     }
 }

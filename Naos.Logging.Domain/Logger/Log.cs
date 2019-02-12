@@ -7,6 +7,8 @@
 namespace Naos.Logging.Domain
 {
     using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Helper to deal with correlations of <see cref="Exception" />'s.
@@ -16,7 +18,7 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Gets the singleton logger being used.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Keeping for preferred IL.")]
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Keeping for preferred IL.")]
         public static ILog Instance { get; private set; } = new Logger();
 
         /// <summary>
@@ -25,39 +27,31 @@ namespace Naos.Logging.Domain
         /// <param name="subjectFunc">Function to get the subject.</param>
         /// <param name="comment">Optional comment.</param>
         /// <param name="originOverride">Optional origin override.</param>
-        public static void Write(Func<object> subjectFunc, string comment = null, string originOverride = null)
+        /// <param name="additionalCorrelations">Optional additional correlations.</param>
+        public static void Write(Func<object> subjectFunc, string comment = null, string originOverride = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             Instance.Write(subjectFunc, comment, originOverride);
         }
 
         /// <summary>
-        /// Write a message.
-        /// </summary>
-        /// <param name="subject">Subject object.</param>
-        /// <param name="comment">Optional comment.</param>
-        /// <param name="originOverride">Optional origin override.</param>
-        public static void Write(string subject, string comment = null, string originOverride = null)
-        {
-            Instance.Write(subject, comment, originOverride);
-        }
-
-        /// <summary>
-        /// Enter into a logged activity.
+        /// GetUsingBlockLogger into a logged activity.
         /// </summary>
         /// <param name="correlatingSubjectFunc">Function to get the correlating subject.</param>
         /// <param name="comment">Optional comment.</param>
         /// <param name="originOverride">Optional origin override.</param>
+        /// <param name="correlationId">Optional correlation ID that will be used for each of the block correlations; DEFAULT is a different one for each.</param>
+        /// <param name="additionalCorrelations">Optional additional correlations.</param>
         /// <returns>A configured <see cref="ICorrelatingActivityLogger" />.</returns>
-        public static ICorrelatingActivityLogger Enter(Func<object> correlatingSubjectFunc, string comment = null, string originOverride = null)
+        public static ILogDisposable GetUsingBlockLogger(Func<object> correlatingSubjectFunc, string comment = null, string originOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
-            return Instance.Enter(correlatingSubjectFunc, comment, originOverride);
+            return Instance.GetUsingBlockLogger(correlatingSubjectFunc, comment, originOverride, correlationId);
         }
 
         /// <summary>
-        /// Set the <see cref="LoggerCallback" /> to send logged messages to.
+        /// Set the <see cref="LogItemHandler" /> to send logged messages to.
         /// </summary>
         /// <param name="callback">Call back to send messages to.</param>
-        public static void SetCallback(LoggerCallback callback)
+        public static void SetCallback(LogItemHandler callback)
         {
             Instance.SetCallback(callback);
         }

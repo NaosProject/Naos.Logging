@@ -15,7 +15,7 @@ namespace Naos.Logging.Domain
     /// <see cref="LogItem"/>s within a defined block of code that explicitly
     /// relates those items.
     /// </summary>
-    public class ActivityCorrelation : IHaveCorrelatingSubject
+    public class ActivityCorrelatio : IHaveCorrelationId
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ActivityCorrelation"/> class.
@@ -24,7 +24,7 @@ namespace Naos.Logging.Domain
         /// <param name="correlatingSubject">The correlating subject.</param>
         /// <param name="elapsedMillisecondsFromFirst">The number of milliseconds that have elapsed from the first log-item in the timeseries of correlated log-items.</param>
         /// <param name="correlationPosition">The position of the log-item within a timeseries of correlated log-items.</param>
-        public ActivityCorrelation(
+        public ActivityCorrelatio(
             string correlationId,
             Subject correlatingSubject,
             long elapsedMillisecondsFromFirst,

@@ -24,6 +24,11 @@ namespace Naos.Logging.Domain
     /// </summary>
     public static class LogHelper
     {
+        /// <summary>
+        /// Summary text used when a null subject is encountered.
+        /// </summary>
+        public const string NullSubjectSummary = "[null]";
+
         static LogHelper()
         {
             MachineName = Diagnostics.Recipes.MachineName.GetMachineName();
@@ -86,26 +91,29 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Build a log item from provided values.
         /// </summary>
+        /// <param name="correlationManager">Factory to produce correlations.</param>
         /// <param name="subjectFunc">Function that returns the subject.</param>
         /// <param name="comment">Optional comment.</param>
         /// <param name="originOverride">Optional origin override.</param>
-        /// <param name="activityCorrelation">Optional activity correlation.</param>
         /// <param name="errorCodeKeyField">Optional error key for <see cref="Exception" />'s; DEFAULT is <see cref="Constants.ExceptionDataKeyForErrorCode" />.</param>
+        /// <param name="additionalCorrelations">Optional additional correlations.</param>
         /// <returns>Constructed <see cref="LogItem" />.</returns>
         public static LogItem BuildLogItem(
+            IManageCorrelations correlationManager,
             Func<object> subjectFunc,
             string comment = null,
             string originOverride = null,
-            ActivityCorrelation activityCorrelation = null,
-            string errorCodeKeyField = null)
+            string errorCodeKeyField = null,
+            IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
+            var timestampUtc = DateTime.UtcNow;
             var correlations = new List<IHaveCorrelationId>();
-            var activityCorrelationPosition = ActivityCorrelationPosition.Unknown;
-            if (activityCorrelation != null)
-            {
-                correlations.Add(activityCorrelation);
-                activityCorrelationPosition = activityCorrelation.CorrelationPosition;
-            }
+            //var activityCorrelationPosition = ActivityCorrelationPosition.Unknown;
+            //if (activityCorrelation != null)
+            //{
+            //    correlations.Add(activityCorrelation);
+            //    activityCorrelationPosition = activityCorrelation.CorrelationPosition;
+            //}
 
             var subject = subjectFunc?.Invoke();
             var kind = DetermineKindFromSubject(subject);
@@ -123,13 +131,9 @@ namespace Naos.Logging.Domain
                     correlatingException = loggedException;
                 }
 
-                var correlationId = correlatingException.GetExceptionIdFromExceptionData().ToString();
+                var exceptionId = correlatingException.GetExceptionIdFromExceptionData().ToString();
 
-                var exceptionCorrelatingSubject = new RawSubject(
-                    correlatingException,
-                    BuildSummaryFromSubjectObject(correlatingException, activityCorrelationPosition));
-
-                var exceptionCorrelation = new ExceptionCorrelation(correlationId, exceptionCorrelatingSubject.ToSubject());
+                var exceptionCorrelation = new ExceptionIdCorrelation(exceptionId);
                 correlations.Add(exceptionCorrelation);
 
                 var errorCode = loggedException.GetErrorCode();
@@ -144,11 +148,11 @@ namespace Naos.Logging.Domain
 
             var rawSubject = new RawSubject(
                 subject,
-                BuildSummaryFromSubjectObject(subject, activityCorrelationPosition));
+                BuildSummaryFromSubjectObject(subject));
 
             var anonymousMethodInfo = subjectFunc != null ? new AnonymousMethodInfo(subjectFunc.Method) : null;
             var context = new LogItemContext(
-                DateTime.UtcNow,
+                timestampUtc,
                 originOverride,
                 MachineName,
                 ProcessName,
@@ -166,12 +170,9 @@ namespace Naos.Logging.Domain
         /// Build summary for <see cref="RawSubject" /> from the subject.
         /// </summary>
         /// <param name="subjectObject">Subject to use.</param>
-        /// <param name="activityCorrelationPosition">Activity position correlation</param>
         /// <returns>A string summary of the subject.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "object", Justification = "Spelling/name is correct.")]
-        public static string BuildSummaryFromSubjectObject(
-            object subjectObject,
-            ActivityCorrelationPosition activityCorrelationPosition)
+        public static string BuildSummaryFromSubjectObject(object subjectObject)
         {
             string result;
             if (subjectObject is Exception ex)
@@ -180,12 +181,7 @@ namespace Naos.Logging.Domain
             }
             else
             {
-                result = subjectObject?.ToString() ?? "[null]";
-            }
-
-            if (activityCorrelationPosition != ActivityCorrelationPosition.Unknown)
-            {
-                result = Invariant($"{activityCorrelationPosition}: {result}");
+                result = subjectObject?.ToString() ?? NullSubjectSummary;
             }
 
             return result;

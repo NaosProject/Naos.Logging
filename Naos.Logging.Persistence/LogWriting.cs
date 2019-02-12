@@ -201,9 +201,18 @@ namespace Naos.Logging.Persistence
                 }
                 catch (Exception failedToLogException)
                 {
+                    var message = "Super failed";
+                    try
+                    {
+
                     var logPayload = new Tuple<LogItem, string, Exception>(logItem, logWriter.ToString(), failedToLogException);
-                    var logPayloadJson = LogWriterBase.DefaultLogItemSerializer.SerializeToString(logPayload);
-                    LastDitchLogger.LogError(logPayloadJson);
+                    message = LogWriterBase.DefaultLogItemSerializer.SerializeToString(logPayload);
+                    }
+                    catch (Exception failedToSerialize)
+                    {
+                        message = "";
+                    }
+                    //LastDitchLogger.LogErrorFromLogItemAndWriter(logPayloadJson);
                 }
             }
         }
@@ -288,8 +297,7 @@ namespace Naos.Logging.Persistence
         }
 
         private static string BuildSummaryFromSubjectObject(
-            object subjectObject,
-            ActivityCorrelationPosition activityCorrelationPosition)
+            object subjectObject)
         {
             string result;
             if (subjectObject is Exception ex)
@@ -299,11 +307,6 @@ namespace Naos.Logging.Persistence
             else
             {
                 result = Formatter.Format(subjectObject);
-            }
-
-            if (activityCorrelationPosition != ActivityCorrelationPosition.Unknown)
-            {
-                result = Invariant($"{activityCorrelationPosition}: {result}");
             }
 
             return result;
@@ -376,12 +379,16 @@ namespace Naos.Logging.Persistence
 
                 var activityCorrelatingSubject = new RawSubject(
                     logEntry.Subject,
-                    BuildSummaryFromSubjectObject(logEntry.Subject, activityCorrelationPosition));
+                    BuildSummaryFromSubjectObject(logEntry.Subject));
 
                 var correlatingId = activityCorrelatingSubject.GetHashCode().ToGuid().ToString();
-                var elapsedMilliseconds = activityCorrelationPosition == ActivityCorrelationPosition.First ? 0 : logEntry.ElapsedMilliseconds ?? throw new InvalidOperationException(Invariant($"{nameof(logEntry)}.{nameof(LogEntry.ElapsedMilliseconds)} is null when there is an {nameof(ActivityCorrelation)}"));
-                var activityCorrelation = new ActivityCorrelation(correlatingId, activityCorrelatingSubject.ToSubject(), elapsedMilliseconds, activityCorrelationPosition);
-                correlations.Add(activityCorrelation);
+                var elapsedMilliseconds = activityCorrelationPosition == ActivityCorrelationPosition.First ? 0 : logEntry.ElapsedMilliseconds ?? throw new InvalidOperationException(Invariant($"{nameof(logEntry)}.{nameof(LogEntry.ElapsedMilliseconds)} is null when there is an {nameof(ElapsedCorrelation)}"));
+                var elapsedCorrelation = new ElapsedCorrelation(correlatingId, TimeSpan.FromMilliseconds(elapsedMilliseconds));
+                var correlatingSubject = activityCorrelatingSubject.ToSubject();
+                correlations.Add(elapsedCorrelation);
+
+                var subjectCorrelation = new SubjectCorrelation(correlatingId, correlatingSubject);
+                correlations.Add(subjectCorrelation);
             }
 
             string stackTrace = null;
@@ -400,9 +407,9 @@ namespace Naos.Logging.Persistence
 
                 var exceptionCorrelatingSubject = new RawSubject(
                     correlatingException,
-                    BuildSummaryFromSubjectObject(correlatingException, activityCorrelationPosition));
+                    BuildSummaryFromSubjectObject(correlatingException));
 
-                var exceptionCorrelation = new ExceptionCorrelation(correlationId, exceptionCorrelatingSubject.ToSubject());
+                var exceptionCorrelation = new ExceptionIdCorrelation(correlationId);
                 correlations.Add(exceptionCorrelation);
 
                 if (this.errorCodeKeysField?.Any() ?? false)
@@ -421,9 +428,19 @@ namespace Naos.Logging.Persistence
                 stackTrace = loggedException.StackTrace;
             }
 
+            switch (activityCorrelationPosition)
+            {
+                case ActivityCorrelationPosition.First:
+                    logItemSubjectObject = UsingBlockLogger.InitialItemOfUsingBlockSubject;
+                    break;
+                case ActivityCorrelationPosition.Last:
+                    logItemSubjectObject = UsingBlockLogger.FinalItemOfUsingBlockSubject;
+                    break;
+            }
+
             var logItemRawSubject = new RawSubject(
                 logItemSubjectObject,
-                BuildSummaryFromSubjectObject(logItemSubjectObject, activityCorrelationPosition));
+                BuildSummaryFromSubjectObject(logItemSubjectObject));
 
             var context = new LogItemContext(logEntry.TimeStamp, logItemOrigin, LogHelper.MachineName, LogHelper.ProcessName, LogHelper.ProcessFileVersion, logEntry.CallingMethod, logEntry.CallingType?.ToTypeDescription(), stackTrace);
 

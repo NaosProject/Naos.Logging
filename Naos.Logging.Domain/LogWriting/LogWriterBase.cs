@@ -245,6 +245,7 @@ namespace Naos.Logging.Domain
             }
             catch (Exception)
             {
+                 /* no-op */
             }
         }
     }
