@@ -31,18 +31,20 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="CorrelationManager"/> class.
         /// </summary>
         public CorrelationManager()
-            : this(null, null, null)
+            : this(null, null, null, null)
         {
         }
 
         private CorrelationManager(
             Dictionary<string, EvaluatedSubject> correlationIdToEvaluatedSubjectMap = null,
             Dictionary<string, Stopwatch> correlationIdToStopwatchMap = null,
-            Dictionary<string, int> correlationIdToPositionMap = null)
+            Dictionary<string, int> correlationIdToPositionMap = null,
+            IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             this.correlationIdToEvaluatedSubjectMap = correlationIdToEvaluatedSubjectMap ?? new Dictionary<string, EvaluatedSubject>();
             this.correlationIdToStopwatchMap = correlationIdToStopwatchMap ?? new Dictionary<string, Stopwatch>();
             this.correlationIdToPositionMap = correlationIdToPositionMap ?? new Dictionary<string, int>();
+            this.additionalCorrelations = additionalCorrelations?.ToList() ?? new List<IHaveCorrelationId>();
         }
 
         /// <inheritdoc />
@@ -141,6 +143,64 @@ namespace Naos.Logging.Domain
                     foreach (var additionalCorrelation in newAdditionalCorrelations)
                     {
                         this.additionalCorrelations.Add(additionalCorrelation);
+                    }
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<IHaveCorrelationId> GetNextCorrelations()
+        {
+            throw new NotImplementedException();
+            lock (this.correlationIdToEvaluatedSubjectMapSync)
+            {
+                lock (this.correlationIdToStopwatchMapSync)
+                {
+                    lock (this.correlationIdToPositionMapSync)
+                    {
+                        lock (this.additionalCorrelationsSync)
+                        {
+                            var result = new List<IHaveCorrelationId>();
+                            foreach (var evaluatedSubject in this.correlationIdToEvaluatedSubjectMap)
+                            {
+                                var subjectCorrelation = new SubjectCorrelation(evaluatedSubject.Key, new RawSubject(evaluatedSubject.Value.Subject, evaluatedSubject.Value.SubjectToString).ToSubject());
+                                result.Add(subjectCorrelation);
+                            }
+
+                            foreach (var stopwatch in this.correlationIdToStopwatchMap)
+                            {
+                                var elapsed = TimeSpan.Zero;
+                                if (stopwatch.Value.IsRunning)
+                                {
+                                    elapsed = stopwatch.Value.Elapsed;
+                                }
+                                else
+                                {
+                                    stopwatch.Value.Start();
+                                }
+
+                                var elapsedCorrelation = new ElapsedCorrelation(stopwatch.Key, elapsed);
+                                result.Add(elapsedCorrelation);
+                            }
+
+                            var positionKeysToAdvance = new List<string>();
+                            foreach (var position in this.correlationIdToPositionMap)
+                            {
+                                positionKeysToAdvance.Add(position.Key);
+                                var orderCorrelation = new OrderCorrelation(position.Key, position.Value);
+                                result.Add(orderCorrelation);
+                            }
+
+                            foreach (var positionKeyToAdvance in positionKeysToAdvance)
+                            {
+                                var currentValue = this.correlationIdToPositionMap[positionKeyToAdvance];
+                                this.correlationIdToPositionMap[positionKeyToAdvance] = currentValue + 1;
+                            }
+
+                            result.AddRange(this.additionalCorrelations);
+
+                            return result;
+                        }
                     }
                 }
             }

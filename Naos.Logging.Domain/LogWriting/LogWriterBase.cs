@@ -176,15 +176,16 @@ namespace Naos.Logging.Domain
 
                 Action<string> logToFile = localMessage =>
                 {
-                    var fileName = Path.Combine(
-                        serializedDateTimeUtcNow,
-                        "--LastDitchLoggedError.log");
+                    var preppedForFilePathTime = serializedDateTimeUtcNow.Replace(":", "-").Replace(".", "_").Replace("T", "--");
+                    var fileName = preppedForFilePathTime + "--LastDitchLoggedError.log";
                     File.WriteAllText(fileName, localMessage);
                 };
 
                 Action<string> logToEventLog = localMessage =>
                 {
-                    var preppedMessage = localMessage.Substring(0, eventLogCharacterLimit);
+                    var preppedMessage = localMessage == null ? "Null Message Provided." :
+                        localMessage.Length <= eventLogCharacterLimit ? localMessage :
+                        localMessage.Substring(0, eventLogCharacterLimit);
                     using (EventLog eventLog = new EventLog("Application"))
                     {
                         eventLog.Source = "Application";

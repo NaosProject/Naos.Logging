@@ -107,13 +107,7 @@ namespace Naos.Logging.Domain
             IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             var timestampUtc = DateTime.UtcNow;
-            var correlations = new List<IHaveCorrelationId>();
-            //var activityCorrelationPosition = ActivityCorrelationPosition.Unknown;
-            //if (activityCorrelation != null)
-            //{
-            //    correlations.Add(activityCorrelation);
-            //    activityCorrelationPosition = activityCorrelation.CorrelationPosition;
-            //}
+            var correlations = new List<IHaveCorrelationId>(additionalCorrelations ?? new IHaveCorrelationId[0]);
 
             var subject = subjectFunc?.Invoke();
             var kind = DetermineKindFromSubject(subject);
@@ -121,6 +115,9 @@ namespace Naos.Logging.Domain
                 ? Constants.ExceptionDataKeyForErrorCode
                 : errorCodeKeyField;
             string stackTrace = null;
+
+            var managedCorrelations = correlationManager.GetNextCorrelations();
+            correlations.AddRange(managedCorrelations);
 
             if (subject is Exception loggedException)
             {

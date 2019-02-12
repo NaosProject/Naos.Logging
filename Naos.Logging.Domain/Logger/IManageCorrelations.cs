@@ -45,5 +45,11 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <param name="newAdditionalCorrelations">Additional Correlations that have already been prepared.</param>
         void AddAdditionalCorrelations(IReadOnlyCollection<IHaveCorrelationId> newAdditionalCorrelations);
+
+        /// <summary>
+        /// Gets the next correlations and advances any that require.
+        /// </summary>
+        /// <returns>The set of correlations to be logged next.</returns>
+        IReadOnlyCollection<IHaveCorrelationId> GetNextCorrelations();
     }
 }

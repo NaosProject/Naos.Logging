@@ -20,11 +20,9 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="OrderCorrelation"/> class.
         /// </summary>
         /// <param name="correlationId">An identifier used to correlate multiple log-items.</param>
-        /// <param name="position">The position in the correlation.</param>
         public OrderCorrelation(
             string correlationId,
-            int position,
-            ActivityCorrelationPosition activityCorrelationPosition)
+            int position)
         {
             if (string.IsNullOrWhiteSpace(correlationId))
             {
@@ -33,7 +31,6 @@ namespace Naos.Logging.Domain
 
             this.CorrelationId = correlationId;
             this.Position = position;
-            this.DoWeNeedThis = activityCorrelationPosition;
         }
 
         /// <inheritdoc />
@@ -43,11 +40,6 @@ namespace Naos.Logging.Domain
         /// Gets the position in a correlation.
         /// </summary>
         public int Position { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="DoWeNeedThis" />.
-        /// </summary>
-        public ActivityCorrelationPosition? DoWeNeedThis { get; private set; }
     }
 
     public enum ActivityCorrelationPosition

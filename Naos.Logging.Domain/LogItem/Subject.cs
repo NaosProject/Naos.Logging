@@ -25,7 +25,7 @@ namespace Naos.Logging.Domain
             string summary)
         {
             this.DescribedSerialization = describedSerialization ?? throw new ArgumentNullException(nameof(describedSerialization));
-            this.Summary = summary ?? throw new ArgumentNullException(nameof(summary));
+            this.Summary = summary ?? LogHelper.NullSubjectSummary;
         }
 
         /// <summary>
