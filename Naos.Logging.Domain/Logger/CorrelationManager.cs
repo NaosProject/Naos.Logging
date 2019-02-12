@@ -151,7 +151,6 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public IReadOnlyCollection<IHaveCorrelationId> GetNextCorrelations()
         {
-            throw new NotImplementedException();
             lock (this.correlationIdToEvaluatedSubjectMapSync)
             {
                 lock (this.correlationIdToStopwatchMapSync)
