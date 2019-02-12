@@ -7,6 +7,7 @@
 namespace Naos.Logging.Test
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using FluentAssertions;
@@ -68,6 +69,34 @@ namespace Naos.Logging.Test
             // Assert
             staticLogMethods.Count.Should().Be(interfaceLogMethods.Count);
             staticLogMethodDescriptors.Intersect(interfaceLogMethodDescriptors).Count().Should().Be(staticLogMethods.Count);
+        }
+
+        [Fact]
+        public void NestedUsings___Correctly_logged_to___Includes_all_correlations()
+        {
+            var items = new List<LogItem>();
+            Log.SetCallback(_ => items.Add(_));
+
+            using (var topLogger = Log.GetUsingBlockLogger(() => "Top."))
+            {
+                topLogger.Write(() => "Message in top before middle.");
+
+                using (var middleLogger = topLogger.GetUsingBlockLogger(() => "Middle."))
+                {
+                    middleLogger.Write(() => "Message in middle before bottom.");
+
+                    using (var bottomLogger = middleLogger.GetUsingBlockLogger(() => "Bottom."))
+                    {
+                        bottomLogger.Write(() => "Message in bottom.");
+                    }
+
+                    middleLogger.Write(() => "Message in middle after bottom.");
+                }
+
+                topLogger.Write(() => "Message in top after middle.");
+            }
+
+            items.Select(_ => Invariant($"SubjectSummary: {_.ToString()}; Correlations: {string.Join(",", _.Correlations.OrderBy(c => c.CorrelationId).Select(c => c.ToString()))}")).ToList().ForEach(this.testOutputHelper.WriteLine);
         }
     }
 }

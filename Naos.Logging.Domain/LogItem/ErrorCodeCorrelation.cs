@@ -20,10 +20,16 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorCodeCorrelation"/> class.
         /// </summary>
+        /// <param name="correlationId">An identifier used to correlate multiple log-items.</param>
         /// <param name="errorCodeKey">Key used to get the error code.</param>
         /// <param name="errorCode">Error code.</param>
-        public ErrorCodeCorrelation(string errorCodeKey, string errorCode)
+        public ErrorCodeCorrelation(string correlationId, string errorCodeKey, string errorCode)
         {
+            if (string.IsNullOrWhiteSpace(correlationId))
+            {
+                throw new ArgumentException(Invariant($"{nameof(correlationId)} is null or white space"));
+            }
+
             if (string.IsNullOrWhiteSpace(errorCodeKey))
             {
                 throw new ArgumentException(Invariant($"{nameof(errorCodeKey)} is null or white space"));
@@ -34,9 +40,13 @@ namespace Naos.Logging.Domain
                 throw new ArgumentException(Invariant($"{nameof(errorCode)} is null or white space"));
             }
 
+            this.CorrelationId = correlationId;
             this.ErrorCodeKey = errorCodeKey;
             this.ErrorCode = errorCode;
         }
+
+        /// <inheritdoc />
+        public string CorrelationId { get; private set; }
 
         /// <summary>
         /// Gets the error code prefix.
@@ -49,6 +59,9 @@ namespace Naos.Logging.Domain
         public string ErrorCode { get; private set; }
 
         /// <inheritdoc />
-        public string CorrelationId => this.ErrorCodeKey + ":" + this.ErrorCode;
+        public override string ToString()
+        {
+            return Invariant($"{nameof(this.CorrelationId)}:{this.CorrelationId} - ErrorCode {this.ErrorCodeKey}={this.ErrorCode}");
+        }
     }
 }

@@ -42,5 +42,11 @@ namespace Naos.Logging.Domain
         /// Gets the elapsed time in the correlation.
         /// </summary>
         public TimeSpan ElapsedTime { get; private set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return Invariant($"{nameof(this.CorrelationId)}:{this.CorrelationId} - {nameof(this.ElapsedTime)}={this.ElapsedTime}");
+        }
     }
 }

@@ -130,13 +130,13 @@ namespace Naos.Logging.Domain
 
                 var exceptionId = correlatingException.GetExceptionIdFromExceptionData().ToString();
 
-                var exceptionCorrelation = new ExceptionIdCorrelation(exceptionId);
+                var exceptionCorrelation = new ExceptionIdCorrelation(exceptionId,exceptionId);
                 correlations.Add(exceptionCorrelation);
 
                 var errorCode = loggedException.GetErrorCode();
                 if (!string.IsNullOrWhiteSpace(errorCode))
                 {
-                    var errorCodeCorrelation = new ErrorCodeCorrelation(localErrorCodeKeyField, errorCode);
+                    var errorCodeCorrelation = new ErrorCodeCorrelation(Guid.NewGuid().ToString().ToUpperInvariant(),localErrorCodeKeyField, errorCode);
                     correlations.Add(errorCodeCorrelation);
                 }
 

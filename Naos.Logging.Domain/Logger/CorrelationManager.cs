@@ -84,14 +84,15 @@ namespace Naos.Logging.Domain
                 throw new ArgumentNullException(Invariant($"Cannot have a null {nameof(correlatingSubjectFunc)}."));
             }
 
-            var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToUpperInvariant();
-            if (this.correlationIdToPositionMap.ContainsKey(localCorrelationId))
-            {
-                throw new ArgumentException(Invariant($"Cannot add an subject correlation twice with the same key; {nameof(correlationId)}={localCorrelationId}"));
-            }
-
             lock (this.correlationIdToEvaluatedSubjectMapSync)
             {
+                var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToUpperInvariant();
+                if (this.correlationIdToEvaluatedSubjectMap.ContainsKey(localCorrelationId))
+                {
+                    throw new ArgumentException(Invariant(
+                        $"Cannot add an subject correlation twice with the same key; {nameof(correlationId)}={localCorrelationId}"));
+                }
+
                 var evaluatedSubject = new EvaluatedSubject(correlatingSubjectFunc);
                 this.correlationIdToEvaluatedSubjectMap.Add(localCorrelationId, evaluatedSubject);
             }
@@ -100,14 +101,15 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public void AddElapsedCorrelation(string correlationId = null)
         {
-            var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToUpperInvariant();
-            if (this.correlationIdToPositionMap.ContainsKey(localCorrelationId))
-            {
-                throw new ArgumentException(Invariant($"Cannot add an elapsed correlation twice with the same key; {nameof(correlationId)}={localCorrelationId}"));
-            }
-
             lock (this.correlationIdToStopwatchMapSync)
             {
+                var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToUpperInvariant();
+                if (this.correlationIdToStopwatchMap.ContainsKey(localCorrelationId))
+                {
+                    throw new ArgumentException(Invariant(
+                        $"Cannot add an elapsed correlation twice with the same key; {nameof(correlationId)}={localCorrelationId}"));
+                }
+
                 var stopWatch = new Stopwatch();
                 this.correlationIdToStopwatchMap.Add(localCorrelationId, stopWatch);
             }
@@ -116,14 +118,15 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public void AddOrderCorrelation(int startingIndex = 0, string correlationId = null)
         {
-            var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToUpperInvariant();
-            if (this.correlationIdToPositionMap.ContainsKey(localCorrelationId))
-            {
-                throw new ArgumentException(Invariant($"Cannot add an order correlation twice with the same key; {nameof(correlationId)}={localCorrelationId}"));
-            }
-
             lock (this.correlationIdToPositionMapSync)
             {
+                var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToUpperInvariant();
+                if (this.correlationIdToPositionMap.ContainsKey(localCorrelationId))
+                {
+                    throw new ArgumentException(Invariant(
+                        $"Cannot add an order correlation twice with the same key; {nameof(correlationId)}={localCorrelationId}"));
+                }
+
                 this.correlationIdToPositionMap.Add(localCorrelationId, startingIndex);
             }
         }

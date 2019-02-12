@@ -20,23 +20,23 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="SubjectCorrelation"/> class.
         /// </summary>
         /// <param name="correlationId">An identifier used to correlate multiple log-items.</param>
-        /// <param name="correlatingSubject">The correlating subject.</param>
+        /// <param name="subject">The correlating subject.</param>
         public SubjectCorrelation(
             string correlationId,
-            Subject correlatingSubject)
+            Subject subject)
         {
             if (string.IsNullOrWhiteSpace(correlationId))
             {
                 throw new ArgumentException(Invariant($"{nameof(correlationId)} is null or white space"));
             }
 
-            if (correlatingSubject == null)
+            if (subject == null)
             {
-                throw new ArgumentNullException(nameof(correlatingSubject));
+                throw new ArgumentNullException(nameof(subject));
             }
 
             this.CorrelationId = correlationId;
-            this.CorrelatingSubject = correlatingSubject;
+            this.Subject = subject;
         }
 
         /// <inheritdoc />
@@ -45,6 +45,12 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Gets the correlating subject.
         /// </summary>
-        public Subject CorrelatingSubject { get; private set; }
+        public Subject Subject { get; private set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return Invariant($"{nameof(this.CorrelationId)}:{this.CorrelationId} - {nameof(this.Subject)}.{nameof(this.Subject.Summary)}={this.Subject.Summary}");
+        }
     }
 }

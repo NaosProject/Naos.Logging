@@ -514,7 +514,7 @@ namespace Naos.Logging.Test
             logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is SubjectCorrelation).CorrelationId).Distinct().Count().Should()
                 .Be(logWriter.LoggedItems.Count);
             logWriter.LoggedItems.ToList().ForEach(
-                _ => ((SubjectCorrelation)_.Correlations.Single(c => c is SubjectCorrelation)).CorrelatingSubject
+                _ => ((SubjectCorrelation)_.Correlations.Single(c => c is SubjectCorrelation)).Subject
                     .DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test));
 
             var enterItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(ActivityCorrelationPosition.First.ToString(), StringComparison.CurrentCulture));

@@ -111,7 +111,6 @@
     <Compile Include="LogItem\IHaveCorrelationId.cs" />
     <Compile Include="LogItem\Subject.cs" />
     <Compile Include="LogItem\LogItem.cs" />
-    <Compile Include="LogItem\ActivityCorrelation.cs" />
     <Compile Include="LogItem\LogItemKind.cs" />
     <Compile Include="LogItem\LogItemOrigin.cs" />
     <Compile Include="LogItem\LogItemContext.cs" />

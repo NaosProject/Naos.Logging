@@ -403,13 +403,9 @@ namespace Naos.Logging.Persistence
                     correlatingException = loggedException;
                 }
 
-                var correlationId = correlatingException.GetExceptionIdFromExceptionData().ToString();
+                var exceptionId = correlatingException.GetExceptionIdFromExceptionData().ToString();
 
-                var exceptionCorrelatingSubject = new RawSubject(
-                    correlatingException,
-                    BuildSummaryFromSubjectObject(correlatingException));
-
-                var exceptionCorrelation = new ExceptionIdCorrelation(correlationId);
+                var exceptionCorrelation = new ExceptionIdCorrelation(exceptionId,exceptionId);
                 correlations.Add(exceptionCorrelation);
 
                 if (this.errorCodeKeysField?.Any() ?? false)
@@ -419,7 +415,7 @@ namespace Naos.Logging.Persistence
                         var errorCode = loggedException.GetErrorCode(errorCodeKey);
                         if (!string.IsNullOrWhiteSpace(errorCode))
                         {
-                            var errorCodeCorrelation = new ErrorCodeCorrelation(errorCodeKey, errorCode);
+                            var errorCodeCorrelation = new ErrorCodeCorrelation(Guid.NewGuid().ToString().ToUpperInvariant(),errorCodeKey, errorCode);
                             correlations.Add(errorCodeCorrelation);
                         }
                     }

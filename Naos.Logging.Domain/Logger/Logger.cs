@@ -73,9 +73,11 @@ namespace Naos.Logging.Domain
         public ILogDisposable GetUsingBlockLogger(Func<object> correlatingSubjectFunc, string comment = null, string originOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             var nestedCorrelationManager = this.correlationManager.ShallowClone();
-            nestedCorrelationManager.AddSubjectCorrelation(correlatingSubjectFunc, correlationId);
-            nestedCorrelationManager.AddOrderCorrelation(correlationId: correlationId);
-            nestedCorrelationManager.AddElapsedCorrelation(correlationId);
+
+            var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToUpperInvariant();
+            nestedCorrelationManager.AddSubjectCorrelation(correlatingSubjectFunc, localCorrelationId);
+            nestedCorrelationManager.AddOrderCorrelation(correlationId: localCorrelationId);
+            nestedCorrelationManager.AddElapsedCorrelation(localCorrelationId);
             nestedCorrelationManager.AddAdditionalCorrelations(additionalCorrelations);
 
             var result = new UsingBlockLogger(

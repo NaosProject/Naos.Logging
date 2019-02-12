@@ -33,5 +33,11 @@ namespace Naos.Logging.Domain
 
         /// <inheritdoc />
         public string CorrelationId { get; private set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return Invariant($"{nameof(this.CorrelationId)}:{this.CorrelationId}");
+        }
     }
 }
