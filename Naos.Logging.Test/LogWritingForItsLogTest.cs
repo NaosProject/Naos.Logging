@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogWritingTest.cs" company="Naos">
+// <copyright file="LogWritingForItsLogTest.cs" company="Naos">
 //    Copyright (c) Naos 2017. All Rights Reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -9,44 +9,87 @@ namespace Naos.Logging.Test
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
+
     using FakeItEasy;
 
     using FluentAssertions;
 
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
-    using Naos.Serialization.Json;
     using OBeautifulCode.Error.Recipes;
     using Xunit;
-    using Xunit.Abstractions;
+
     using static System.FormattableString;
 
-    public class LogWritingTest
-    {
-        private readonly ITestOutputHelper testOutputHelper;
-        private static InMemoryLogWriter memoryLogWriter;
-        private static string expectedOrigin = LogItemOrigin.NaosLoggingLogger.ToString();
+    using Log = Its.Log.Instrumentation.Log;
 
-        public LogWritingTest(ITestOutputHelper testOutputHelper)
+    public static class LogWritingForItsLogTest
+    {
+        private static InMemoryLogWriter memoryLogWriter;
+
+        [Fact]
+        public static void LogWrite___Should_create_LogItem___When_logging_string_subject_without_comment()
         {
-            this.testOutputHelper = testOutputHelper;
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var subject = "this is a string subject " + A.Dummy<string>();
+
+            // Act
+            Log.Write(subject);
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<string>();
+
+            logItem.Subject.Summary.Should().Be(subject);
+            actualSubject.Should().Be(subject);
+            logItem.Kind.Should().Be(LogItemKind.String);
+            logItem.Comment.Should().BeNull();
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().BeNull();
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
+            logItem.Context.CallingMethod.Should().BeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().BeNull();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            logItem.Correlations.Should().BeEmpty();
         }
 
         [Fact]
-        public void Debug()
+        public static void LogWrite___Should_create_LogItem___When_logging_string_subject_with_comment()
         {
-            var config = new EventLogConfig(
-                new Dictionary<LogItemKind, IReadOnlyCollection<string>>
-                {
-                    { LogItemKind.String, null }, { LogItemKind.Object, null }, { LogItemKind.Exception, null },
-                    { LogItemKind.Unknown, null }, { LogItemKind.Telemetry, null },
-                },
-                shouldCreateSourceIfMissing: true,
-                logName: "CoMetrics",
-                source: "CmLogShipper");
-            var json = new NaosJsonSerializer().SerializeToString(config);
-            this.testOutputHelper.WriteLine(json);
+            // Arrange
+            var logWriter = BuildAndConfigureMemoryLogWriter();
+            var subject = "this is a string subject " + A.Dummy<string>();
+            var comment = "this is a comment " + A.Dummy<string>();
+
+            // Act
+            Log.Write(subject, comment);
+
+            // Assert
+            var logItem = logWriter.LoggedItems.Single();
+            var actualSubject = logItem.Subject.DeserializeSubject<string>();
+
+            logItem.Subject.Summary.Should().Be(subject);
+            actualSubject.Should().Be(subject);
+            logItem.Kind.Should().Be(LogItemKind.String);
+            logItem.Comment.Should().Be(comment);
+
+            logItem.Context.Should().NotBeNull();
+            logItem.Context.StackTrace.Should().BeNull();
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
+            logItem.Context.CallingMethod.Should().BeNullOrWhiteSpace();
+            logItem.Context.CallingType.Should().BeNull();
+            logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+
+            logItem.Correlations.Should().BeEmpty();
         }
 
         [Fact]
@@ -70,7 +113,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -103,7 +146,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -135,7 +178,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -168,7 +211,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -200,7 +243,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -233,7 +276,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -273,7 +316,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -315,7 +358,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -359,7 +402,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -447,49 +490,55 @@ namespace Naos.Logging.Test
             var exceptionToThrow = new InvalidOperationException("Oh no.");
 
             // Act
-            using (var log = Log.GetUsingBlockLogger(() => enterSubject))
+            using (var log = Log.Enter(() => enterSubject))
             {
-                // to make sure the next message doesn't come too quickly for the assert later.
-                Thread.Sleep(1);
                 try
                 {
                     throw exceptionToThrow;
                 }
                 catch (Exception exception)
                 {
-                    log.Write(() => exception);
+                    log.Trace(() => exception);
                 }
 
-                log.Write(() => stringTraceWithLambda);
-                log.Write(() => traceObjectWithLambda);
+                log.Trace(stringTraceWithoutLambda);
+                log.Trace(() => stringTraceWithLambda);
+                log.Trace(() => traceObjectWithLambda);
             }
 
             // Assert
-            //logWriter.LoggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is ActivityCorrelation).Should().NotBeNull());
-            //logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is ActivityCorrelation).CorrelationId).Distinct().Count().Should()
-            //    .Be(1);
-            //logWriter.LoggedItems.ToList().ForEach(
-            //    _ => ((ActivityCorrelation)_.Correlations.Single(c => c is ActivityCorrelation)).CorrelatingSubject
-            //        .DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test));
+            logWriter.LoggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is ElapsedCorrelation).Should().NotBeNull());
+            logWriter.LoggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is SubjectCorrelation).Should().NotBeNull());
+            logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is ElapsedCorrelation).CorrelationId).Distinct().Count().Should()
+                .Be(logWriter.LoggedItems.Count);
+            logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is SubjectCorrelation).CorrelationId).Distinct().Count().Should()
+                .Be(logWriter.LoggedItems.Count);
+            logWriter.LoggedItems.ToList().ForEach(
+                _ => ((SubjectCorrelation)_.Correlations.Single(c => c is SubjectCorrelation)).CorrelatingSubject
+                    .DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test));
 
-            //var enterItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(ActivityCorrelationPosition.First.ToString(), StringComparison.CurrentCulture));
-            //enterItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
-            //var enterCorelation = (ActivityCorrelation)enterItem.Correlations.Single(_ => _ is ActivityCorrelation);
-            //enterCorelation.ElapsedMillisecondsFromFirst.Should().Be(0);
+            var enterItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(ActivityCorrelationPosition.First.ToString(), StringComparison.CurrentCulture));
+            enterItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
+            var enterCorelation = (ElapsedCorrelation)enterItem.Correlations.Single(_ => _ is ElapsedCorrelation);
+            enterCorelation.ElapsedTime.TotalMilliseconds.Should().Be(0);
+            //enterCorelation.CorrelationPosition.Should().Be(ActivityCorrelationPosition.First);
 
-            //var middleItems = logWriter.LoggedItems.Where(
-            //    _ => new[] { exceptionToThrow.Message, stringTraceWithLambda, stringTraceWithoutLambda, traceObjectWithLambda.ToString() }.Any(
-            //        a => _.Subject.Summary.EndsWith(a, StringComparison.CurrentCulture))).ToList();
-            //middleItems.ForEach(_ =>
-            //    {
-            //        var middleCorrelation = (ActivityCorrelation)_.Correlations.Single(s => s is ActivityCorrelation);
-            //        middleCorrelation.ElapsedMillisecondsFromFirst.Should().BeGreaterThan(0);
-            //    });
+            var middleItems = logWriter.LoggedItems.Where(
+                _ => new[] { exceptionToThrow.Message, stringTraceWithLambda, stringTraceWithoutLambda, traceObjectWithLambda.ToString() }.Any(
+                    a => _.Subject.Summary.EndsWith(a, StringComparison.CurrentCulture))).ToList();
+            middleItems.ForEach(_ =>
+            {
+                _.Subject.Summary.Should().StartWith(ActivityCorrelationPosition.Middle.ToString());
+                var middleCorrelation = (ElapsedCorrelation)_.Correlations.Single(s => s is ElapsedCorrelation);
+                //middleCorrelation.CorrelationPosition.Should().Be(ActivityCorrelationPosition.Middle);
+                middleCorrelation.ElapsedTime.TotalMilliseconds.Should().BeGreaterThan(0);
+            });
 
-            //var exitItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(ActivityCorrelationPosition.Last.ToString(), StringComparison.CurrentCulture));
-            //exitItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
-            //var exitCorelation = (ActivityCorrelation)exitItem.Correlations.Single(_ => _ is ActivityCorrelation);
-            //exitCorelation.ElapsedMillisecondsFromFirst.Should().BeGreaterThan(0);
+            var exitItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(ActivityCorrelationPosition.Last.ToString(), StringComparison.CurrentCulture));
+            exitItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
+            var exitCorelation = (ElapsedCorrelation)exitItem.Correlations.Single(_ => _ is ElapsedCorrelation);
+            exitCorelation.ElapsedTime.TotalMilliseconds.Should().BeGreaterThan(0);
+            //exitCorelation.CorrelationPosition.Should().Be(ActivityCorrelationPosition.Last);
         }
 
         [Fact]
@@ -499,26 +548,27 @@ namespace Naos.Logging.Test
             var logWriter = BuildAndConfigureMemoryLogWriter();
 
             // Act
+            Log.Write((string)null);
             Log.Write(() => (string)null);
             Log.Write(() => (DifferentTestObjectWithToString)null);
             Log.Write(() => (Exception)null);
 
-            using (var log = Log.GetUsingBlockLogger(() => (TestObjectWithToString)null))
+            using (var log = Log.Enter(() => (TestObjectWithToString)null))
             {
-                log.Write((Func<string>)null);
-                log.Write(() => (string)null);
-                log.Write(() => (DifferentTestObjectWithToString)null);
-                log.Write(() => (Exception)null);
+                log.Trace(null);
+                log.Trace(() => (string)null);
+                log.Trace(() => (DifferentTestObjectWithToString)null);
+                log.Trace(() => (Exception)null);
             }
 
             // Assert
-            logWriter.LoggedItems.Count.Should().Be(9);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == LogHelper.NullSubjectSummary).Should().Be(4);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.First)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.Last)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
-            var middleItems = logWriter.LoggedItems.Where(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.Middle)}: {LogHelper.NullSubjectSummary}")).ToList();
+            logWriter.LoggedItems.Count.Should().Be(10);
+            logWriter.LoggedItems.Count(_ => _.Subject.Summary == "[null]").Should().Be(4);
+            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.First)}: [null]")).Should().Be(1);
+            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.Last)}: [null]")).Should().Be(1);
+            var middleItems = logWriter.LoggedItems.Where(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.Middle)}: [null]")).ToList();
             middleItems.Count.Should().Be(4);
-            middleItems.Count(_ => _.Context.CallingMethod != null).Should().Be(3, "We have this on everything except the null lambda.");
+            middleItems.Count(_ => _.Context.CallingMethod != null).Should().Be(4, "We have this on everything because the correlating subject has it.");
             middleItems.Count(_ => _.Correlations.Any(c => c is ExceptionIdCorrelation)).Should().Be(0, "Can't know if null is an exception or not.");
         }
 

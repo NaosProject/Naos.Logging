@@ -134,6 +134,7 @@
     <Compile Include="EnumerationTest.cs" />
     <Compile Include="InvalidLogEntryTests.cs" />
     <Compile Include="LogInclusionKindToOriginsMaps.cs" />
+    <Compile Include="LogWritingForItsLogTest.cs" />
     <Compile Include="TimeSlicedFilesLogConfigurationExtensionsTests.cs" />
     <Compile Include="TimeSlicedFilesTests.cs" />
     <Compile Include="InMemoryTests.cs" />
@@ -143,7 +144,7 @@
     <Compile Include="ConsoleTests.cs" />
     <Compile Include="DebugTests.cs" />
     <Compile Include="ShareSerializationTestLogic.cs" />
-    <Compile Include="LogWritingTest.cs" />
+    <Compile Include="LogWritingForNaosLoggerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
