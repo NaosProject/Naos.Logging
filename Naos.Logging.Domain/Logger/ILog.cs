@@ -32,6 +32,7 @@ namespace Naos.Logging.Domain
         /// <param name="correlationId">Optional correlation ID that will be used for each of the block correlations; DEFAULT is a different one for each.</param>
         /// <param name="additionalCorrelations">Optional additional correlations.</param>
         /// <returns>A configured <see cref="ICorrelatingActivityLogger" />.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "With", Justification = "Spelling/name is correct.")]
         ILogDisposable With(Func<object> correlatingSubjectFunc, string defaultCommentOverride = null, string defaultOriginOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null);
 
         /// <summary>

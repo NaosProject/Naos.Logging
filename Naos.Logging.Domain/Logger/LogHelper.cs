@@ -110,12 +110,12 @@ namespace Naos.Logging.Domain
             var kind = DetermineKindFromSubject(subject);
             string stackTrace = null;
 
-            var managedCorrelations = correlationManager.GetNextCorrelations();
+            var managedCorrelations = correlationManager?.GetNextCorrelations() ?? new IHaveCorrelationId[0];
             correlations.AddRange(managedCorrelations);
 
             if (subject is Exception loggedException)
             {
-                var exceptionCorrelations = correlationManager.GetExceptionCorrelations(loggedException);
+                var exceptionCorrelations = correlationManager?.GetExceptionCorrelations(loggedException) ?? new IHaveCorrelationId[0];
                 correlations.AddRange(exceptionCorrelations);
 
                 stackTrace = loggedException.StackTrace;

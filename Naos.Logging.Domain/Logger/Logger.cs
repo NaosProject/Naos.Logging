@@ -69,6 +69,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Preference is lowercase guids.")]
         public ILogDisposable With(Func<object> correlatingSubjectFunc = null, string defaultCommentOverride = null, string defaultOriginOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             var nestedCorrelationManager = this.correlationManager.ShallowClone();

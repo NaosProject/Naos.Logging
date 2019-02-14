@@ -72,7 +72,7 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public void NestedUsings___Correctly_logged_to___Includes_all_correlations()
+        public void NestedUsing___Correctly_logged_to___Includes_all_correlations()
         {
             var items = new List<LogItem>();
             Log.SetCallback(_ => items.Add(_));

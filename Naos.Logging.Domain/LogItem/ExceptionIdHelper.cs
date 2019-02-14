@@ -79,8 +79,8 @@ namespace Naos.Logging.Domain
                 if (localException.Data.Contains(ExceptionIdKey))
                 {
                     var exceptionIdString = localException.Data[ExceptionIdKey]?.ToString();
-                    Guid.TryParse(exceptionIdString, out var result);
-                    return result;
+                    var success = Guid.TryParse(exceptionIdString, out var result);
+                    return success ? result : Guid.Empty;
                 }
                 else
                 {

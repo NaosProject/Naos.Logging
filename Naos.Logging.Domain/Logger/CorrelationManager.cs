@@ -77,6 +77,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Preference is lowercase guids.")]
         public void AddSubjectCorrelation(Func<object> correlatingSubjectFunc, string correlationId = null)
         {
             lock (this.subjectCorrelationsSync)
@@ -89,6 +90,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Preference is lowercase guids.")]
         public void AddElapsedCorrelation(string correlationId = null)
         {
             lock (this.stopwatchCorrelationsSync)
@@ -101,6 +103,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Preference is lowercase guids.")]
         public void AddOrderCorrelation(int startingIndex = 0, string correlationId = null)
         {
             lock (this.positionCorrelationsSync)
@@ -190,6 +193,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Preference is lowercase guids.")]
         public IReadOnlyCollection<IHaveCorrelationId> GetExceptionCorrelations(Exception exception)
         {
             var result = new List<IHaveCorrelationId>();

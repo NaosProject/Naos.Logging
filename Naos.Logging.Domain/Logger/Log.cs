@@ -30,7 +30,7 @@ namespace Naos.Logging.Domain
         /// <param name="additionalCorrelations">Optional additional correlations.</param>
         public static void Write(Func<object> subjectFunc = null, string comment = null, string origin = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
-            Instance.Write(subjectFunc, comment, origin);
+            Instance.Write(subjectFunc, comment, origin, additionalCorrelations);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Naos.Logging.Domain
         /// <returns>A configured <see cref="ICorrelatingActivityLogger" />.</returns>
         public static ILogDisposable With(Func<object> correlatingSubjectFunc, string defaultCommentOverride = null, string defaultOriginOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
-            return Instance.With(correlatingSubjectFunc, defaultCommentOverride, defaultOriginOverride, correlationId);
+            return Instance.With(correlatingSubjectFunc, defaultCommentOverride, defaultOriginOverride, correlationId, additionalCorrelations);
         }
 
         /// <summary>
