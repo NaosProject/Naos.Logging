@@ -77,15 +77,15 @@ namespace Naos.Logging.Test
             var items = new List<LogItem>();
             Log.SetCallback(_ => items.Add(_));
 
-            using (var topLogger = Log.GetUsingBlockLogger(() => "Top."))
+            using (var topLogger = Log.With(() => "Top."))
             {
                 topLogger.Write(() => "Message in top before middle.");
 
-                using (var middleLogger = topLogger.GetUsingBlockLogger(() => "Middle."))
+                using (var middleLogger = topLogger.With(() => "Middle."))
                 {
                     middleLogger.Write(() => "Message in middle before bottom.");
 
-                    using (var bottomLogger = middleLogger.GetUsingBlockLogger(() => "Bottom."))
+                    using (var bottomLogger = middleLogger.With(() => "Bottom."))
                     {
                         bottomLogger.Write(() => "Message in bottom.");
                     }
