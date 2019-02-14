@@ -16,7 +16,7 @@ namespace Naos.Logging.Domain
     public interface IManageCorrelations
     {
         /// <summary>
-        /// Make a shallow clone that can have new correlations but will also persist the existing correlations in sync with this 
+        /// Make a shallow clone that can have new correlations but will also persist the existing correlations in sync with the configured ones.
         /// </summary>
         /// <returns>Cloned <see cref="IManageCorrelations" />.</returns>
         IManageCorrelations ShallowClone();

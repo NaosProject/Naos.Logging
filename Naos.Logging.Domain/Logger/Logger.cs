@@ -8,6 +8,7 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
+    using static System.FormattableString;
 
     /// <summary>
     /// Default implementation of <see cref="ILog" />.  Messages will be sent to a configured <see cref="LogItemHandler" /> which can be configured directly or via LogWriting.Setup in Persistence.
@@ -28,7 +29,7 @@ namespace Naos.Logging.Domain
         /// Initializes a new instance of the <see cref="Logger"/> class.
         /// </summary>
         /// <param name="logItemHandler">Optional <see cref="LogItemHandler" /> to process <see cref="LogItem" />'s; DEFAULT is a null handler.</param>
-        /// <param name="correlationManager">Optional correlation manager potentially with active correlations; DEFAULT is a new <see cref="CorrelationManagerr" />.</param>
+        /// <param name="correlationManager">Optional correlation manager potentially with active correlations; DEFAULT is a new <see cref="CorrelationManager" />.</param>
         /// <param name="defaultOrigin">Optional default origin to use; DEFAULT is <see cref="LogItemOrigin.NaosLoggingLogger" />.</param>
         /// <param name="defaultComment">Optional default comment to use; DEFAULT is null.</param>
         public Logger(LogItemHandler logItemHandler = null, IManageCorrelations correlationManager = null, string defaultOrigin = null, string defaultComment = null)
@@ -47,17 +48,23 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public void Write(Func<object> subjectFunc, string comment = null, string origin = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
-            // what do we pass to build log items to build correlations?  just the manager?  do we foreach correlations we havent seen b/c error doesnt work that way?
+            LogItem logItem = null;
             try
             {
-                var logItem = LogHelper.BuildLogItem(this.correlationManager, subjectFunc, comment ?? this.defaultComment, origin ?? this.defaultOrigin, additionalCorrelations: additionalCorrelations);
+                logItem = LogHelper.BuildLogItem(this.correlationManager, subjectFunc, comment ?? this.defaultComment, origin ?? this.defaultOrigin, additionalCorrelations: additionalCorrelations);
+            }
+            catch (Exception failedToBuildException)
+            {
+                LastDitchLogger.LogError(Invariant($"Error in {this.GetType().FullName}.{nameof(this.Write)} - {nameof(failedToBuildException)}: {failedToBuildException}"));
+            }
+
+            try
+            {
                 this.logItemHandler(logItem);
             }
-            catch (Exception e)
+            catch (Exception failedToWriteException)
             {
-                // what do we log? should we tostring the subject? should we use a more permissive serializer?
-                // could have failed to build log item issue...
-                LastDitchLogger.LogError("");
+                LastDitchLogger.LogError(Invariant($"Error in {this.GetType().FullName}.{nameof(this.Write)} - {nameof(failedToWriteException)}: {failedToWriteException}"));
             }
         }
 

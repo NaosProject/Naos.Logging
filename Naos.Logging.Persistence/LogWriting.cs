@@ -201,18 +201,18 @@ namespace Naos.Logging.Persistence
                 }
                 catch (Exception failedToLogException)
                 {
-                    var message = "Super failed";
+                    string message;
                     try
                     {
-
-                    var logPayload = new Tuple<LogItem, string, Exception>(logItem, logWriter.ToString(), failedToLogException);
-                    message = LogWriterBase.DefaultLogItemSerializer.SerializeToString(logPayload);
+                        var logPayload = new Tuple<LogItem, string, Exception>(logItem, logWriter.ToString(), failedToLogException);
+                        message = LogWriterBase.DefaultLogItemSerializer.SerializeToString(logPayload);
                     }
                     catch (Exception failedToSerialize)
                     {
-                        message = "";
+                        message = Invariant($"Error in {this.GetType().FullName}.{nameof(this.LogToActiveLogWriters)} - {nameof(failedToLogException)}: {failedToLogException} - {nameof(failedToSerialize)}: {failedToSerialize}");
                     }
-                    //LastDitchLogger.LogErrorFromLogItemAndWriter(logPayloadJson);
+
+                    LastDitchLogger.LogError(message);
                 }
             }
         }

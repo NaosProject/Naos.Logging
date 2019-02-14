@@ -9,7 +9,6 @@ namespace Naos.Logging.Test
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using FakeItEasy;
 
     using FluentAssertions;
@@ -24,13 +23,19 @@ namespace Naos.Logging.Test
 
     public class LogWritingForNaosLoggerTest
     {
+        private readonly string expectedOrigin = LogItemOrigin.NaosLoggingLogger.ToString();
+        private readonly List<LogItem> loggedItems = new List<LogItem>();
         private readonly ITestOutputHelper testOutputHelper;
-        private static InMemoryLogWriter memoryLogWriter;
-        private static string expectedOrigin = LogItemOrigin.NaosLoggingLogger.ToString();
 
         public LogWritingForNaosLoggerTest(ITestOutputHelper testOutputHelper)
         {
             this.testOutputHelper = testOutputHelper;
+            Log.SetCallback(this.SaveLogItems);
+        }
+
+        private void SaveLogItems(LogItem logItem)
+        {
+            this.loggedItems.Add(logItem);
         }
 
         [Fact]
@@ -43,24 +48,23 @@ namespace Naos.Logging.Test
                     { LogItemKind.Unknown, null }, { LogItemKind.Telemetry, null },
                 },
                 shouldCreateSourceIfMissing: true,
-                logName: "CoMetrics",
-                source: "CmLogShipper");
+                logName: "NaosLoggingTestLogName",
+                source: "NaosLoggingTestSource");
             var json = new NaosJsonSerializer().SerializeToString(config);
             this.testOutputHelper.WriteLine(json);
         }
 
         [Fact]
-        public static void LogWrite___Should_create_LogItem___When_logging_string_subject_via_lambda_without_comment()
+        public void LogWrite___Should_create_LogItem___When_logging_string_subject_via_lambda_without_comment()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
             var subject = "this is a string subject " + A.Dummy<string>();
 
             // Act
             Log.Write(() => subject);
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = this.loggedItems.Single();
             var actualSubject = logItem.Subject.DeserializeSubject<string>();
 
             logItem.Subject.Summary.Should().Be(subject);
@@ -70,7 +74,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(this.expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -82,10 +86,9 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public static void LogWrite___Should_create_LogItem___When_logging_real_object_subject_via_lambda_with_comment()
+        public void LogWrite___Should_create_LogItem___When_logging_real_object_subject_via_lambda_with_comment()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
             var subject = new TestObjectWithToString();
             var comment = "this is a comment " + A.Dummy<string>();
 
@@ -93,7 +96,7 @@ namespace Naos.Logging.Test
             Log.Write(() => subject, comment);
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = this.loggedItems.Single();
             var actualSubject = logItem.Subject.DeserializeSubject<TestObjectWithToString>();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
@@ -103,7 +106,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(this.expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -115,17 +118,16 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public static void LogWrite___Should_create_LogItem___When_logging_real_object_subject_via_lambda_without_comment()
+        public void LogWrite___Should_create_LogItem___When_logging_real_object_subject_via_lambda_without_comment()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
             var subject = new TestObjectWithToString();
 
             // Act
             Log.Write(() => subject);
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = this.loggedItems.Single();
             var actualSubject = logItem.Subject.DeserializeSubject<TestObjectWithToString>();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
@@ -135,7 +137,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(this.expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -147,10 +149,9 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public static void LogWrite___Should_create_LogItem___When_logging_anonymous_object_subject_via_lambda_with_comment()
+        public void LogWrite___Should_create_LogItem___When_logging_anonymous_object_subject_via_lambda_with_comment()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
             var subject = new { Message = "hello" };
             var comment = "this is a comment " + A.Dummy<string>();
 
@@ -158,7 +159,7 @@ namespace Naos.Logging.Test
             Log.Write(() => subject, comment);
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = this.loggedItems.Single();
             dynamic actualSubject = logItem.Subject.DeserializeSubject();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
@@ -168,7 +169,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(this.expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -180,17 +181,16 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public static void LogWrite___Should_create_LogItem___When_logging_anonymous_object_subject_via_lambda_without_comment()
+        public void LogWrite___Should_create_LogItem___When_logging_anonymous_object_subject_via_lambda_without_comment()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
             var subject = new { Message = "hello" };
 
             // Act
             Log.Write(() => subject);
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = this.loggedItems.Single();
             dynamic actualSubject = logItem.Subject.DeserializeSubject();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
@@ -200,7 +200,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(this.expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -212,10 +212,9 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public static void LogWrite___Should_create_LogItem___When_logging_string_subject_via_lambda_with_comment()
+        public void LogWrite___Should_create_LogItem___When_logging_string_subject_via_lambda_with_comment()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
             var subject = "this is a string subject " + A.Dummy<string>();
             var comment = "this is a comment " + A.Dummy<string>();
 
@@ -223,7 +222,7 @@ namespace Naos.Logging.Test
             Log.Write(() => subject, comment);
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = this.loggedItems.Single();
             var actualSubject = logItem.Subject.DeserializeSubject<string>();
 
             logItem.Subject.Summary.Should().Be(subject);
@@ -233,7 +232,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().BeNull();
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(this.expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.Should().NotBeNull();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -245,10 +244,9 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public static void Log_Write___Records_details_correctly___With_exception_and_no_comment()
+        public void Log_Write___Records_details_correctly___With_exception_and_no_comment()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
             var exceptionMessage = "Exception " + A.Dummy<string>();
 
             // Act
@@ -262,7 +260,7 @@ namespace Naos.Logging.Test
             }
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = this.loggedItems.Single();
             var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
 
             logItem.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {exceptionMessage}"));
@@ -273,7 +271,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(this.expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -286,10 +284,9 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public static void Log_Write___Records_details_correctly___With_exception_and_comment()
+        public void Log_Write___Records_details_correctly___With_exception_and_comment()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
             var exceptionMessage = "Exception " + A.Dummy<string>();
             var comment = "this is a comment " + A.Dummy<string>();
 
@@ -304,7 +301,7 @@ namespace Naos.Logging.Test
             }
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = this.loggedItems.Single();
             var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
 
             logItem.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {exceptionMessage}"));
@@ -315,7 +312,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(this.expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -329,10 +326,9 @@ namespace Naos.Logging.Test
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Need lowercase.")]
         [Fact]
-        public static void Log_Write___Records_details_correctly___With_exception_and_comment_and_error_code()
+        public void Log_Write___Records_details_correctly___With_exception_and_comment_and_error_code()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
             var exceptionMessage = "Exception " + A.Dummy<string>();
             var comment = "this is a comment " + A.Dummy<string>();
             var errorCode = "errorCode" + Guid.NewGuid().ToString().ToLowerInvariant();
@@ -348,7 +344,7 @@ namespace Naos.Logging.Test
             }
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = this.loggedItems.Single();
             var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
 
             logItem.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {exceptionMessage}"));
@@ -359,7 +355,7 @@ namespace Naos.Logging.Test
 
             logItem.Context.Should().NotBeNull();
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
-            logItem.Context.Origin.Should().Be(expectedOrigin);
+            logItem.Context.Origin.Should().Be(this.expectedOrigin);
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
             logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
@@ -375,10 +371,9 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public static void Log_Write___Records_details_correctly___With_exception_and_inner_exception()
+        public void Log_Write___Records_details_correctly___With_exception_and_inner_exception()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
             var exceptionMessage = "Exception " + A.Dummy<string>();
             var innerExceptionMessage = "Exception to inner " + A.Dummy<string>();
 
@@ -401,10 +396,10 @@ namespace Naos.Logging.Test
             }
 
             // Assert
-            var timeOrderedItems = logWriter.LoggedItems.OrderBy(_ => _.Context.TimestampUtc).ToList();
+            var timeOrderedItems = this.loggedItems.OrderBy(_ => _.Context.TimestampUtc).ToList();
             timeOrderedItems.Count.Should().Be(2);
-            var logItemInner = logWriter.LoggedItems.First();
-            var logItem = logWriter.LoggedItems.Last();
+            var logItemInner = this.loggedItems.First();
+            var logItem = this.loggedItems.Last();
 
             var innerSubject = logItemInner.Subject.DeserializeSubject<InvalidOperationException>();
             var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
@@ -435,11 +430,9 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public static void Log_Enter_Activity_Trace___Records_details_correctly___With_exception_and_comment()
+        public void Log_Enter_Activity_Trace___Records_details_correctly___With_exception_and_comment()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
-
             var enterSubject = new TestObjectWithToString();
             var stringTraceWithoutLambda = "some trace without a lambda" + A.Dummy<string>();
             var stringTraceWithLambda = "some trace with a lambda" + A.Dummy<string>();
@@ -450,7 +443,6 @@ namespace Naos.Logging.Test
             using (var log = Log.With(() => enterSubject))
             {
                 // to make sure the next message doesn't come too quickly for the assert later.
-                Thread.Sleep(1);
                 try
                 {
                     throw exceptionToThrow;
@@ -465,19 +457,19 @@ namespace Naos.Logging.Test
             }
 
             // Assert
-            //logWriter.LoggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is ActivityCorrelation).Should().NotBeNull());
-            //logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is ActivityCorrelation).CorrelationId).Distinct().Count().Should()
+            //this.loggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is ActivityCorrelation).Should().NotBeNull());
+            //this.loggedItems.Select(_ => _.Correlations.Single(c => c is ActivityCorrelation).CorrelationId).Distinct().Count().Should()
             //    .Be(1);
-            //logWriter.LoggedItems.ToList().ForEach(
+            //this.loggedItems.ToList().ForEach(
             //    _ => ((ActivityCorrelation)_.Correlations.Single(c => c is ActivityCorrelation)).CorrelatingSubject
             //        .DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test));
 
-            //var enterItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(RelativePosition.First.ToString(), StringComparison.CurrentCulture));
+            //var enterItem = this.loggedItems.Single(_ => _.Subject.Summary.StartsWith(RelativePosition.First.ToString(), StringComparison.CurrentCulture));
             //enterItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
             //var enterCorelation = (ActivityCorrelation)enterItem.Correlations.Single(_ => _ is ActivityCorrelation);
             //enterCorelation.ElapsedMillisecondsFromFirst.Should().Be(0);
 
-            //var middleItems = logWriter.LoggedItems.Where(
+            //var middleItems = this.loggedItems.Where(
             //    _ => new[] { exceptionToThrow.Message, stringTraceWithLambda, stringTraceWithoutLambda, traceObjectWithLambda.ToString() }.Any(
             //        a => _.Subject.Summary.EndsWith(a, StringComparison.CurrentCulture))).ToList();
             //middleItems.ForEach(_ =>
@@ -486,17 +478,16 @@ namespace Naos.Logging.Test
             //        middleCorrelation.ElapsedMillisecondsFromFirst.Should().BeGreaterThan(0);
             //    });
 
-            //var exitItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(RelativePosition.Last.ToString(), StringComparison.CurrentCulture));
+            //var exitItem = this.loggedItems.Single(_ => _.Subject.Summary.StartsWith(RelativePosition.Last.ToString(), StringComparison.CurrentCulture));
             //exitItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
             //var exitCorelation = (ActivityCorrelation)exitItem.Correlations.Single(_ => _ is ActivityCorrelation);
             //exitCorelation.ElapsedMillisecondsFromFirst.Should().BeGreaterThan(0);
         }
 
         [Fact]
-        public static void Log_Write___Should_make_null_subject_LogItem___When_nulls_written()
+        public void Log_Write___Should_make_null_subject_LogItem___When_nulls_written()
         {
             // Arrange
-            var logWriter = BuildAndConfigureMemoryLogWriter();
 
             // Act
             Log.Write(() => (string)null);
@@ -512,11 +503,11 @@ namespace Naos.Logging.Test
             }
 
             // Assert
-            logWriter.LoggedItems.Count.Should().Be(9);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == LogHelper.NullSubjectSummary).Should().Be(4);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.First)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.Last)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
-            var middleItems = logWriter.LoggedItems.Where(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.Middle)}: {LogHelper.NullSubjectSummary}")).ToList();
+            this.loggedItems.Count.Should().Be(9);
+            this.loggedItems.Count(_ => _.Subject.Summary == LogHelper.NullSubjectSummary).Should().Be(4);
+            this.loggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.First)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
+            this.loggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.Last)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
+            var middleItems = this.loggedItems.Where(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.Middle)}: {LogHelper.NullSubjectSummary}")).ToList();
             middleItems.Count.Should().Be(4);
             middleItems.Count(_ => _.Context.CallingMethod != null).Should().Be(3, "We have this on everything except the null lambda.");
             middleItems.Count(_ => _.Correlations.Any(c => c is ExceptionIdCorrelation)).Should().Be(0, "Can't know if null is an exception or not.");
@@ -542,23 +533,6 @@ namespace Naos.Logging.Test
             {
                 return "hjhjhjhjhjhjhjhjhj";
             }
-        }
-
-        private static InMemoryLogWriter BuildAndConfigureMemoryLogWriter()
-        {
-            if (memoryLogWriter == null)
-            {
-                var memoryLogConfig = new InMemoryLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>());
-                memoryLogWriter = new InMemoryLogWriter(memoryLogConfig);
-                var settings = new LogWritingSettings();
-                LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] { memoryLogWriter }, errorCodeKeys: new[] { Constants.ExceptionDataKeyForErrorCode });
-            }
-            else
-            {
-                memoryLogWriter.PurgeAllLoggedItems();
-            }
-
-            return memoryLogWriter;
         }
     }
 }

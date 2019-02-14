@@ -9,7 +9,7 @@ namespace Naos.Logging.Test
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using System.Threading;
     using FakeItEasy;
 
     using FluentAssertions;
@@ -25,6 +25,8 @@ namespace Naos.Logging.Test
 
     public static class LogWritingForItsLogTest
     {
+        private static readonly object MemoryLogWriterSync = new object();
+
         private static InMemoryLogWriter memoryLogWriter;
 
         [Fact]
@@ -69,6 +71,7 @@ namespace Naos.Logging.Test
 
             // Act
             Log.Write(subject, comment);
+            Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
             var logItem = logWriter.LoggedItems.Single();
@@ -101,6 +104,7 @@ namespace Naos.Logging.Test
 
             // Act
             Log.Write(() => subject);
+            Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
             var logItem = logWriter.LoggedItems.Single();
@@ -134,6 +138,7 @@ namespace Naos.Logging.Test
 
             // Act
             Log.Write(() => subject, comment);
+            Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
             var logItem = logWriter.LoggedItems.Single();
@@ -166,6 +171,7 @@ namespace Naos.Logging.Test
 
             // Act
             Log.Write(() => subject);
+            Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
             var logItem = logWriter.LoggedItems.Single();
@@ -199,6 +205,7 @@ namespace Naos.Logging.Test
 
             // Act
             Log.Write(() => subject, comment);
+            Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
             var logItem = logWriter.LoggedItems.Single();
@@ -231,6 +238,7 @@ namespace Naos.Logging.Test
 
             // Act
             Log.Write(() => subject);
+            Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
             var logItem = logWriter.LoggedItems.Single();
@@ -264,6 +272,7 @@ namespace Naos.Logging.Test
 
             // Act
             Log.Write(() => subject, comment);
+            Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
             var logItem = logWriter.LoggedItems.Single();
@@ -596,19 +605,24 @@ namespace Naos.Logging.Test
 
         private static InMemoryLogWriter BuildAndConfigureMemoryLogWriter()
         {
-            if (memoryLogWriter == null)
+            lock (MemoryLogWriterSync)
             {
-                var memoryLogConfig = new InMemoryLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>());
-                memoryLogWriter = new InMemoryLogWriter(memoryLogConfig);
-                var settings = new LogWritingSettings();
-                LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] { memoryLogWriter }, errorCodeKeys: new[] { Constants.ExceptionDataKeyForErrorCode });
-            }
-            else
-            {
-                memoryLogWriter.PurgeAllLoggedItems();
-            }
+                if (memoryLogWriter == null)
+                {
+                    var memoryLogConfig =
+                        new InMemoryLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>());
+                    memoryLogWriter = new InMemoryLogWriter(memoryLogConfig);
+                    var settings = new LogWritingSettings();
+                    LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] {memoryLogWriter},
+                        errorCodeKeys: new[] {Constants.ExceptionDataKeyForErrorCode});
+                }
+                else
+                {
+                    memoryLogWriter.PurgeAllLoggedItems();
+                }
 
-            return memoryLogWriter;
+                return memoryLogWriter;
+            }
         }
     }
 }
