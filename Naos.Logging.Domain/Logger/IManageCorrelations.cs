@@ -8,6 +8,7 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
+    using OBeautifulCode.Error.Recipes;
 
     /// <summary>
     /// Interface for a client facing logger.
@@ -41,6 +42,13 @@ namespace Naos.Logging.Domain
         void AddOrderCorrelation(int startingIndex = 0, string correlationId = null);
 
         /// <summary>
+        /// Prepare for exception correlations by setting the error code key or a specific correlation ID.
+        /// </summary>
+        /// <param name="errorCodeKey">Error code key to use to extract error code if any.</param>
+        /// <param name="correlationId">Optional correlation id; DEFAULT is new Guid.</param>
+        void PrepareExceptionCorrelations(string errorCodeKey = Constants.ExceptionDataKeyForErrorCode, string correlationId = null);
+
+        /// <summary>
         /// Add additional arbitrary correlations to be used for each message.
         /// </summary>
         /// <param name="newAdditionalCorrelations">Additional Correlations that have already been prepared.</param>
@@ -51,5 +59,12 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <returns>The set of correlations to be logged next.</returns>
         IReadOnlyCollection<IHaveCorrelationId> GetNextCorrelations();
+
+        /// <summary>
+        /// Gets the correlations that are derived from the exception provided, if any.
+        /// </summary>
+        /// <param name="exception">Exception to examine.</param>
+        /// <returns>The set of correlations associated with the exception; if none then empty collection.</returns>
+        IReadOnlyCollection<IHaveCorrelationId> GetExceptionCorrelations(Exception exception);
     }
 }

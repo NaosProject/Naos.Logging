@@ -25,26 +25,26 @@ namespace Naos.Logging.Domain
         /// Write a message.
         /// </summary>
         /// <param name="subjectFunc">Function to get the subject.</param>
-        /// <param name="comment">Optional comment.</param>
-        /// <param name="originOverride">Optional origin override.</param>
+        /// <param name="comment">Optional defaultCommentOverride.</param>
+        /// <param name="origin">Optional origin override.</param>
         /// <param name="additionalCorrelations">Optional additional correlations.</param>
-        public static void Write(Func<object> subjectFunc, string comment = null, string originOverride = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
+        public static void Write(Func<object> subjectFunc = null, string comment = null, string origin = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
-            Instance.Write(subjectFunc, comment, originOverride);
+            Instance.Write(subjectFunc, comment, origin);
         }
 
         /// <summary>
-        /// GetUsingBlockLogger into a logged activity.
+        /// With into a logged activity.
         /// </summary>
         /// <param name="correlatingSubjectFunc">Function to get the correlating subject.</param>
-        /// <param name="comment">Optional comment.</param>
-        /// <param name="originOverride">Optional origin override.</param>
+        /// <param name="defaultCommentOverride">Optional defaultCommentOverride.</param>
+        /// <param name="defaultOriginOverride">Optional origin override.</param>
         /// <param name="correlationId">Optional correlation ID that will be used for each of the block correlations; DEFAULT is a different one for each.</param>
         /// <param name="additionalCorrelations">Optional additional correlations.</param>
         /// <returns>A configured <see cref="ICorrelatingActivityLogger" />.</returns>
-        public static ILogDisposable GetUsingBlockLogger(Func<object> correlatingSubjectFunc, string comment = null, string originOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
+        public static ILogDisposable With(Func<object> correlatingSubjectFunc, string defaultCommentOverride = null, string defaultOriginOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
-            return Instance.GetUsingBlockLogger(correlatingSubjectFunc, comment, originOverride, correlationId);
+            return Instance.With(correlatingSubjectFunc, defaultCommentOverride, defaultOriginOverride, correlationId);
         }
 
         /// <summary>

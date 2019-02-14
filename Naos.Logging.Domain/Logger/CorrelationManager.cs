@@ -10,6 +10,7 @@ namespace Naos.Logging.Domain
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using OBeautifulCode.Error.Recipes;
 
     using static System.FormattableString;
 
@@ -18,13 +19,15 @@ namespace Naos.Logging.Domain
     /// </summary>
     public class CorrelationManager : IManageCorrelations
     {
-        private readonly object correlationIdToEvaluatedSubjectMapSync = new object();
-        private readonly Dictionary<string, EvaluatedSubject> correlationIdToEvaluatedSubjectMap;
-        private readonly object correlationIdToStopwatchMapSync = new object();
-        private readonly Dictionary<string, Stopwatch> correlationIdToStopwatchMap;
-        private readonly object correlationIdToPositionMapSync = new object();
-        private readonly Dictionary<string, int> correlationIdToPositionMap;
+        private readonly object subjectCorrelationsSync = new object();
+        private readonly List<ManagedCorrelation<EvaluatedSubject>> subjectCorrelations;
+        private readonly object stopwatchCorrelationsSync = new object();
+        private readonly List<ManagedCorrelation<Stopwatch>> stopwatchCorrelations;
+        private readonly object positionCorrelationsSync = new object();
+        private readonly List<ManagedCorrelation<int>> positionCorrelations;
         private readonly object additionalCorrelationsSync = new object();
+        private string errorCodeKeyField = Constants.ExceptionDataKeyForErrorCode;
+        private string exceptionCorrelationsCorrelationId;
         private IList<IHaveCorrelationId> additionalCorrelations;
 
         /// <summary>
@@ -36,39 +39,36 @@ namespace Naos.Logging.Domain
         }
 
         private CorrelationManager(
-            Dictionary<string, EvaluatedSubject> correlationIdToEvaluatedSubjectMap = null,
-            Dictionary<string, Stopwatch> correlationIdToStopwatchMap = null,
-            Dictionary<string, int> correlationIdToPositionMap = null,
+            List<ManagedCorrelation<EvaluatedSubject>> subjectCorrelations = null,
+            List<ManagedCorrelation<Stopwatch>> stopwatchCorrelations = null,
+            List<ManagedCorrelation<int>> positionCorrelations = null,
             IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
-            this.correlationIdToEvaluatedSubjectMap = correlationIdToEvaluatedSubjectMap ?? new Dictionary<string, EvaluatedSubject>();
-            this.correlationIdToStopwatchMap = correlationIdToStopwatchMap ?? new Dictionary<string, Stopwatch>();
-            this.correlationIdToPositionMap = correlationIdToPositionMap ?? new Dictionary<string, int>();
+            this.subjectCorrelations = subjectCorrelations ?? new List<ManagedCorrelation<EvaluatedSubject>>();
+            this.stopwatchCorrelations = stopwatchCorrelations ?? new List<ManagedCorrelation<Stopwatch>>();
+            this.positionCorrelations = positionCorrelations ?? new List<ManagedCorrelation<int>>();
             this.additionalCorrelations = additionalCorrelations?.ToList() ?? new List<IHaveCorrelationId>();
         }
 
         /// <inheritdoc />
         public IManageCorrelations ShallowClone()
         {
-            lock (this.correlationIdToEvaluatedSubjectMapSync)
+            lock (this.subjectCorrelationsSync)
             {
-                lock (this.correlationIdToStopwatchMapSync)
+                lock (this.stopwatchCorrelationsSync)
                 {
-                    lock (this.correlationIdToPositionMapSync)
+                    lock (this.positionCorrelationsSync)
                     {
                         lock (this.additionalCorrelationsSync)
                         {
-                            var newCorrelationIdToEvaluatedSubjectMap =
-                                this.correlationIdToEvaluatedSubjectMap.ToDictionary(k => k.Key, v => v.Value);
-                            var newCorrelationIdToStopwatchMap =
-                                this.correlationIdToStopwatchMap.ToDictionary(k => k.Key, v => v.Value);
-                            var newCorrelationIdToPositionMap =
-                                this.correlationIdToPositionMap.ToDictionary(k => k.Key, v => v.Value);
+                            var newSubjectCorrelations = this.subjectCorrelations.Select(_ => _).ToList();
+                            var newStopwatchCorrelations = this.stopwatchCorrelations.Select(_ => _).ToList();
+                            var newPositionCorrelations = this.positionCorrelations.Select(_ => _).ToList();
 
                             var result = new CorrelationManager(
-                                newCorrelationIdToEvaluatedSubjectMap,
-                                newCorrelationIdToStopwatchMap,
-                                newCorrelationIdToPositionMap);
+                                newSubjectCorrelations,
+                                newStopwatchCorrelations,
+                                newPositionCorrelations);
                             return result;
                         }
                     }
@@ -79,56 +79,43 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public void AddSubjectCorrelation(Func<object> correlatingSubjectFunc, string correlationId = null)
         {
-            if (correlatingSubjectFunc == null)
+            lock (this.subjectCorrelationsSync)
             {
-                throw new ArgumentNullException(Invariant($"Cannot have a null {nameof(correlatingSubjectFunc)}."));
-            }
-
-            lock (this.correlationIdToEvaluatedSubjectMapSync)
-            {
-                var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToUpperInvariant();
-                if (this.correlationIdToEvaluatedSubjectMap.ContainsKey(localCorrelationId))
-                {
-                    throw new ArgumentException(Invariant(
-                        $"Cannot add an subject correlation twice with the same key; {nameof(correlationId)}={localCorrelationId}"));
-                }
+                var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToLowerInvariant();
 
                 var evaluatedSubject = new EvaluatedSubject(correlatingSubjectFunc);
-                this.correlationIdToEvaluatedSubjectMap.Add(localCorrelationId, evaluatedSubject);
+                this.subjectCorrelations.Add(new ManagedCorrelation<EvaluatedSubject>(localCorrelationId, evaluatedSubject));
             }
         }
 
         /// <inheritdoc />
         public void AddElapsedCorrelation(string correlationId = null)
         {
-            lock (this.correlationIdToStopwatchMapSync)
+            lock (this.stopwatchCorrelationsSync)
             {
-                var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToUpperInvariant();
-                if (this.correlationIdToStopwatchMap.ContainsKey(localCorrelationId))
-                {
-                    throw new ArgumentException(Invariant(
-                        $"Cannot add an elapsed correlation twice with the same key; {nameof(correlationId)}={localCorrelationId}"));
-                }
+                var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToLowerInvariant();
 
                 var stopWatch = new Stopwatch();
-                this.correlationIdToStopwatchMap.Add(localCorrelationId, stopWatch);
+                this.stopwatchCorrelations.Add(new ManagedCorrelation<Stopwatch>(localCorrelationId, stopWatch));
             }
         }
 
         /// <inheritdoc />
         public void AddOrderCorrelation(int startingIndex = 0, string correlationId = null)
         {
-            lock (this.correlationIdToPositionMapSync)
+            lock (this.positionCorrelationsSync)
             {
-                var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToUpperInvariant();
-                if (this.correlationIdToPositionMap.ContainsKey(localCorrelationId))
-                {
-                    throw new ArgumentException(Invariant(
-                        $"Cannot add an order correlation twice with the same key; {nameof(correlationId)}={localCorrelationId}"));
-                }
+                var localCorrelationId = correlationId ?? Guid.NewGuid().ToString().ToLowerInvariant();
 
-                this.correlationIdToPositionMap.Add(localCorrelationId, startingIndex);
+                this.positionCorrelations.Add(new ManagedCorrelation<int>(localCorrelationId, startingIndex));
             }
+        }
+
+        /// <inheritdoc />
+        public void PrepareExceptionCorrelations(string errorCodeKey = Constants.ExceptionDataKeyForErrorCode, string correlationId = null)
+        {
+            this.errorCodeKeyField = errorCodeKey;
+            this.exceptionCorrelationsCorrelationId = correlationId;
         }
 
         /// <inheritdoc />
@@ -154,49 +141,43 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public IReadOnlyCollection<IHaveCorrelationId> GetNextCorrelations()
         {
-            lock (this.correlationIdToEvaluatedSubjectMapSync)
+            lock (this.subjectCorrelationsSync)
             {
-                lock (this.correlationIdToStopwatchMapSync)
+                lock (this.stopwatchCorrelationsSync)
                 {
-                    lock (this.correlationIdToPositionMapSync)
+                    lock (this.positionCorrelationsSync)
                     {
                         lock (this.additionalCorrelationsSync)
                         {
                             var result = new List<IHaveCorrelationId>();
-                            foreach (var evaluatedSubject in this.correlationIdToEvaluatedSubjectMap)
+                            foreach (var evaluatedSubject in this.subjectCorrelations)
                             {
-                                var subjectCorrelation = new SubjectCorrelation(evaluatedSubject.Key, new RawSubject(evaluatedSubject.Value.Subject, evaluatedSubject.Value.SubjectToString).ToSubject());
+                                var subjectCorrelation = new SubjectCorrelation(evaluatedSubject.CorrelationId, new RawSubject(evaluatedSubject.Item.Subject, evaluatedSubject.Item.SubjectToString).ToSubject());
                                 result.Add(subjectCorrelation);
                             }
 
-                            foreach (var stopwatch in this.correlationIdToStopwatchMap)
+                            foreach (var stopwatch in this.stopwatchCorrelations)
                             {
                                 var elapsed = TimeSpan.Zero;
-                                if (stopwatch.Value.IsRunning)
+                                if (stopwatch.Item.IsRunning)
                                 {
-                                    elapsed = stopwatch.Value.Elapsed;
+                                    elapsed = stopwatch.Item.Elapsed;
                                 }
                                 else
                                 {
-                                    stopwatch.Value.Start();
+                                    stopwatch.Item.Start();
                                 }
 
-                                var elapsedCorrelation = new ElapsedCorrelation(stopwatch.Key, elapsed);
+                                var elapsedCorrelation = new ElapsedCorrelation(stopwatch.CorrelationId, elapsed);
                                 result.Add(elapsedCorrelation);
                             }
 
-                            var positionKeysToAdvance = new List<string>();
-                            foreach (var position in this.correlationIdToPositionMap)
+                            foreach (var position in this.positionCorrelations)
                             {
-                                positionKeysToAdvance.Add(position.Key);
-                                var orderCorrelation = new OrderCorrelation(position.Key, position.Value);
+                                var positionItem = position.Item;
+                                position.UpdateItem(positionItem + 1);
+                                var orderCorrelation = new OrderCorrelation(position.CorrelationId, positionItem);
                                 result.Add(orderCorrelation);
-                            }
-
-                            foreach (var positionKeyToAdvance in positionKeysToAdvance)
-                            {
-                                var currentValue = this.correlationIdToPositionMap[positionKeyToAdvance];
-                                this.correlationIdToPositionMap[positionKeyToAdvance] = currentValue + 1;
                             }
 
                             result.AddRange(this.additionalCorrelations);
@@ -205,6 +186,59 @@ namespace Naos.Logging.Domain
                         }
                     }
                 }
+            }
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<IHaveCorrelationId> GetExceptionCorrelations(Exception exception)
+        {
+            var result = new List<IHaveCorrelationId>();
+
+            if (exception != null)
+            {
+                var correlationId = string.IsNullOrWhiteSpace(this.exceptionCorrelationsCorrelationId)
+                    ? Guid.NewGuid().ToString().ToLowerInvariant()
+                    : this.exceptionCorrelationsCorrelationId;
+
+                var correlatingException = exception.FindFirstExceptionInChainWithExceptionId();
+                if (correlatingException == null)
+                {
+                    exception.GenerateAndWriteExceptionIdIntoExceptionData();
+                    correlatingException = exception;
+                    var exceptionId = correlatingException.GetExceptionIdFromExceptionData().ToString();
+                    var exceptionIdCorrelation = new ExceptionIdCorrelation(correlationId, exceptionId);
+                    result.Add(exceptionIdCorrelation);
+                }
+
+                var errorCode = exception.GetErrorCode();
+                if (!string.IsNullOrWhiteSpace(errorCode))
+                {
+                    var errorCodeCorrelation = new ErrorCodeCorrelation(
+                        correlationId,
+                        this.errorCodeKeyField,
+                        errorCode);
+                    result.Add(errorCodeCorrelation);
+                }
+            }
+
+            return result;
+        }
+
+        private class ManagedCorrelation<T>
+        {
+            public ManagedCorrelation(string correlationId, T item)
+            {
+                this.CorrelationId = correlationId;
+                this.Item = item;
+            }
+
+            public string CorrelationId { get; private set; }
+
+            public T Item { get; private set; }
+
+            public void UpdateItem(T newItem)
+            {
+                this.Item = newItem;
             }
         }
     }

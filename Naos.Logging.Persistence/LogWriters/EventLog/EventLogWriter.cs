@@ -74,7 +74,7 @@ namespace Naos.Logging.Persistence
                 var wasEnumerationOrigin = Enum.TryParse<LogItemOrigin>(logItem.Context.Origin, true, out LogItemOrigin enumerationOrigin);
                 if (!wasEnumerationOrigin)
                 {
-                    enumerationOrigin = LogItemOrigin.Custom;
+                    enumerationOrigin = LogItemOrigin.Unknown;
                 }
 
                 eventLog.WriteEntry(logMessage, eventLogEntryType, this.eventId, (short)enumerationOrigin, bytes);

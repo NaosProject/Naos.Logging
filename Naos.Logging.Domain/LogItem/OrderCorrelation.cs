@@ -48,12 +48,4 @@ namespace Naos.Logging.Domain
             return Invariant($"{nameof(this.CorrelationId)}:{this.CorrelationId} - {nameof(this.Position)}={this.Position}");
         }
     }
-
-    public enum ActivityCorrelationPosition
-    {
-        Unknown,
-        Middle,
-        First,
-        Last
-    }
 }

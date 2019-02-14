@@ -14,7 +14,6 @@ namespace Naos.Logging.Domain
     using Naos.Diagnostics.Recipes;
     using Naos.Serialization.Domain;
     using Naos.Telemetry.Domain;
-    using OBeautifulCode.Error.Recipes;
     using OBeautifulCode.TypeRepresentation;
 
     using static System.FormattableString;
@@ -95,7 +94,6 @@ namespace Naos.Logging.Domain
         /// <param name="subjectFunc">Function that returns the subject.</param>
         /// <param name="comment">Optional comment.</param>
         /// <param name="originOverride">Optional origin override.</param>
-        /// <param name="errorCodeKeyField">Optional error key for <see cref="Exception" />'s; DEFAULT is <see cref="Constants.ExceptionDataKeyForErrorCode" />.</param>
         /// <param name="additionalCorrelations">Optional additional correlations.</param>
         /// <returns>Constructed <see cref="LogItem" />.</returns>
         public static LogItem BuildLogItem(
@@ -103,7 +101,6 @@ namespace Naos.Logging.Domain
             Func<object> subjectFunc,
             string comment = null,
             string originOverride = null,
-            string errorCodeKeyField = null,
             IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             var timestampUtc = DateTime.UtcNow;
@@ -111,9 +108,6 @@ namespace Naos.Logging.Domain
 
             var subject = subjectFunc?.Invoke();
             var kind = DetermineKindFromSubject(subject);
-            var localErrorCodeKeyField = string.IsNullOrWhiteSpace(errorCodeKeyField)
-                ? Constants.ExceptionDataKeyForErrorCode
-                : errorCodeKeyField;
             string stackTrace = null;
 
             var managedCorrelations = correlationManager.GetNextCorrelations();
@@ -121,24 +115,8 @@ namespace Naos.Logging.Domain
 
             if (subject is Exception loggedException)
             {
-                var correlatingException = loggedException.FindFirstExceptionInChainWithExceptionId();
-                if (correlatingException == null)
-                {
-                    loggedException.GenerateAndWriteExceptionIdIntoExceptionData();
-                    correlatingException = loggedException;
-                }
-
-                var exceptionId = correlatingException.GetExceptionIdFromExceptionData().ToString();
-
-                var exceptionCorrelation = new ExceptionIdCorrelation(exceptionId,exceptionId);
-                correlations.Add(exceptionCorrelation);
-
-                var errorCode = loggedException.GetErrorCode();
-                if (!string.IsNullOrWhiteSpace(errorCode))
-                {
-                    var errorCodeCorrelation = new ErrorCodeCorrelation(Guid.NewGuid().ToString().ToUpperInvariant(),localErrorCodeKeyField, errorCode);
-                    correlations.Add(errorCodeCorrelation);
-                }
+                var exceptionCorrelations = correlationManager.GetExceptionCorrelations(loggedException);
+                correlations.AddRange(exceptionCorrelations);
 
                 stackTrace = loggedException.StackTrace;
             }

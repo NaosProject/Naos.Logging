@@ -19,11 +19,6 @@ namespace Naos.Logging.Domain
         Unknown,
 
         /// <summary>
-        /// This will be the specific enumeration value for when a custom origin is provided as a string.
-        /// </summary>
-        Custom,
-
-        /// <summary>
         /// Messages from <see cref="Logger" />.
         /// </summary>
         NaosLoggingLogger,

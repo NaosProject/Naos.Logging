@@ -447,7 +447,7 @@ namespace Naos.Logging.Test
             var exceptionToThrow = new InvalidOperationException("Oh no.");
 
             // Act
-            using (var log = Log.GetUsingBlockLogger(() => enterSubject))
+            using (var log = Log.With(() => enterSubject))
             {
                 // to make sure the next message doesn't come too quickly for the assert later.
                 Thread.Sleep(1);
@@ -472,7 +472,7 @@ namespace Naos.Logging.Test
             //    _ => ((ActivityCorrelation)_.Correlations.Single(c => c is ActivityCorrelation)).CorrelatingSubject
             //        .DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test));
 
-            //var enterItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(ActivityCorrelationPosition.First.ToString(), StringComparison.CurrentCulture));
+            //var enterItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(RelativePosition.First.ToString(), StringComparison.CurrentCulture));
             //enterItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
             //var enterCorelation = (ActivityCorrelation)enterItem.Correlations.Single(_ => _ is ActivityCorrelation);
             //enterCorelation.ElapsedMillisecondsFromFirst.Should().Be(0);
@@ -486,7 +486,7 @@ namespace Naos.Logging.Test
             //        middleCorrelation.ElapsedMillisecondsFromFirst.Should().BeGreaterThan(0);
             //    });
 
-            //var exitItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(ActivityCorrelationPosition.Last.ToString(), StringComparison.CurrentCulture));
+            //var exitItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(RelativePosition.Last.ToString(), StringComparison.CurrentCulture));
             //exitItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
             //var exitCorelation = (ActivityCorrelation)exitItem.Correlations.Single(_ => _ is ActivityCorrelation);
             //exitCorelation.ElapsedMillisecondsFromFirst.Should().BeGreaterThan(0);
@@ -503,7 +503,7 @@ namespace Naos.Logging.Test
             Log.Write(() => (DifferentTestObjectWithToString)null);
             Log.Write(() => (Exception)null);
 
-            using (var log = Log.GetUsingBlockLogger(() => (TestObjectWithToString)null))
+            using (var log = Log.With(() => (TestObjectWithToString)null))
             {
                 log.Write((Func<string>)null);
                 log.Write(() => (string)null);
@@ -514,9 +514,9 @@ namespace Naos.Logging.Test
             // Assert
             logWriter.LoggedItems.Count.Should().Be(9);
             logWriter.LoggedItems.Count(_ => _.Subject.Summary == LogHelper.NullSubjectSummary).Should().Be(4);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.First)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.Last)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
-            var middleItems = logWriter.LoggedItems.Where(_ => _.Subject.Summary == Invariant($"{nameof(ActivityCorrelationPosition.Middle)}: {LogHelper.NullSubjectSummary}")).ToList();
+            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.First)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
+            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.Last)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
+            var middleItems = logWriter.LoggedItems.Where(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.Middle)}: {LogHelper.NullSubjectSummary}")).ToList();
             middleItems.Count.Should().Be(4);
             middleItems.Count(_ => _.Context.CallingMethod != null).Should().Be(3, "We have this on everything except the null lambda.");
             middleItems.Count(_ => _.Correlations.Any(c => c is ExceptionIdCorrelation)).Should().Be(0, "Can't know if null is an exception or not.");
@@ -525,7 +525,7 @@ namespace Naos.Logging.Test
         private class TestObjectWithToString
         {
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing.")]
-            public string Test { get; set; } = Guid.NewGuid().ToString().ToUpperInvariant();
+            public string Test { get; set; } = Guid.NewGuid().ToString().ToLowerInvariant();
 
             public override string ToString()
             {
@@ -536,7 +536,7 @@ namespace Naos.Logging.Test
         private class DifferentTestObjectWithToString
         {
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing.")]
-            public string Test { get; set; } = Guid.NewGuid().ToString().ToUpperInvariant();
+            public string Test { get; set; } = Guid.NewGuid().ToString().ToLowerInvariant();
 
             public override string ToString()
             {

@@ -51,12 +51,12 @@ namespace Naos.Logging.Domain
         {
             if (loggedException == null)
             {
-                throw new ArgumentNullException(nameof(loggedException));
+                return Guid.Empty;
             }
 
             if (loggedException.Data.Contains(ExceptionIdKey))
             {
-                throw new InvalidOperationException(Invariant($"Provided exception's data dictionary already has an {ExceptionIdKey} entry: {loggedException.Data[ExceptionIdKey]?.ToString() ?? "<NULL>"}"));
+                return Guid.Empty;
             }
 
             var result = Guid.NewGuid();
@@ -79,12 +79,7 @@ namespace Naos.Logging.Domain
                 if (localException.Data.Contains(ExceptionIdKey))
                 {
                     var exceptionIdString = localException.Data[ExceptionIdKey]?.ToString();
-                    if (string.IsNullOrWhiteSpace(exceptionIdString))
-                    {
-                        throw new InvalidOperationException(Invariant($"Found a {ExceptionIdKey} key in data dictionary but it had no value for exception: {correlatingException}."));
-                    }
-
-                    var result = Guid.Parse(exceptionIdString);
+                    Guid.TryParse(exceptionIdString, out var result);
                     return result;
                 }
                 else

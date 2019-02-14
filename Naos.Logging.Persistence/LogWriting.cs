@@ -273,23 +273,23 @@ namespace Naos.Logging.Persistence
             /* no-op */
         }
 
-        private static ActivityCorrelationPosition GetActivityCorrelationPositionFromLogEntry(
+        private static RelativePosition GetActivityCorrelationPositionFromLogEntry(
             LogEntry logEntry)
         {
-            ActivityCorrelationPosition result;
+            RelativePosition result;
             switch (logEntry.EventType)
             {
                 case TraceEventType.Verbose:
-                    result = ActivityCorrelationPosition.Middle;
+                    result = RelativePosition.Middle;
                     break;
                 case TraceEventType.Start:
-                    result = ActivityCorrelationPosition.First;
+                    result = RelativePosition.First;
                     break;
                 case TraceEventType.Stop:
-                    result = ActivityCorrelationPosition.Last;
+                    result = RelativePosition.Last;
                     break;
                 default:
-                    result = ActivityCorrelationPosition.Unknown;
+                    result = RelativePosition.Unknown;
                     break;
             }
 
@@ -335,7 +335,7 @@ namespace Naos.Logging.Persistence
                 throw new ArgumentException(Invariant($"{nameof(LogEntry)} cannot have the property {nameof(LogEntry.Category)} set; found: {logEntry.Category}."));
             }
 
-            if (activityCorrelationPosition != ActivityCorrelationPosition.Middle && (logEntry.Params?.Any() ?? false))
+            if (activityCorrelationPosition != RelativePosition.Middle && (logEntry.Params?.Any() ?? false))
             {
                 throw new ArgumentException(Invariant($"{nameof(LogEntry)} cannot have the property {nameof(LogEntry.Params)} set unless it's part of the {nameof(LogActivity.Trace)} scenario; found: {logEntry.Params.Select(_ => _.ToString()).ToCsv()}"));
             }
@@ -343,18 +343,18 @@ namespace Naos.Logging.Persistence
             object logItemSubjectObject;
             var correlations = new List<IHaveCorrelationId>(additionalCorrelations ?? new IHaveCorrelationId[0]);
 
-            if (activityCorrelationPosition == ActivityCorrelationPosition.Unknown)
+            if (activityCorrelationPosition == RelativePosition.Unknown)
             {
                 logItemSubjectObject = logEntry.Subject;
             }
             else
             {
-                if ((activityCorrelationPosition == ActivityCorrelationPosition.First) ||
-                    (activityCorrelationPosition == ActivityCorrelationPosition.Last))
+                if ((activityCorrelationPosition == RelativePosition.First) ||
+                    (activityCorrelationPosition == RelativePosition.Last))
                 {
                     logItemSubjectObject = logEntry.Subject;
                 }
-                else if (activityCorrelationPosition == ActivityCorrelationPosition.Middle)
+                else if (activityCorrelationPosition == RelativePosition.Middle)
                 {
                     if (logEntry.Params?.Any() ?? false)
                     {
@@ -374,7 +374,7 @@ namespace Naos.Logging.Persistence
                 }
                 else
                 {
-                    throw new NotSupportedException(Invariant($"This {nameof(ActivityCorrelationPosition)} is not supported: {activityCorrelationPosition}"));
+                    throw new NotSupportedException(Invariant($"This {nameof(RelativePosition)} is not supported: {activityCorrelationPosition}"));
                 }
 
                 var activityCorrelatingSubject = new RawSubject(
@@ -382,7 +382,7 @@ namespace Naos.Logging.Persistence
                     BuildSummaryFromSubjectObject(logEntry.Subject));
 
                 var correlatingId = activityCorrelatingSubject.GetHashCode().ToGuid().ToString();
-                var elapsedMilliseconds = activityCorrelationPosition == ActivityCorrelationPosition.First ? 0 : logEntry.ElapsedMilliseconds ?? throw new InvalidOperationException(Invariant($"{nameof(logEntry)}.{nameof(LogEntry.ElapsedMilliseconds)} is null when there is an {nameof(ElapsedCorrelation)}"));
+                var elapsedMilliseconds = activityCorrelationPosition == RelativePosition.First ? 0 : logEntry.ElapsedMilliseconds ?? throw new InvalidOperationException(Invariant($"{nameof(logEntry)}.{nameof(LogEntry.ElapsedMilliseconds)} is null when there is an {nameof(ElapsedCorrelation)}"));
                 var elapsedCorrelation = new ElapsedCorrelation(correlatingId, TimeSpan.FromMilliseconds(elapsedMilliseconds));
                 var correlatingSubject = activityCorrelatingSubject.ToSubject();
                 correlations.Add(elapsedCorrelation);
@@ -415,7 +415,7 @@ namespace Naos.Logging.Persistence
                         var errorCode = loggedException.GetErrorCode(errorCodeKey);
                         if (!string.IsNullOrWhiteSpace(errorCode))
                         {
-                            var errorCodeCorrelation = new ErrorCodeCorrelation(Guid.NewGuid().ToString().ToUpperInvariant(),errorCodeKey, errorCode);
+                            var errorCodeCorrelation = new ErrorCodeCorrelation(Guid.NewGuid().ToString().ToLowerInvariant(),errorCodeKey, errorCode);
                             correlations.Add(errorCodeCorrelation);
                         }
                     }
@@ -426,10 +426,10 @@ namespace Naos.Logging.Persistence
 
             switch (activityCorrelationPosition)
             {
-                case ActivityCorrelationPosition.First:
+                case RelativePosition.First:
                     logItemSubjectObject = UsingBlockLogger.InitialItemOfUsingBlockSubject;
                     break;
-                case ActivityCorrelationPosition.Last:
+                case RelativePosition.Last:
                     logItemSubjectObject = UsingBlockLogger.FinalItemOfUsingBlockSubject;
                     break;
             }
@@ -446,5 +446,16 @@ namespace Naos.Logging.Persistence
 
             return result;
         }
+    }
+
+    /// <summary>
+    /// Track the relative position of Its.Log.Instrumentation.Log.Enter messages.
+    /// </summary>
+    public enum RelativePosition
+    {
+        Unknown,
+        Middle,
+        First,
+        Last
     }
 }

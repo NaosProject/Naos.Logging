@@ -25,7 +25,7 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Initializes a new instance of the <see cref="UsingBlockLogger"/> class.
         /// </summary>
-        /// <param name="correlationManager">Optional correlation manager potentially with active correlations; DEFAULT is a new <see cref="CorrelationManagerr" />.</param>
+        /// <param name="correlationManager">Optional correlation manager potentially with active correlations; DEFAULT is a new <see cref="CorrelationManager" />.</param>
         /// <param name="logItemHandler">Handler callback to log send generated messages to.</param>
         /// <param name="origin">Origin override.</param>
         /// <param name="initialComment">Comment for first and last message.</param>
@@ -37,9 +37,6 @@ namespace Naos.Logging.Domain
             : base(logItemHandler, correlationManager, origin, initialComment)
         {
             this.Write(() => InitialItemOfUsingBlockSubject);
-            
-            //should we post subject here???
-            //write initial message here? include correlationid(s)?
         }
 
         /// <inheritdoc />
@@ -48,8 +45,6 @@ namespace Naos.Logging.Domain
         public void Dispose()
         {
             this.Write(() => FinalItemOfUsingBlockSubject);
-
-            //write final message here? signal is final, put something in subject??
         }
     }
 }

@@ -279,7 +279,7 @@ namespace Naos.Logging.Test
         [Fact]
         public static void Writer_reader___Roundtrip___Test()
         {
-            var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString().ToUpperInvariant());
+            var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString().ToLowerInvariant());
 
             try
             {
