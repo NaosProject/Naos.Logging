@@ -42,6 +42,8 @@ namespace Naos.Logging.Persistence
 
         private IReadOnlyCollection<string> errorCodeKeysField;
 
+        private IManageCorrelations itsLogCorrelationManager = new Naos.Logging.Domain.CorrelationManager();
+
         private LogWriting()
         {
             /* instance class that can only be used as a singleton. */
@@ -273,23 +275,23 @@ namespace Naos.Logging.Persistence
             /* no-op */
         }
 
-        private static RelativePosition GetActivityCorrelationPositionFromLogEntry(
+        private static int GetSomewhatFakePositionFromLogEntry(
             LogEntry logEntry)
         {
-            RelativePosition result;
+            int result;
             switch (logEntry.EventType)
             {
                 case TraceEventType.Verbose:
-                    result = RelativePosition.Middle;
+                    result = 1;
                     break;
                 case TraceEventType.Start:
-                    result = RelativePosition.First;
+                    result = 0;
                     break;
                 case TraceEventType.Stop:
-                    result = RelativePosition.Last;
+                    result = 2;
                     break;
                 default:
-                    result = RelativePosition.Unknown;
+                    result = -1;
                     break;
             }
 
@@ -328,14 +330,14 @@ namespace Naos.Logging.Persistence
         {
             logEntry = logEntry ?? throw new ArgumentNullException(nameof(logEntry));
 
-            var activityCorrelationPosition = GetActivityCorrelationPositionFromLogEntry(logEntry);
+            var psuedoOrderCorrelationPosition = GetSomewhatFakePositionFromLogEntry(logEntry);
 
             if (!string.IsNullOrWhiteSpace(logEntry.Category))
             {
                 throw new ArgumentException(Invariant($"{nameof(LogEntry)} cannot have the property {nameof(LogEntry.Category)} set; found: {logEntry.Category}."));
             }
 
-            if (activityCorrelationPosition != RelativePosition.Middle && (logEntry.Params?.Any() ?? false))
+            if (psuedoOrderCorrelationPosition != 1 && (logEntry.Params?.Any() ?? false))
             {
                 throw new ArgumentException(Invariant($"{nameof(LogEntry)} cannot have the property {nameof(LogEntry.Params)} set unless it's part of the {nameof(LogActivity.Trace)} scenario; found: {logEntry.Params.Select(_ => _.ToString()).ToCsv()}"));
             }
@@ -343,18 +345,18 @@ namespace Naos.Logging.Persistence
             object logItemSubjectObject;
             var correlations = new List<IHaveCorrelationId>(additionalCorrelations ?? new IHaveCorrelationId[0]);
 
-            if (activityCorrelationPosition == RelativePosition.Unknown)
+            if (psuedoOrderCorrelationPosition == -1)
             {
                 logItemSubjectObject = logEntry.Subject;
             }
             else
             {
-                if ((activityCorrelationPosition == RelativePosition.First) ||
-                    (activityCorrelationPosition == RelativePosition.Last))
+                if ((psuedoOrderCorrelationPosition == 0) ||
+                    (psuedoOrderCorrelationPosition == 2))
                 {
                     logItemSubjectObject = logEntry.Subject;
                 }
-                else if (activityCorrelationPosition == RelativePosition.Middle)
+                else if (psuedoOrderCorrelationPosition == 1)
                 {
                     if (logEntry.Params?.Any() ?? false)
                     {
@@ -374,7 +376,7 @@ namespace Naos.Logging.Persistence
                 }
                 else
                 {
-                    throw new NotSupportedException(Invariant($"This {nameof(RelativePosition)} is not supported: {activityCorrelationPosition}"));
+                    throw new NotSupportedException(Invariant($"This fake order correlation position is not supported: {psuedoOrderCorrelationPosition}"));
                 }
 
                 var activityCorrelatingSubject = new RawSubject(
@@ -382,13 +384,16 @@ namespace Naos.Logging.Persistence
                     BuildSummaryFromSubjectObject(logEntry.Subject));
 
                 var correlatingId = activityCorrelatingSubject.GetHashCode().ToGuid().ToString();
-                var elapsedMilliseconds = activityCorrelationPosition == RelativePosition.First ? 0 : logEntry.ElapsedMilliseconds ?? throw new InvalidOperationException(Invariant($"{nameof(logEntry)}.{nameof(LogEntry.ElapsedMilliseconds)} is null when there is an {nameof(ElapsedCorrelation)}"));
+                var elapsedMilliseconds = psuedoOrderCorrelationPosition == 0 ? 0 : logEntry.ElapsedMilliseconds ?? throw new InvalidOperationException(Invariant($"{nameof(logEntry)}.{nameof(LogEntry.ElapsedMilliseconds)} is null when there is an {nameof(ElapsedCorrelation)}"));
                 var elapsedCorrelation = new ElapsedCorrelation(correlatingId, TimeSpan.FromMilliseconds(elapsedMilliseconds));
                 var correlatingSubject = activityCorrelatingSubject.ToSubject();
                 correlations.Add(elapsedCorrelation);
 
                 var subjectCorrelation = new SubjectCorrelation(correlatingId, correlatingSubject);
                 correlations.Add(subjectCorrelation);
+
+                var orderCorrelation = new OrderCorrelation(correlatingId, psuedoOrderCorrelationPosition);
+                correlations.Add(orderCorrelation);
             }
 
             string stackTrace = null;
@@ -396,40 +401,18 @@ namespace Naos.Logging.Persistence
 
             if (logItemSubjectObject is Exception loggedException)
             {
-                var correlatingException = loggedException.FindFirstExceptionInChainWithExceptionId();
-                if (correlatingException == null)
-                {
-                    loggedException.GenerateAndWriteExceptionIdIntoExceptionData();
-                    correlatingException = loggedException;
-                }
-
-                var exceptionId = correlatingException.GetExceptionIdFromExceptionData().ToString();
-
-                var exceptionCorrelation = new ExceptionIdCorrelation(exceptionId,exceptionId);
-                correlations.Add(exceptionCorrelation);
-
-                if (this.errorCodeKeysField?.Any() ?? false)
-                {
-                    foreach (var errorCodeKey in this.errorCodeKeysField)
-                    {
-                        var errorCode = loggedException.GetErrorCode(errorCodeKey);
-                        if (!string.IsNullOrWhiteSpace(errorCode))
-                        {
-                            var errorCodeCorrelation = new ErrorCodeCorrelation(Guid.NewGuid().ToString().ToLowerInvariant(),errorCodeKey, errorCode);
-                            correlations.Add(errorCodeCorrelation);
-                        }
-                    }
-                }
+                var exceptionCorrelations = this.itsLogCorrelationManager.GetExceptionCorrelations(loggedException);
+                correlations.AddRange(exceptionCorrelations);
 
                 stackTrace = loggedException.StackTrace;
             }
 
-            switch (activityCorrelationPosition)
+            switch (psuedoOrderCorrelationPosition)
             {
-                case RelativePosition.First:
+                case 0:
                     logItemSubjectObject = UsingBlockLogger.InitialItemOfUsingBlockSubject;
                     break;
-                case RelativePosition.Last:
+                case 2:
                     logItemSubjectObject = UsingBlockLogger.FinalItemOfUsingBlockSubject;
                     break;
             }
@@ -446,16 +429,5 @@ namespace Naos.Logging.Persistence
 
             return result;
         }
-    }
-
-    /// <summary>
-    /// Track the relative position of Its.Log.Instrumentation.Log.Enter messages.
-    /// </summary>
-    public enum RelativePosition
-    {
-        Unknown,
-        Middle,
-        First,
-        Last
     }
 }

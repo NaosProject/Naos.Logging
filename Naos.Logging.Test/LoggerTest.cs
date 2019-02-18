@@ -27,6 +27,7 @@ namespace Naos.Logging.Test
             this.testOutputHelper = testOutputHelper;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ILog", Justification = "Spelling/name is correct.")]
         [Fact]
         public void Log_and_ILog__Have_same_methods()
         {

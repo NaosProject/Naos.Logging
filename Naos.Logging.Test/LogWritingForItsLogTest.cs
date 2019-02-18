@@ -133,7 +133,7 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var logWriter = BuildAndConfigureMemoryLogWriter();
-            var subject = new TestObjectWithToString();
+            var subject = new TestObjectWithToStringForItsLog();
             var comment = "this is a comment " + A.Dummy<string>();
 
             // Act
@@ -142,7 +142,7 @@ namespace Naos.Logging.Test
 
             // Assert
             var logItem = logWriter.LoggedItems.Single();
-            var actualSubject = logItem.Subject.DeserializeSubject<TestObjectWithToString>();
+            var actualSubject = logItem.Subject.DeserializeSubject<TestObjectWithToStringForItsLog>();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
             actualSubject.ToString().Should().Be(subject.ToString());
@@ -167,7 +167,7 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var logWriter = BuildAndConfigureMemoryLogWriter();
-            var subject = new TestObjectWithToString();
+            var subject = new TestObjectWithToStringForItsLog();
 
             // Act
             Log.Write(() => subject);
@@ -175,7 +175,7 @@ namespace Naos.Logging.Test
 
             // Assert
             var logItem = logWriter.LoggedItems.Single();
-            var actualSubject = logItem.Subject.DeserializeSubject<TestObjectWithToString>();
+            var actualSubject = logItem.Subject.DeserializeSubject<TestObjectWithToStringForItsLog>();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
             actualSubject.ToString().Should().Be(subject.ToString());
@@ -334,7 +334,7 @@ namespace Naos.Logging.Test
             logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
 
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single();
-            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
         }
 
         [Fact]
@@ -376,7 +376,7 @@ namespace Naos.Logging.Test
             logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
 
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single();
-            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Need lowercase.")]
@@ -423,7 +423,7 @@ namespace Naos.Logging.Test
             errorCodeCorrelation.ErrorCode.Should().Be(errorCode);
 
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single(_ => _.GetType() == typeof(ExceptionIdCorrelation));
-            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
         }
 
         [Fact]
@@ -481,9 +481,9 @@ namespace Naos.Logging.Test
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single();
 
             innerCorrelation.CorrelationId.Should().Be(innerSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
-            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
 
-            innerCorrelation.CorrelationId.Should().Be(exceptionCorrelation.CorrelationId);
+            innerCorrelation.ExceptionId.Should().Be(exceptionCorrelation.CorrelationId);
         }
 
         [Fact]
@@ -492,10 +492,10 @@ namespace Naos.Logging.Test
             // Arrange
             var logWriter = BuildAndConfigureMemoryLogWriter();
 
-            var enterSubject = new TestObjectWithToString();
+            var enterSubject = new TestObjectWithToStringForItsLog();
             var stringTraceWithoutLambda = "some trace without a lambda" + A.Dummy<string>();
             var stringTraceWithLambda = "some trace with a lambda" + A.Dummy<string>();
-            var traceObjectWithLambda = new DifferentTestObjectWithToString();
+            var traceObjectWithLambda = new DifferentTestObjectWithToStringForItsLog();
             var exceptionToThrow = new InvalidOperationException("Oh no.");
 
             // Act
@@ -524,30 +524,27 @@ namespace Naos.Logging.Test
                 .Be(logWriter.LoggedItems.Count);
             logWriter.LoggedItems.ToList().ForEach(
                 _ => ((SubjectCorrelation)_.Correlations.Single(c => c is SubjectCorrelation)).Subject
-                    .DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test));
+                    .DeserializeSubject<TestObjectWithToStringForItsLog>().Test.Should().Be(enterSubject.Test));
 
-            var enterItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(RelativePosition.First.ToString(), StringComparison.CurrentCulture));
-            enterItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
-            var enterCorelation = (ElapsedCorrelation)enterItem.Correlations.Single(_ => _ is ElapsedCorrelation);
-            enterCorelation.ElapsedTime.TotalMilliseconds.Should().Be(0);
-            //enterCorelation.CorrelationPosition.Should().Be(RelativePosition.First);
+            var enterItem = logWriter.LoggedItems.Single(_ => _.Correlations.Any(c => c is OrderCorrelation oc && oc.Position == 0));
+            enterItem.Subject.DeserializeSubject<string>().Should().Be(UsingBlockLogger.InitialItemOfUsingBlockSubject);
+            var enterCorrelation = (ElapsedCorrelation)enterItem.Correlations.Single(_ => _ is ElapsedCorrelation);
+            enterCorrelation.ElapsedTime.TotalMilliseconds.Should().Be(0);
 
             var middleItems = logWriter.LoggedItems.Where(
                 _ => new[] { exceptionToThrow.Message, stringTraceWithLambda, stringTraceWithoutLambda, traceObjectWithLambda.ToString() }.Any(
                     a => _.Subject.Summary.EndsWith(a, StringComparison.CurrentCulture))).ToList();
             middleItems.ForEach(_ =>
             {
-                _.Subject.Summary.Should().StartWith(RelativePosition.Middle.ToString());
+                _.Correlations.Any(c => c is OrderCorrelation oc && oc.Position == 1).Should().BeTrue();
                 var middleCorrelation = (ElapsedCorrelation)_.Correlations.Single(s => s is ElapsedCorrelation);
-                //middleCorrelation.CorrelationPosition.Should().Be(RelativePosition.Middle);
                 middleCorrelation.ElapsedTime.TotalMilliseconds.Should().BeGreaterThan(0);
             });
 
-            var exitItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.StartsWith(RelativePosition.Last.ToString(), StringComparison.CurrentCulture));
-            exitItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
-            var exitCorelation = (ElapsedCorrelation)exitItem.Correlations.Single(_ => _ is ElapsedCorrelation);
-            exitCorelation.ElapsedTime.TotalMilliseconds.Should().BeGreaterThan(0);
-            //exitCorelation.CorrelationPosition.Should().Be(RelativePosition.Last);
+            var exitItem = logWriter.LoggedItems.Single(_ => _.Correlations.Any(c => c is OrderCorrelation oc && oc.Position == 2));
+            exitItem.Subject.DeserializeSubject<string>().Should().Be(UsingBlockLogger.FinalItemOfUsingBlockSubject);
+            var exitCorrelation = (ElapsedCorrelation)exitItem.Correlations.Single(_ => _ is ElapsedCorrelation);
+            exitCorrelation.ElapsedTime.TotalMilliseconds.Should().BeGreaterThan(0);
         }
 
         [Fact]
@@ -559,29 +556,29 @@ namespace Naos.Logging.Test
             // Act
             Log.Write((string)null);
             Log.Write(() => (string)null);
-            Log.Write(() => (DifferentTestObjectWithToString)null);
+            Log.Write(() => (DifferentTestObjectWithToStringForItsLog)null);
             Log.Write(() => (Exception)null);
 
-            using (var log = Log.Enter(() => (TestObjectWithToString)null))
+            using (var log = Log.Enter(() => (TestObjectWithToStringForItsLog)null))
             {
                 log.Trace(null);
                 log.Trace(() => (string)null);
-                log.Trace(() => (DifferentTestObjectWithToString)null);
+                log.Trace(() => (DifferentTestObjectWithToStringForItsLog)null);
                 log.Trace(() => (Exception)null);
             }
 
             // Assert
             logWriter.LoggedItems.Count.Should().Be(10);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == "[null]").Should().Be(4);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.First)}: [null]")).Should().Be(1);
-            logWriter.LoggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.Last)}: [null]")).Should().Be(1);
-            var middleItems = logWriter.LoggedItems.Where(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.Middle)}: [null]")).ToList();
+            logWriter.LoggedItems.Count(_ => _.Subject.Summary == "[null]").Should().Be(8);
+            logWriter.LoggedItems.Count(_ => _.Correlations.Any(c => c is OrderCorrelation oc && oc.Position == 0)).Should().Be(1);
+            logWriter.LoggedItems.Count(_ => _.Correlations.Any(c => c is OrderCorrelation oc && oc.Position == 2)).Should().Be(1);
+            var middleItems = logWriter.LoggedItems.Where(_ => _.Correlations.Any(c => c is OrderCorrelation oc && oc.Position == 1)).ToList();
             middleItems.Count.Should().Be(4);
             middleItems.Count(_ => _.Context.CallingMethod != null).Should().Be(4, "We have this on everything because the correlating subject has it.");
             middleItems.Count(_ => _.Correlations.Any(c => c is ExceptionIdCorrelation)).Should().Be(0, "Can't know if null is an exception or not.");
         }
 
-        private class TestObjectWithToString
+        private class TestObjectWithToStringForItsLog
         {
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing.")]
             public string Test { get; set; } = Guid.NewGuid().ToString().ToLowerInvariant();
@@ -592,7 +589,7 @@ namespace Naos.Logging.Test
             }
         }
 
-        private class DifferentTestObjectWithToString
+        private class DifferentTestObjectWithToStringForItsLog
         {
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing.")]
             public string Test { get; set; } = Guid.NewGuid().ToString().ToLowerInvariant();
@@ -613,8 +610,10 @@ namespace Naos.Logging.Test
                         new InMemoryLogConfig(new Dictionary<LogItemKind, IReadOnlyCollection<string>>());
                     memoryLogWriter = new InMemoryLogWriter(memoryLogConfig);
                     var settings = new LogWritingSettings();
-                    LogWriting.Instance.Setup(settings, configuredAndManagedLogWriters: new[] {memoryLogWriter},
-                        errorCodeKeys: new[] {Constants.ExceptionDataKeyForErrorCode});
+                    LogWriting.Instance.Setup(
+                        settings,
+                        configuredAndManagedLogWriters: new[] { memoryLogWriter },
+                        errorCodeKeys: new[] { Constants.ExceptionDataKeyForErrorCode });
                 }
                 else
                 {

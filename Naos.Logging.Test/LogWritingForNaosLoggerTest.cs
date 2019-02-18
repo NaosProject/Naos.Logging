@@ -280,7 +280,7 @@ namespace Naos.Logging.Test
             logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
 
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single();
-            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
         }
 
         [Fact]
@@ -321,7 +321,7 @@ namespace Naos.Logging.Test
             logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
 
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single();
-            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Need lowercase.")]
@@ -367,7 +367,7 @@ namespace Naos.Logging.Test
             errorCodeCorrelation.ErrorCode.Should().Be(errorCode);
 
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single(_ => _.GetType() == typeof(ExceptionIdCorrelation));
-            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
         }
 
         [Fact]
@@ -423,10 +423,10 @@ namespace Naos.Logging.Test
             var innerCorrelation = (ExceptionIdCorrelation)logItemInner.Correlations.Single();
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single();
 
-            innerCorrelation.CorrelationId.Should().Be(innerSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
-            exceptionCorrelation.CorrelationId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            innerCorrelation.ExceptionId.Should().Be(innerSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
 
-            innerCorrelation.CorrelationId.Should().Be(exceptionCorrelation.CorrelationId);
+            innerCorrelation.ExceptionId.Should().Be(exceptionCorrelation.ExceptionId);
         }
 
         [Fact]
@@ -434,7 +434,6 @@ namespace Naos.Logging.Test
         {
             // Arrange
             var enterSubject = new TestObjectWithToString();
-            var stringTraceWithoutLambda = "some trace without a lambda" + A.Dummy<string>();
             var stringTraceWithLambda = "some trace with a lambda" + A.Dummy<string>();
             var traceObjectWithLambda = new DifferentTestObjectWithToString();
             var exceptionToThrow = new InvalidOperationException("Oh no.");
@@ -504,10 +503,10 @@ namespace Naos.Logging.Test
 
             // Assert
             this.loggedItems.Count.Should().Be(9);
-            this.loggedItems.Count(_ => _.Subject.Summary == LogHelper.NullSubjectSummary).Should().Be(4);
-            this.loggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.First)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
-            this.loggedItems.Count(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.Last)}: {LogHelper.NullSubjectSummary}")).Should().Be(1);
-            var middleItems = this.loggedItems.Where(_ => _.Subject.Summary == Invariant($"{nameof(RelativePosition.Middle)}: {LogHelper.NullSubjectSummary}")).ToList();
+            this.loggedItems.Count(_ => _.Subject.Summary == LogHelper.NullSubjectSummary && _.Correlations.Count == 0).Should().Be(3);
+            this.loggedItems.Count(_ => _.Subject.Summary == UsingBlockLogger.InitialItemOfUsingBlockSubject).Should().Be(1);
+            this.loggedItems.Count(_ => _.Subject.Summary == UsingBlockLogger.FinalItemOfUsingBlockSubject).Should().Be(1);
+            var middleItems = this.loggedItems.Where(_ => _.Subject.Summary == LogHelper.NullSubjectSummary && _.Correlations.Any(c => c is OrderCorrelation oc && oc.Position > 0 && oc.Position < 5)).ToList();
             middleItems.Count.Should().Be(4);
             middleItems.Count(_ => _.Context.CallingMethod != null).Should().Be(3, "We have this on everything except the null lambda.");
             middleItems.Count(_ => _.Correlations.Any(c => c is ExceptionIdCorrelation)).Should().Be(0, "Can't know if null is an exception or not.");
