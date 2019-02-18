@@ -456,31 +456,35 @@ namespace Naos.Logging.Test
             }
 
             // Assert
-            //this.loggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is ActivityCorrelation).Should().NotBeNull());
-            //this.loggedItems.Select(_ => _.Correlations.Single(c => c is ActivityCorrelation).CorrelationId).Distinct().Count().Should()
-            //    .Be(1);
-            //this.loggedItems.ToList().ForEach(
-            //    _ => ((ActivityCorrelation)_.Correlations.Single(c => c is ActivityCorrelation)).CorrelatingSubject
-            //        .DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test));
+            this.loggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is ElapsedCorrelation).Should().NotBeNull());
+            this.loggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is SubjectCorrelation).Should().NotBeNull());
+            this.loggedItems.Select(_ => _.Correlations.Single(c => c is ElapsedCorrelation)).Count().Should()
+                .Be(this.loggedItems.Count);
+            this.loggedItems.Select(_ => _.Correlations.Single(c => c is SubjectCorrelation)).Count().Should()
+                .Be(this.loggedItems.Count);
+            this.loggedItems.ToList().ForEach(
+                _ => ((SubjectCorrelation)_.Correlations.Single(c => c is SubjectCorrelation)).Subject
+                    .DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test));
 
-            //var enterItem = this.loggedItems.Single(_ => _.Subject.Summary.StartsWith(RelativePosition.First.ToString(), StringComparison.CurrentCulture));
-            //enterItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
-            //var enterCorelation = (ActivityCorrelation)enterItem.Correlations.Single(_ => _ is ActivityCorrelation);
-            //enterCorelation.ElapsedMillisecondsFromFirst.Should().Be(0);
+            var enterItem = this.loggedItems.Single(_ => _.Correlations.Any(c => c is OrderCorrelation oc && oc.Position == 0));
+            enterItem.Subject.DeserializeSubject<string>().Should().Be(UsingBlockLogger.InitialItemOfUsingBlockSubject);
+            var enterCorrelation = (ElapsedCorrelation)enterItem.Correlations.Single(_ => _ is ElapsedCorrelation);
+            enterCorrelation.ElapsedTime.TotalMilliseconds.Should().Be(0);
 
-            //var middleItems = this.loggedItems.Where(
-            //    _ => new[] { exceptionToThrow.Message, stringTraceWithLambda, stringTraceWithoutLambda, traceObjectWithLambda.ToString() }.Any(
-            //        a => _.Subject.Summary.EndsWith(a, StringComparison.CurrentCulture))).ToList();
-            //middleItems.ForEach(_ =>
-            //    {
-            //        var middleCorrelation = (ActivityCorrelation)_.Correlations.Single(s => s is ActivityCorrelation);
-            //        middleCorrelation.ElapsedMillisecondsFromFirst.Should().BeGreaterThan(0);
-            //    });
+            var middleItems = this.loggedItems.Where(
+                _ => new[] { exceptionToThrow.Message, stringTraceWithLambda, traceObjectWithLambda.ToString() }.Any(
+                    a => _.Subject.Summary.EndsWith(a, StringComparison.CurrentCulture))).ToList();
+            middleItems.ForEach(_ =>
+            {
+                _.Correlations.Any(c => c is OrderCorrelation oc && oc.Position > 0 && oc.Position < 4).Should().BeTrue();
+                var middleCorrelation = (ElapsedCorrelation)_.Correlations.Single(s => s is ElapsedCorrelation);
+                middleCorrelation.ElapsedTime.TotalMilliseconds.Should().BeGreaterThan(0);
+            });
 
-            //var exitItem = this.loggedItems.Single(_ => _.Subject.Summary.StartsWith(RelativePosition.Last.ToString(), StringComparison.CurrentCulture));
-            //exitItem.Subject.DeserializeSubject<TestObjectWithToString>().Test.Should().Be(enterSubject.Test);
-            //var exitCorelation = (ActivityCorrelation)exitItem.Correlations.Single(_ => _ is ActivityCorrelation);
-            //exitCorelation.ElapsedMillisecondsFromFirst.Should().BeGreaterThan(0);
+            var exitItem = this.loggedItems.Single(_ => _.Correlations.Any(c => c is OrderCorrelation oc && oc.Position == 4));
+            exitItem.Subject.DeserializeSubject<string>().Should().Be(UsingBlockLogger.FinalItemOfUsingBlockSubject);
+            var exitCorrelation = (ElapsedCorrelation)exitItem.Correlations.Single(_ => _ is ElapsedCorrelation);
+            exitCorrelation.ElapsedTime.TotalMilliseconds.Should().BeGreaterThan(0);
         }
 
         [Fact]
