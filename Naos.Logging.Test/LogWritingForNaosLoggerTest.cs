@@ -488,11 +488,69 @@ namespace Naos.Logging.Test
         }
 
         [Fact]
-        public void Log_Write___Should_make_null_subject_LogItem___When_nulls_written()
+        public void Log_Write___MultipleNestedLoggers_should_accumulate_correlations()
         {
             // Arrange
+            var firstCorrelationId = Guid.NewGuid().ToString();
+            var firstLoggerSubject = "First Subject";
+
+            var secondCorrelationId = Guid.NewGuid().ToString();
+            var secondLoggerSubject = "Second Subject";
+            var secondCorrelatingSubject = "Second Correlating Subject";
+
+            var thirdCorrelationId = Guid.NewGuid().ToString();
+            var thirdLoggerSubject = "Third Subject";
+            var thirdCorrelatingSubject = "Third Correlating Subject";
 
             // Act
+            using (var first = Log.With(correlationId: firstCorrelationId))
+            {
+                first.Write(() => firstLoggerSubject);
+                using (var second = first.With(() => secondCorrelatingSubject, correlationId: secondCorrelationId))
+                {
+                    second.Write(() => secondLoggerSubject);
+                    using (var third = second.With(() => thirdCorrelatingSubject, correlationId: thirdCorrelationId))
+                    {
+                        third.Write(() => thirdLoggerSubject);
+                    }
+                }
+            }
+
+            // Assert
+            this.loggedItems.Count.Should().Be(9);
+            this.loggedItems.SelectMany(_ => _.Correlations.Select(c => c.CorrelationId).Distinct()).Count(_ => _ == firstCorrelationId).Should().Be(9);
+            this.loggedItems.SelectMany(_ => _.Correlations.Select(c => c.CorrelationId).Distinct()).Count(_ => _ == secondCorrelationId).Should().Be(6);
+            this.loggedItems.SelectMany(_ => _.Correlations.Select(c => c.CorrelationId).Distinct()).Count(_ => _ == thirdCorrelationId).Should().Be(3);
+
+            foreach (var logItem in this.loggedItems)
+            {
+                logItem.Correlations.SingleOrDefault(_ => _.CorrelationId == firstCorrelationId && _ is ElapsedCorrelation).Should().NotBeNull("All items should have first elapsed time correlation");
+                logItem.Correlations.SingleOrDefault(_ => _.CorrelationId == firstCorrelationId && _ is OrderCorrelation).Should().NotBeNull("All items should have first order correlation");
+
+                if (logItem.Correlations.Select(c => c.CorrelationId).Contains(secondCorrelationId))
+                {
+                    var subjectCorrelation = logItem.Correlations.SingleOrDefault(_ => _.CorrelationId == secondCorrelationId && _ is SubjectCorrelation) as SubjectCorrelation;
+                    subjectCorrelation.Should().NotBeNull("All items should have first elapsed time correlation");
+                    (subjectCorrelation?.Subject.DeserializeSubject<string>() ?? throw new InvalidOperationException("Should have already asserted is not null.")).Should().Be(secondCorrelatingSubject);
+                    logItem.Correlations.SingleOrDefault(_ => _.CorrelationId == secondCorrelationId && _ is ElapsedCorrelation).Should().NotBeNull();
+                    logItem.Correlations.SingleOrDefault(_ => _.CorrelationId == secondCorrelationId && _ is OrderCorrelation).Should().NotBeNull();
+                }
+
+                if (logItem.Correlations.Select(c => c.CorrelationId).Contains(thirdCorrelationId))
+                {
+                    var subjectCorrelation = logItem.Correlations.SingleOrDefault(_ => _.CorrelationId == thirdCorrelationId && _ is SubjectCorrelation) as SubjectCorrelation;
+                    subjectCorrelation.Should().NotBeNull("All items should have first elapsed time correlation");
+                    (subjectCorrelation?.Subject.DeserializeSubject<string>() ?? throw new InvalidOperationException("Should have already asserted is not null.")).Should().Be(thirdCorrelatingSubject);
+                    logItem.Correlations.SingleOrDefault(_ => _.CorrelationId == thirdCorrelationId && _ is ElapsedCorrelation).Should().NotBeNull();
+                    logItem.Correlations.SingleOrDefault(_ => _.CorrelationId == thirdCorrelationId && _ is OrderCorrelation).Should().NotBeNull();
+                }
+            }
+        }
+
+        [Fact]
+        public void Log_Write___Should_make_null_subject_LogItem___When_nulls_written()
+        {
+            // Arrange & Act
             Log.Write(() => (string)null);
             Log.Write(() => (DifferentTestObjectWithToString)null);
             Log.Write(() => (Exception)null);

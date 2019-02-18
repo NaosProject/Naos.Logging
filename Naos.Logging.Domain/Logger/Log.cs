@@ -28,7 +28,7 @@ namespace Naos.Logging.Domain
         /// <param name="comment">Optional defaultCommentOverride.</param>
         /// <param name="origin">Optional origin override.</param>
         /// <param name="additionalCorrelations">Optional additional correlations.</param>
-        public static void Write(Func<object> subjectFunc = null, string comment = null, string origin = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
+        public static void Write(Func<object> subjectFunc, string comment = null, string origin = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             Instance.Write(subjectFunc, comment, origin, additionalCorrelations);
         }
@@ -36,13 +36,13 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// With into a logged activity.
         /// </summary>
-        /// <param name="correlatingSubjectFunc">Function to get the correlating subject.</param>
+        /// <param name="correlatingSubjectFunc">Optional function to get the correlating subject.</param>
         /// <param name="defaultCommentOverride">Optional defaultCommentOverride.</param>
         /// <param name="defaultOriginOverride">Optional origin override.</param>
         /// <param name="correlationId">Optional correlation ID that will be used for each of the block correlations; DEFAULT is a different one for each.</param>
         /// <param name="additionalCorrelations">Optional additional correlations.</param>
         /// <returns>A configured <see cref="ICorrelatingActivityLogger" />.</returns>
-        public static ILogDisposable With(Func<object> correlatingSubjectFunc, string defaultCommentOverride = null, string defaultOriginOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
+        public static ILogDisposable With(Func<object> correlatingSubjectFunc = null, string defaultCommentOverride = null, string defaultOriginOverride = null, string correlationId = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             return Instance.With(correlatingSubjectFunc, defaultCommentOverride, defaultOriginOverride, correlationId, additionalCorrelations);
         }
