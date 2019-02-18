@@ -131,6 +131,7 @@
     <Compile Include=".recipes\OBeautifulCode.Validation\ValidatedNotNullAttribute.cs" />
     <Compile Include="BuildingHelpers.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="NaosToItsLogCompareTests.cs" />
     <Compile Include="LoggerTest.cs" />
     <Compile Include="EnumerationTest.cs" />
     <Compile Include="InvalidLogEntryTests.cs" />

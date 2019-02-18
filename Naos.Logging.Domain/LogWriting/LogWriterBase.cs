@@ -93,7 +93,7 @@ namespace Naos.Logging.Domain
         /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
         /// <param name="appendTrailingNewLine">Optional value indicating whether or not to append a trailing new line; DEFAULT is false.</param>
         /// <returns>Log message.</returns>
-        protected static string BuildLogMessageFromLogItem(
+        public static string BuildLogMessageFromLogItem(
             LogItem logItem,
             LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
             bool appendTrailingNewLine = false)
@@ -103,58 +103,91 @@ namespace Naos.Logging.Domain
                 throw new ArgumentNullException(nameof(logItem));
             }
 
-            var stringBuiler = new StringBuilder();
+            if (logItemPropertiesToIncludeInLogMessage == LogItemPropertiesToIncludeInLogMessage.None)
+            {
+                return string.Empty;
+            }
+
+            var stringBuilder = new StringBuilder();
             var itemsToLog = logItemPropertiesToIncludeInLogMessage.GetIndividualFlags<LogItemPropertiesToIncludeInLogMessage>().Where(_ => _.GetIndividualFlags().Count == 1).OrderBy(_ => (int)_).ToList();
 
-            foreach (var itemToLog in itemsToLog)
+            if (itemsToLog.Contains(LogItemPropertiesToIncludeInLogMessage.LogItemSerialization))
             {
-                switch (itemToLog)
+                var serializedLogItem = DefaultLogItemSerializer.SerializeToString(logItem);
+                stringBuilder.AppendLine();
+                stringBuilder.Append(serializedLogItem);
+                stringBuilder.Append(",");
+            }
+            else
+            {
+                const string indentationPadding = "      ";
+                const string firstLineDelimiter = "|";
+                if (itemsToLog.Contains(LogItemPropertiesToIncludeInLogMessage.Timestamp))
                 {
-                    case LogItemPropertiesToIncludeInLogMessage.None:
-                        /* no - op */
-                        break;
-                    case LogItemPropertiesToIncludeInLogMessage.Timestamp:
-                        stringBuiler.Append(logItem.Context.TimestampUtc.ToString("u", CultureInfo.InvariantCulture));
-                        stringBuiler.Append("|");
-                        break;
-                    case LogItemPropertiesToIncludeInLogMessage.CorrelationTypeAndIds:
-                        var correlationEntries = logItem.Correlations.Select(_ => Invariant($"{_.GetType().Name}={_.CorrelationId}")).ToList();
-                        stringBuiler.Append(correlationEntries.Any() ? correlationEntries.ToCsv() : "No Correlations");
-                        stringBuiler.Append("|");
-                        break;
-                    case LogItemPropertiesToIncludeInLogMessage.Origin:
-                        stringBuiler.Append(logItem.Context.Origin);
-                        stringBuiler.Append("|");
-                        break;
-                    case LogItemPropertiesToIncludeInLogMessage.SubjectSummary:
-                        stringBuiler.Append(logItem.Subject.Summary);
-                        stringBuiler.Append("|");
-                        break;
-                    case LogItemPropertiesToIncludeInLogMessage.Comment:
-                        stringBuiler.Append(string.IsNullOrWhiteSpace(logItem.Comment) ? "No Comment" : logItem.Comment);
-                        stringBuiler.Append("|");
-                        break;
-                    case LogItemPropertiesToIncludeInLogMessage.StackTrace:
-                        stringBuiler.AppendLine();
-                        stringBuiler.AppendLine(logItem.Context.StackTrace);
-                        break;
-                    case LogItemPropertiesToIncludeInLogMessage.LogItemSerialization:
-                        var serializedLogItem = DefaultLogItemSerializer.SerializeToString(logItem);
-                        stringBuiler.AppendLine();
-                        stringBuiler.Append(serializedLogItem);
-                        stringBuiler.Append(",");
-                        break;
-                    default:
-                        throw new NotSupportedException(Invariant($"Unsupported {nameof(LogItemPropertiesToIncludeInLogMessage)}: {itemToLog}."));
+                    stringBuilder.Append(logItem.Context.TimestampUtc.ToString("u", CultureInfo.InvariantCulture));
+                    stringBuilder.Append(firstLineDelimiter);
+                }
+
+                if (itemsToLog.Contains(LogItemPropertiesToIncludeInLogMessage.SubjectSummary))
+                {
+                    stringBuilder.Append("Summary: ");
+                    stringBuilder.Append(logItem.Subject.Summary);
+                    stringBuilder.Append(firstLineDelimiter);
+                }
+
+                if (itemsToLog.Contains(LogItemPropertiesToIncludeInLogMessage.Comment))
+                {
+                    stringBuilder.Append("Comment: ");
+                    stringBuilder.Append(logItem.Comment ?? LogHelper.NullSubjectSummary);
+                    stringBuilder.Append(firstLineDelimiter);
+                }
+
+                // close out first line
+                stringBuilder.AppendLine();
+
+                if (itemsToLog.Contains(LogItemPropertiesToIncludeInLogMessage.Origin))
+                {
+                    stringBuilder.Append(indentationPadding);
+                    stringBuilder.Append("Origin: ");
+                    stringBuilder.AppendLine(logItem.Context.Origin);
+                }
+
+                if (itemsToLog.Contains(LogItemPropertiesToIncludeInLogMessage.Kind))
+                {
+                    stringBuilder.Append(indentationPadding);
+                    stringBuilder.Append("Kind: ");
+                    stringBuilder.AppendLine(logItem.Kind.ToString());
+                }
+
+                if (itemsToLog.Contains(LogItemPropertiesToIncludeInLogMessage.CorrelationTypeAndIds))
+                {
+                    stringBuilder.Append(indentationPadding);
+                    stringBuilder.AppendLine("Correlations:");
+                    foreach (var correlation in logItem.Correlations)
+                    {
+                        stringBuilder.Append(indentationPadding);
+                        stringBuilder.Append(indentationPadding);
+                        stringBuilder.AppendLine(correlation.ToString());
+                    }
+                }
+
+                if (itemsToLog.Contains(LogItemPropertiesToIncludeInLogMessage.StackTrace))
+                {
+                    stringBuilder.Append(indentationPadding);
+                    stringBuilder.AppendLine("StackTrace:");
+                    stringBuilder.Append(indentationPadding);
+                    stringBuilder.Append(indentationPadding);
+                    stringBuilder.Append(logItem.Context.StackTrace ?? LogHelper.NullSubjectSummary);
+                    stringBuilder.AppendLine();
                 }
             }
 
             if (appendTrailingNewLine)
             {
-                stringBuiler.AppendLine();
+                stringBuilder.AppendLine();
             }
 
-            return stringBuiler.ToString();
+            return stringBuilder.ToString();
         }
      }
 
