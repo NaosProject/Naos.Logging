@@ -613,7 +613,8 @@ namespace Naos.Logging.Test
                     LogWriting.Instance.Setup(
                         settings,
                         configuredAndManagedLogWriters: new[] { memoryLogWriter },
-                        errorCodeKeys: new[] { Constants.ExceptionDataKeyForErrorCode });
+                        errorCodeKeys: new[] { Constants.ExceptionDataKeyForErrorCode },
+                        multipleCallsToSetupStrategy: MultipleCallsToSetupStrategy.Overwrite);
                 }
                 else
                 {
