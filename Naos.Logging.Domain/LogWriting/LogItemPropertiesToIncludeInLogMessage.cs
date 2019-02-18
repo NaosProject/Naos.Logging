@@ -69,6 +69,6 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Include all items.
         /// </summary>
-        All = Timestamp | CorrelationTypeAndIds | Origin | SubjectSummary | Comment | StackTrace | LogItemSerialization,
+        All = Timestamp | CorrelationTypeAndIds | Origin | Kind | SubjectSummary | Comment | StackTrace | LogItemSerialization,
     }
 }
