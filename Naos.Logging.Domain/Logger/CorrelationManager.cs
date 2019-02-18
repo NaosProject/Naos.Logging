@@ -26,7 +26,7 @@ namespace Naos.Logging.Domain
         private readonly object positionCorrelationsSync = new object();
         private readonly List<ManagedCorrelation<int>> positionCorrelations;
         private readonly object additionalCorrelationsSync = new object();
-        private string errorCodeKeyField = Constants.ExceptionDataKeyForErrorCode;
+        private IReadOnlyCollection<string> errorCodeKeysField = new[] { Constants.ExceptionDataKeyForErrorCode };
         private string exceptionCorrelationsCorrelationId;
         private IList<IHaveCorrelationId> additionalCorrelations;
 
@@ -115,9 +115,11 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
-        public void PrepareExceptionCorrelations(string errorCodeKey = Constants.ExceptionDataKeyForErrorCode, string correlationId = null)
+        public void PrepareExceptionCorrelations(
+            IReadOnlyCollection<string> errorCodeKey = null,
+            string correlationId = null)
         {
-            this.errorCodeKeyField = errorCodeKey;
+            this.errorCodeKeysField = errorCodeKey ?? new[] { Constants.ExceptionDataKeyForErrorCode };
             this.exceptionCorrelationsCorrelationId = correlationId;
         }
 
@@ -193,35 +195,52 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Preference is lowercase guids.")]
         public IReadOnlyCollection<IHaveCorrelationId> GetExceptionCorrelations(Exception exception)
         {
+            return BuildExceptionCorrelations(exception, this.exceptionCorrelationsCorrelationId, this.errorCodeKeysField);
+        }
+
+        /// <summary>
+        /// Builds the exception correlations from provided ID and exception object.
+        /// </summary>
+        /// <param name="exception">Exception object.</param>
+        /// <param name="correlationId">Correlation ID (will get new guid if null or empty string).</param>
+        /// <param name="errorCodeKeys">Error code keys to search for; DEFAULT is OBC Error Code, empty collection will disable feature.</param>
+        /// <returns>Set of applicable correlations.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Preference is lowercase guids.")]
+        public static IReadOnlyCollection<IHaveCorrelationId> BuildExceptionCorrelations(Exception exception, string correlationId, IReadOnlyCollection<string> errorCodeKeys)
+        {
+            var localCorrelationId = string.IsNullOrWhiteSpace(correlationId)
+                ? Guid.NewGuid().ToString().ToLowerInvariant()
+                : correlationId;
+
             var result = new List<IHaveCorrelationId>();
 
             if (exception != null)
             {
-                var correlationId = string.IsNullOrWhiteSpace(this.exceptionCorrelationsCorrelationId)
-                    ? Guid.NewGuid().ToString().ToLowerInvariant()
-                    : this.exceptionCorrelationsCorrelationId;
-
                 var correlatingException = exception.FindFirstExceptionInChainWithExceptionId();
                 if (correlatingException == null)
                 {
                     exception.GenerateAndWriteExceptionIdIntoExceptionData();
                     correlatingException = exception;
-                    var exceptionId = correlatingException.GetExceptionIdFromExceptionData().ToString();
-                    var exceptionIdCorrelation = new ExceptionIdCorrelation(correlationId, exceptionId);
-                    result.Add(exceptionIdCorrelation);
                 }
 
-                var errorCode = exception.GetErrorCode();
-                if (!string.IsNullOrWhiteSpace(errorCode))
+                var exceptionId = correlatingException.GetExceptionIdFromExceptionData().ToString();
+                var exceptionIdCorrelation = new ExceptionIdCorrelation(localCorrelationId, exceptionId);
+                result.Add(exceptionIdCorrelation);
+
+                foreach (var errorCodeKey in errorCodeKeys ?? new[] { Constants.ExceptionDataKeyForErrorCode })
                 {
-                    var errorCodeCorrelation = new ErrorCodeCorrelation(
-                        correlationId,
-                        this.errorCodeKeyField,
-                        errorCode);
-                    result.Add(errorCodeCorrelation);
+                    var errorCode = exception.GetErrorCode(errorCodeKey);
+                    if (!string.IsNullOrWhiteSpace(errorCode))
+                    {
+                        var errorCodeCorrelation = new ErrorCodeCorrelation(
+                            localCorrelationId,
+                            errorCodeKey,
+                            errorCode);
+
+                        result.Add(errorCodeCorrelation);
+                    }
                 }
             }
 

@@ -44,9 +44,11 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Prepare for exception correlations by setting the error code key or a specific correlation ID.
         /// </summary>
-        /// <param name="errorCodeKey">Error code key to use to extract error code if any.</param>
+        /// <param name="errorCodeKey">Error code key to use to extract error code if any; DEFAULT is OBC Error Code Key, empty collection will disable feature.</param>
         /// <param name="correlationId">Optional correlation id; DEFAULT is new Guid.</param>
-        void PrepareExceptionCorrelations(string errorCodeKey = Constants.ExceptionDataKeyForErrorCode, string correlationId = null);
+        void PrepareExceptionCorrelations(
+            IReadOnlyCollection<string> errorCodeKey = null,
+            string correlationId = null);
 
         /// <summary>
         /// Add additional arbitrary correlations to be used for each message.

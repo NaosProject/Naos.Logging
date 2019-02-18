@@ -22,6 +22,7 @@ namespace Naos.Logging.Persistence
     using OBeautifulCode.Math.Recipes;
     using OBeautifulCode.TypeRepresentation;
     using static System.FormattableString;
+    using CorrelationManager = System.Diagnostics.CorrelationManager;
     using Log = Naos.Logging.Domain.Log;
 
     /// <summary>
@@ -41,8 +42,6 @@ namespace Naos.Logging.Persistence
         private IReadOnlyCollection<LogWriterBase> activeLogWriters;
 
         private IReadOnlyCollection<string> errorCodeKeysField;
-
-        private IManageCorrelations itsLogCorrelationManager = new Naos.Logging.Domain.CorrelationManager();
 
         private LogWriting()
         {
@@ -344,7 +343,7 @@ namespace Naos.Logging.Persistence
 
             object logItemSubjectObject;
             var correlations = new List<IHaveCorrelationId>(additionalCorrelations ?? new IHaveCorrelationId[0]);
-
+            var correlationId = Guid.NewGuid().ToString().ToLowerInvariant();
             if (psuedoOrderCorrelationPosition == -1)
             {
                 logItemSubjectObject = logEntry.Subject;
@@ -383,16 +382,16 @@ namespace Naos.Logging.Persistence
                     logEntry.Subject,
                     BuildSummaryFromSubjectObject(logEntry.Subject));
 
-                var correlatingId = activityCorrelatingSubject.GetHashCode().ToGuid().ToString();
+                correlationId = activityCorrelatingSubject.GetHashCode().ToGuid().ToString().ToLowerInvariant();
                 var elapsedMilliseconds = psuedoOrderCorrelationPosition == 0 ? 0 : logEntry.ElapsedMilliseconds ?? throw new InvalidOperationException(Invariant($"{nameof(logEntry)}.{nameof(LogEntry.ElapsedMilliseconds)} is null when there is an {nameof(ElapsedCorrelation)}"));
-                var elapsedCorrelation = new ElapsedCorrelation(correlatingId, TimeSpan.FromMilliseconds(elapsedMilliseconds));
+                var elapsedCorrelation = new ElapsedCorrelation(correlationId, TimeSpan.FromMilliseconds(elapsedMilliseconds));
                 var correlatingSubject = activityCorrelatingSubject.ToSubject();
                 correlations.Add(elapsedCorrelation);
 
-                var subjectCorrelation = new SubjectCorrelation(correlatingId, correlatingSubject);
+                var subjectCorrelation = new SubjectCorrelation(correlationId, correlatingSubject);
                 correlations.Add(subjectCorrelation);
 
-                var orderCorrelation = new OrderCorrelation(correlatingId, psuedoOrderCorrelationPosition);
+                var orderCorrelation = new OrderCorrelation(correlationId, psuedoOrderCorrelationPosition);
                 correlations.Add(orderCorrelation);
             }
 
@@ -401,7 +400,7 @@ namespace Naos.Logging.Persistence
 
             if (logItemSubjectObject is Exception loggedException)
             {
-                var exceptionCorrelations = this.itsLogCorrelationManager.GetExceptionCorrelations(loggedException);
+                var exceptionCorrelations = Logging.Domain.CorrelationManager.BuildExceptionCorrelations(loggedException, correlationId, this.errorCodeKeysField);
                 correlations.AddRange(exceptionCorrelations);
 
                 stackTrace = loggedException.StackTrace;

@@ -480,10 +480,10 @@ namespace Naos.Logging.Test
             var innerCorrelation = (ExceptionIdCorrelation)logItemInner.Correlations.Single();
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single();
 
-            innerCorrelation.CorrelationId.Should().Be(innerSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
+            innerCorrelation.ExceptionId.Should().Be(innerSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
             exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
 
-            innerCorrelation.ExceptionId.Should().Be(exceptionCorrelation.CorrelationId);
+            innerCorrelation.ExceptionId.Should().Be(exceptionCorrelation.ExceptionId);
         }
 
         [Fact]
