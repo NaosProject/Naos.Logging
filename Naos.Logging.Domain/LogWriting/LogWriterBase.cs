@@ -38,7 +38,7 @@ namespace Naos.Logging.Domain
         /// Default serializer to use for converting a <see cref="LogItem" /> into a string.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Is immuatable.")]
-        public static readonly ISerializeAndDeserialize DefaultLogItemSerializer = JsonSerializerFactory.Instance.BuildSerializer(DefaultLogItemSerializationDescription);
+        public static readonly ISerializeAndDeserialize DefaultLogItemSerializer = JsonSerializerFactory.Instance.BuildSerializer(DefaultLogItemSerializationDescription, unregisteredTypeEncounteredStrategy: UnregisteredTypeEncounteredStrategy.Attempt);
 
         private readonly LogWriterConfigBase logWriterConfigBase;
 

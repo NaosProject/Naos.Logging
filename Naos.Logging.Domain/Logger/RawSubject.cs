@@ -142,6 +142,11 @@ namespace Naos.Logging.Domain
         {
             new { serializationDescription }.Must().NotBeNull();
 
+            if (serializationDescription == LogHelper.SubjectSerializationDescription)
+            {
+                return LogWriterBase.DefaultLogItemSerializer;
+            }
+
             var configurationType = serializationDescription.ConfigurationTypeDescription?.ResolveFromLoadedTypes(typeMatchStrategy, multipleMatchStrategy);
             lock (this.sync)
             {
