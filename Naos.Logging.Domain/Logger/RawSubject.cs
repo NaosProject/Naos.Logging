@@ -142,19 +142,17 @@ namespace Naos.Logging.Domain
         {
             new { serializationDescription }.Must().NotBeNull();
 
-
+            var configurationType = serializationDescription.ConfigurationTypeDescription?.ResolveFromLoadedTypes(typeMatchStrategy, multipleMatchStrategy);
             lock (this.sync)
             {
-                var configurationType = serializationDescription.ConfigurationTypeDescription?.ResolveFromLoadedTypes(typeMatchStrategy, multipleMatchStrategy);
-
                 switch (serializationDescription.SerializationKind)
                 {
                     case SerializationKind.Json:
                     {
-                        var configurationTypeForKeyCheck = configurationType ?? typeof(NullSerializationConfiguration);
+                        var configurationTypeForKeyCheck = configurationType ?? typeof(NullJsonConfiguration);
                         if (!this.configurationTypeToSerializerMap.ContainsKey(configurationTypeForKeyCheck))
                         {
-                            var serializer = new NaosJsonSerializer(configurationType, UnregisteredTypeEncounteredStrategy.Attempt);
+                            var serializer = new NaosJsonSerializer(configurationTypeForKeyCheck, UnregisteredTypeEncounteredStrategy.Attempt);
                             this.configurationTypeToSerializerMap[configurationTypeForKeyCheck] = serializer;
                         }
 
