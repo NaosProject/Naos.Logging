@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogItem.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="LogItem.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -9,13 +9,14 @@ namespace Naos.Logging.Domain
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using OBeautifulCode.Collection.Recipes;
+    using OBeautifulCode.Math.Recipes;
     using static System.FormattableString;
 
     /// <summary>
     /// The atomic unit of logging, composed of a message and some context for that message.
     /// </summary>
-    public class LogItem
+    public class LogItem : IEquatable<LogItem>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LogItem"/> class.
@@ -99,5 +100,53 @@ namespace Naos.Logging.Domain
         {
             return this.Subject.Summary;
         }
+
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        /// <param name="first">First parameter.</param>
+        /// <param name="second">Second parameter.</param>
+        /// <returns>A value indicating whether or not the two items are equal.</returns>
+        public static bool operator ==(LogItem first, LogItem second)
+        {
+            if (ReferenceEquals(first, second))
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(first, null) || ReferenceEquals(second, null))
+            {
+                return false;
+            }
+
+            return first.Subject == second.Subject &&
+                   first.Kind == second.Kind && 
+                   first.Context == second.Context && 
+                   string.Equals(first.Comment, second.Comment, StringComparison.OrdinalIgnoreCase) &&
+                   first.Correlations.SequenceEqualHandlingNulls(second.Correlations);
+        }
+
+        /// <summary>
+        /// Inequality operator.
+        /// </summary>
+        /// <param name="first">First parameter.</param>
+        /// <param name="second">Second parameter.</param>
+        /// <returns>A value indicating whether or not the two items are inequal.</returns>
+        public static bool operator !=(LogItem first, LogItem second) => !(first == second);
+
+        /// <inheritdoc />
+        public bool Equals(LogItem other) => this == other;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => this == (obj as LogItem);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => HashCodeHelper.Initialize()
+            .Hash(this.Subject)
+            .Hash(this.Kind)
+            .Hash(this.Context)
+            .Hash(this.Comment)
+            .HashElements(this.Correlations)
+            .Value;
     }
 }

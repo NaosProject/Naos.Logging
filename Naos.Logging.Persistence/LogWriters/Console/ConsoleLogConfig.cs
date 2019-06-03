@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ConsoleLogConfig.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="ConsoleLogConfig.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -9,7 +9,9 @@ namespace Naos.Logging.Persistence
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using Naos.Logging.Domain;
+    using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Math.Recipes;
 
     /// <summary>
@@ -39,7 +41,7 @@ namespace Naos.Logging.Persistence
         }
 
         /// <summary>
-        /// Gets the log-item origins to log to <see cref="Console.Out" />
+        /// Gets the log-item origins to log to <see cref="Console.Out" />.
         /// </summary>
         public IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<string>> LogInclusionKindToOriginsMapForConsoleOut { get; private set; }
 
@@ -49,7 +51,7 @@ namespace Naos.Logging.Persistence
         public string LogInclusionKindToOriginsMapForConsoleOutFriendlyString { get; private set; }
 
         /// <summary>
-        /// Gets the log-item origins to log to <see cref="Console.Error" />
+        /// Gets the log-item origins to log to <see cref="Console.Error" />.
         /// </summary>
         public IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<string>> LogInclusionKindToOriginsMapForConsoleError { get; private set; }
 
@@ -59,60 +61,54 @@ namespace Naos.Logging.Persistence
         public string LogInclusionKindToOriginsMapForConsoleErrorFriendlyString { get; private set; }
 
         /// <summary>
-        /// Equality operator.
+        /// Determines whether two objects of type <see cref="ConsoleLogConfig"/> are equal.
         /// </summary>
-        /// <param name="first">First parameter.</param>
-        /// <param name="second">Second parameter.</param>
-        /// <returns>A value indicating whether or not the two items are equal.</returns>
+        /// <param name="left">The object to the left of the operator.</param>
+        /// <param name="right">The object to the right of the operator.</param>
+        /// <returns>True if the two items are equal; false otherwise.</returns>
         public static bool operator ==(
-            ConsoleLogConfig first,
-            ConsoleLogConfig second)
+            ConsoleLogConfig left,
+            ConsoleLogConfig right)
         {
-            if (ReferenceEquals(first, second))
+            if (ReferenceEquals(left, right))
             {
                 return true;
             }
 
-            if (ReferenceEquals(first, null) || ReferenceEquals(second, null))
+            if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
             {
                 return false;
             }
 
-            var result = (first.LogItemPropertiesToIncludeInLogMessage == second.LogItemPropertiesToIncludeInLogMessage) &&
-                         (first.LogInclusionKindToOriginsMapFriendlyString == second.LogInclusionKindToOriginsMapFriendlyString) &&
-                         (first.LogInclusionKindToOriginsMapForConsoleOutFriendlyString == second.LogInclusionKindToOriginsMapForConsoleOutFriendlyString) &&
-                         (first.LogInclusionKindToOriginsMapForConsoleErrorFriendlyString == second.LogInclusionKindToOriginsMapForConsoleErrorFriendlyString);
+            var result = left.BaseEquals(right) &&
+                         left.LogInclusionKindToOriginsMapForConsoleOut.DictionaryEqualHavingEnumerableValues(right.LogInclusionKindToOriginsMapForConsoleOut, enumerableEqualityComparerStrategy: EnumerableEqualityComparerStrategy.NoSymmetricDifference) &&
+                         left.LogInclusionKindToOriginsMapForConsoleError.DictionaryEqualHavingEnumerableValues(right.LogInclusionKindToOriginsMapForConsoleError, enumerableEqualityComparerStrategy: EnumerableEqualityComparerStrategy.NoSymmetricDifference);
 
             return result;
         }
 
         /// <summary>
-        /// Inequality operator.
+        /// Determines whether two objects of type <see cref="ConsoleLogConfig"/> are not equal.
         /// </summary>
-        /// <param name="first">First parameter.</param>
-        /// <param name="second">Second parameter.</param>
-        /// <returns>A value indicating whether or not the two items are inequal.</returns>
+        /// <param name="left">The object to the left of the operator.</param>
+        /// <param name="right">The object to the right of the operator.</param>
+        /// <returns>True if the two items not equal; false otherwise.</returns>
         public static bool operator !=(
-            ConsoleLogConfig first,
-            ConsoleLogConfig second) => !(first == second);
+            ConsoleLogConfig left,
+            ConsoleLogConfig right)
+            => !(left == right);
 
         /// <inheritdoc />
-        public bool Equals(
-            ConsoleLogConfig other) => this == other;
+        public bool Equals(ConsoleLogConfig other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(
-            object obj) => this == (obj as ConsoleLogConfig);
+        public override bool Equals(object obj) => this == (obj as ConsoleLogConfig);
 
         /// <inheritdoc />
-        public override int GetHashCode() =>
-            HashCodeHelper
-                .Initialize()
-                .Hash(this.LogItemPropertiesToIncludeInLogMessage)
-                .Hash(this.LogInclusionKindToOriginsMapFriendlyString)
-                .Hash(this.LogInclusionKindToOriginsMapForConsoleOutFriendlyString)
-                .Hash(this.LogInclusionKindToOriginsMapForConsoleErrorFriendlyString)
-                .Value;
+        public override int GetHashCode() => HashCodeHelper.Initialize(this.GetBaseHashCode())
+                                                           .HashDictionaryHavingEnumerableValuesForSymmetricDifferenceValueEquality(this.LogInclusionKindToOriginsMapForConsoleOut)
+                                                           .HashDictionaryHavingEnumerableValuesForSymmetricDifferenceValueEquality(this.LogInclusionKindToOriginsMapForConsoleError)
+                                                           .Value;
 
         /// <summary>
         /// Decide whether to include the item in <see cref="Console.Out" />.

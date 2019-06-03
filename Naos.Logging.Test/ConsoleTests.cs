@@ -1,12 +1,13 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ConsoleTests.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="ConsoleTests.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Naos.Logging.Test
 {
     using System;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
 
@@ -50,9 +51,9 @@ namespace Naos.Logging.Test
         [Fact]
         public static void LogProcessor___Valid___Works()
         {
-            using (var consoleOut = new StringWriter())
+            using (var consoleOut = new StringWriter(CultureInfo.CurrentCulture))
             {
-                using (var consoleError = new StringWriter())
+                using (var consoleError = new StringWriter(CultureInfo.CurrentCulture))
                 {
                     // Arrange
                     var infoCanary = A.Dummy<string>();

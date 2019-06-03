@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogHelper.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="LogHelper.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ namespace Naos.Logging.Domain
     using Naos.Diagnostics.Recipes;
     using Naos.Serialization.Domain;
     using Naos.Telemetry.Domain;
-    using OBeautifulCode.TypeRepresentation;
+    using OBeautifulCode.Type;
 
     using static System.FormattableString;
 
@@ -34,9 +34,9 @@ namespace Naos.Logging.Domain
             ProcessName = ProcessHelpers.GetRunningProcess().GetName();
             ProcessFileVersion = ProcessHelpers.GetRunningProcess().GetFileVersion();
             SubjectSerializationDescription = new SerializationDescription(
-                SerializationFormat.Json,
-                SerializationRepresentation.String,
-                SerializationKind.Compact);
+                SerializationKind.Json,
+                SerializationFormat.String,
+                typeof(LoggingJsonConfiguration).ToTypeDescription());
         }
 
         /// <summary>

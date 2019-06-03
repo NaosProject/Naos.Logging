@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ShareSerializationTestLogic.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="ShareSerializationTestLogic.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -9,7 +9,7 @@ namespace Naos.Logging.Test
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using FluentAssertions;
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
     using Naos.Serialization.Bson;
@@ -20,9 +20,9 @@ namespace Naos.Logging.Test
 
     public static class ShareSerializationTestLogic
     {
-        private static readonly NaosBsonSerializer BsonSerializerToUse = new NaosBsonSerializer(SerializationKind.Custom, typeof(BsonConfigurationForTesting));
+        private static readonly NaosBsonSerializer BsonSerializerToUse = new NaosBsonSerializer(typeof(LoggingBsonConfiguration));
 
-        private static readonly NaosJsonSerializer JsonSerializerToUse = new NaosJsonSerializer();
+        private static readonly NaosJsonSerializer JsonSerializerToUse = new NaosJsonSerializer(typeof(LoggingJsonConfiguration));
 
         private static readonly IReadOnlyCollection<IStringSerializeAndDeserialize> StringSerializers = new IStringSerializeAndDeserialize[] { BsonSerializerToUse, JsonSerializerToUse }.ToList();
 
@@ -40,13 +40,17 @@ namespace Naos.Logging.Test
 
         internal static void ActAndAssertForRoundtripSerialization(object expected, Action<object> throwIfObjectsDiffer)
         {
+            var expectedHashCode = expected.GetHashCode();
             foreach (var stringSerializer in StringSerializers)
             {
                 var actualString = stringSerializer.SerializeToString(expected);
                 var actualObject = stringSerializer.Deserialize(actualString, expected.GetType());
+                var actualHashCode = actualObject.GetHashCode();
 
                 try
                 {
+                    actualHashCode.Should().Be(expectedHashCode);
+
                     throwIfObjectsDiffer(actualObject);
                 }
                 catch (Exception ex)
@@ -59,9 +63,11 @@ namespace Naos.Logging.Test
             {
                 var actualBytes = binarySerializer.SerializeToBytes(expected);
                 var actualObject = binarySerializer.Deserialize(actualBytes, expected.GetType());
+                var actualHashCode = actualObject.GetHashCode();
 
                 try
                 {
+                    actualHashCode.Should().Be(expectedHashCode);
                     throwIfObjectsDiffer(actualObject);
                 }
                 catch (Exception ex)
@@ -70,13 +76,5 @@ namespace Naos.Logging.Test
                 }
             }
         }
-    }
-
-    internal class BsonConfigurationForTesting : BsonConfigurationBase
-    {
-        protected override IReadOnlyCollection<Type> TypesToAutoRegister => new[]
-        {
-            typeof(LogWriterConfigBase),
-        };
     }
 }

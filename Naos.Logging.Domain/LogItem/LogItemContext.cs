@@ -1,14 +1,14 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogItemContext.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="LogItemContext.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Naos.Logging.Domain
 {
     using System;
-
-    using OBeautifulCode.TypeRepresentation;
+    using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Type;
 
     using static System.FormattableString;
 
@@ -16,7 +16,7 @@ namespace Naos.Logging.Domain
     /// Stores some context for a <see cref="LogItem"/>
     /// (e.g. it's origin, time logged, the name of process within which the log-item was generated).
     /// </summary>
-    public class LogItemContext
+    public class LogItemContext : IEquatable<LogItemContext>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LogItemContext"/> class.
@@ -117,5 +117,59 @@ namespace Naos.Logging.Domain
             var result = new LogItemContext(this.TimestampUtc, origin, this.MachineName, this.ProcessName, this.ProcessFileVersion, this.CallingMethod, this.CallingType, this.StackTrace);
             return result;
         }
+
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        /// <param name="first">First parameter.</param>
+        /// <param name="second">Second parameter.</param>
+        /// <returns>A value indicating whether or not the two items are equal.</returns>
+        public static bool operator ==(LogItemContext first, LogItemContext second)
+        {
+            if (ReferenceEquals(first, second))
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(first, null) || ReferenceEquals(second, null))
+            {
+                return false;
+            }
+
+            return first.TimestampUtc == second.TimestampUtc &&
+                   string.Equals(first.Origin, second.Origin, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(first.MachineName, second.MachineName, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(first.ProcessName, second.ProcessName, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(first.ProcessFileVersion, second.ProcessFileVersion, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(first.CallingMethod, second.CallingMethod, StringComparison.OrdinalIgnoreCase) &&
+                   first.CallingType == second.CallingType &&
+                   string.Equals(first.StackTrace, second.StackTrace, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Inequality operator.
+        /// </summary>
+        /// <param name="first">First parameter.</param>
+        /// <param name="second">Second parameter.</param>
+        /// <returns>A value indicating whether or not the two items are unequal.</returns>
+        public static bool operator !=(LogItemContext first, LogItemContext second) => !(first == second);
+
+        /// <inheritdoc />
+        public bool Equals(LogItemContext other) => this == other;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => this == (obj as LogItemContext);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => HashCodeHelper.Initialize()
+            .Hash(this.TimestampUtc)
+            .Hash(this.Origin)
+            .Hash(this.MachineName)
+            .Hash(this.ProcessName)
+            .Hash(this.ProcessFileVersion)
+            .Hash(this.CallingMethod)
+            .Hash(this.CallingType)
+            .Hash(this.StackTrace)
+            .Value;
     }
 }

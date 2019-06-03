@@ -1,14 +1,15 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogWriterConfigBase.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="LogWriterConfigBase.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Naos.Logging.Domain
 {
+    using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Linq;
+    using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Math.Recipes;
     using OBeautifulCode.Validation.Recipes;
     using static System.FormattableString;
@@ -16,11 +17,8 @@ namespace Naos.Logging.Domain
     /// <summary>
     /// Base class for all log writer configuration.
     /// </summary>
-    [Bindable(BindableSupport.Default)]
-    public abstract class LogWriterConfigBase
+    public abstract class LogWriterConfigBase : IEquatable<LogWriterConfigBase>
     {
-        private static readonly LogInclusionConfigComparer LogInclusionConfigComparer = new LogInclusionConfigComparer();
-
         /// <summary>
         /// Initializes a new instance of the <see cref="LogWriterConfigBase"/> class.
         /// </summary>
@@ -106,45 +104,82 @@ namespace Naos.Logging.Domain
         public string LogInclusionKindToOriginsMapFriendlyString { get; private set; }
 
         /// <summary>
-        /// Compare two inclusion map configs for equality.
+        /// Determines whether two objects of type <see cref="LogWriterConfigBase"/> are equal.
         /// </summary>
-        /// <param name="first">First to compare.</param>
-        /// <param name="second">Second to compare.</param>
-        /// <returns>A value indicating whether or not they are equal.</returns>
-        protected static bool LogInclusionKindToOriginsMapsAreEqual(
-            IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>> first,
-            IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<LogItemOrigin>> second)
+        /// <param name="left">The object to the left of the operator.</param>
+        /// <param name="right">The object to the right of the operator.</param>
+        /// <returns>True if the two items are equal; false otherwise.</returns>
+        public static bool operator ==(
+            LogWriterConfigBase left,
+            LogWriterConfigBase right)
         {
-            var result = first.OrderBy(_ => _.Key).SequenceEqual(second.OrderBy(_ => _.Key), LogInclusionConfigComparer);
-            return result;
-        }
-    }
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
 
-    /// <summary>
-    /// Comparer for use in comparing values from the log inclusion config.
-    /// </summary>
-    internal class LogInclusionConfigComparer : IEqualityComparer<KeyValuePair<LogItemKind, IReadOnlyCollection<LogItemOrigin>>>
-    {
-        /// <inheritdoc />
-        public bool Equals(KeyValuePair<LogItemKind, IReadOnlyCollection<LogItemOrigin>> x, KeyValuePair<LogItemKind, IReadOnlyCollection<LogItemOrigin>> y)
-        {
-            // null implies all and empty collection implies none so nulls must be checked separately, cannot coalesce...
-            var result = x.Key == y.Key &&
-                         !(x.Value != null && y.Value == null) &&
-                         !(x.Value == null && y.Value != null) &&
-                         ((x.Value == null && y.Value == null) || x.Value.OrderBy(_ => _).SequenceEqual(y.Value.OrderBy(_ => _)));
+            if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
+            {
+                return false;
+            }
+
+            var result = left.Equals((object)right);
 
             return result;
         }
 
+        /// <summary>
+        /// Determines whether two objects of type <see cref="LogWriterConfigBase"/> are not equal.
+        /// </summary>
+        /// <param name="left">The object to the left of the operator.</param>
+        /// <param name="right">The object to the right of the operator.</param>
+        /// <returns>True if the two items not equal; false otherwise.</returns>
+        public static bool operator !=(
+            LogWriterConfigBase left,
+            LogWriterConfigBase right)
+            => !(left == right);
+
         /// <inheritdoc />
-        public int GetHashCode(KeyValuePair<LogItemKind, IReadOnlyCollection<LogItemOrigin>> obj)
+        public bool Equals(
+            LogWriterConfigBase other)
+            => this == other;
+        /// <inheritdoc />
+
+        public abstract override bool Equals(object obj);
+
+        /// <inheritdoc />
+        public abstract override int GetHashCode();
+
+        /// <summary>
+        /// Determines if this <see cref="LogWriterConfigBase "/> is equal to another based on properties on the base class.
+        /// </summary>
+        /// <param name="other">The other Form.</param>
+        /// <returns>
+        /// true if the two Forms are equal based on properties on the base class; otherwise false.
+        /// </returns>
+        protected virtual bool BaseEquals(
+            LogWriterConfigBase other)
         {
-            var result =
-                HashCodeHelper.Initialize()
-                   .Hash(obj.Key)
-                   .HashElements(obj.Value == null ? obj.Value : obj.Value.OrderBy(_ => _).ToList())
-                   .Value;
+            new { other }.Must().NotBeNull();
+
+            var result = this.LogInclusionKindToOriginsMap.DictionaryEqualHavingEnumerableValues(other.LogInclusionKindToOriginsMap, enumerableEqualityComparerStrategy: EnumerableEqualityComparerStrategy.NoSymmetricDifference) &&
+                         this.LogItemPropertiesToIncludeInLogMessage == other.LogItemPropertiesToIncludeInLogMessage;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets a <see cref="HashCodeHelper"/> pre-computed by hashing the base class's properties.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="HashCodeHelper"/> pre-computed by hashing the base class's properties.
+        /// </returns>
+        protected virtual int GetBaseHashCode()
+        {
+            var result = HashCodeHelper.Initialize()
+                .HashDictionaryHavingEnumerableValuesForSymmetricDifferenceValueEquality(this.LogInclusionKindToOriginsMap)
+                .Hash(this.LogItemPropertiesToIncludeInLogMessage)
+                .Value;
 
             return result;
         }

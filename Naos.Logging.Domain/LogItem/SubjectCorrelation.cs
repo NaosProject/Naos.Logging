@@ -1,20 +1,20 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SubjectCorrelation.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="SubjectCorrelation.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Naos.Logging.Domain
 {
     using System;
-
+    using OBeautifulCode.Math.Recipes;
     using static System.FormattableString;
 
     /// <summary>
     /// Specifies how a single <see cref="LogItem"/> is correlated with other
     /// <see cref="LogItem"/>s with a shared common subject.
     /// </summary>
-    public class SubjectCorrelation : IHaveCorrelationId
+    public class SubjectCorrelation : IHaveCorrelationId, IEquatable<SubjectCorrelation>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SubjectCorrelation"/> class.
@@ -30,13 +30,8 @@ namespace Naos.Logging.Domain
                 throw new ArgumentException(Invariant($"{nameof(correlationId)} is null or white space"));
             }
 
-            if (subject == null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
             this.CorrelationId = correlationId;
-            this.Subject = subject;
+            this.Subject = subject ?? throw new ArgumentNullException(nameof(subject));
         }
 
         /// <inheritdoc />
@@ -52,5 +47,43 @@ namespace Naos.Logging.Domain
         {
             return Invariant($"{nameof(this.CorrelationId)}:{this.CorrelationId} - {nameof(this.Subject)}.{nameof(this.Subject.Summary)}={this.Subject.Summary}");
         }
+
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        /// <param name="first">First parameter.</param>
+        /// <param name="second">Second parameter.</param>
+        /// <returns>A value indicating whether or not the two items are equal.</returns>
+        public static bool operator ==(SubjectCorrelation first, SubjectCorrelation second)
+        {
+            if (ReferenceEquals(first, second))
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(first, null) || ReferenceEquals(second, null))
+            {
+                return false;
+            }
+
+            return string.Equals(first.CorrelationId, second.CorrelationId, StringComparison.OrdinalIgnoreCase) && first.Subject == second.Subject;
+        }
+
+        /// <summary>
+        /// Inequality operator.
+        /// </summary>
+        /// <param name="first">First parameter.</param>
+        /// <param name="second">Second parameter.</param>
+        /// <returns>A value indicating whether or not the two items are inequal.</returns>
+        public static bool operator !=(SubjectCorrelation first, SubjectCorrelation second) => !(first == second);
+
+        /// <inheritdoc />
+        public bool Equals(SubjectCorrelation other) => this == other;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => this == (obj as SubjectCorrelation);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => HashCodeHelper.Initialize().Hash(this.CorrelationId).Hash(this.Subject).Value;
     }
 }

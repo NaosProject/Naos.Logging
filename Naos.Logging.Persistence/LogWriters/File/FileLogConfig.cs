@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FileLogConfig.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="FileLogConfig.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -54,56 +54,53 @@ namespace Naos.Logging.Persistence
         public bool CreateDirectoryStructureIfMissing { get; private set; }
 
         /// <summary>
-        /// Equality operator.
+        /// Determines whether two objects of type <see cref="FileLogConfig"/> are equal.
         /// </summary>
-        /// <param name="first">First parameter.</param>
-        /// <param name="second">Second parameter.</param>
-        /// <returns>A value indicating whether or not the two items are equal.</returns>
-        public static bool operator ==(FileLogConfig first, FileLogConfig second)
+        /// <param name="left">The object to the left of the operator.</param>
+        /// <param name="right">The object to the right of the operator.</param>
+        /// <returns>True if the two items are equal; false otherwise.</returns>
+        public static bool operator ==(
+            FileLogConfig left,
+            FileLogConfig right)
         {
-            if (ReferenceEquals(first, second))
+            if (ReferenceEquals(left, right))
             {
                 return true;
             }
 
-            if (ReferenceEquals(first, null) || ReferenceEquals(second, null))
+            if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
             {
                 return false;
             }
 
-            var result = (first.LogItemPropertiesToIncludeInLogMessage == second.LogItemPropertiesToIncludeInLogMessage) &&
-                         (first.LogInclusionKindToOriginsMapFriendlyString == second.LogInclusionKindToOriginsMapFriendlyString) &&
-                         (first.LogFilePath == second.LogFilePath) &&
-                         (first.CreateDirectoryStructureIfMissing == second.CreateDirectoryStructureIfMissing);
+            var result = left.BaseEquals(right) &&
+                         string.Equals(left.LogFilePath, right.LogFilePath, StringComparison.Ordinal) &&
+                         left.CreateDirectoryStructureIfMissing == right.CreateDirectoryStructureIfMissing;
+
             return result;
         }
 
         /// <summary>
-        /// Inequality operator.
+        /// Determines whether two objects of type <see cref="FileLogConfig"/> are not equal.
         /// </summary>
-        /// <param name="first">First parameter.</param>
-        /// <param name="second">Second parameter.</param>
-        /// <returns>A value indicating whether or not the two items are inequal.</returns>
+        /// <param name="left">The object to the left of the operator.</param>
+        /// <param name="right">The object to the right of the operator.</param>
+        /// <returns>True if the two items not equal; false otherwise.</returns>
         public static bool operator !=(
-            FileLogConfig first,
-            FileLogConfig second) => !(first == second);
+            FileLogConfig left,
+            FileLogConfig right)
+            => !(left == right);
 
         /// <inheritdoc />
-        public bool Equals(
-            FileLogConfig other) => this == other;
+        public bool Equals(FileLogConfig other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(
-            object obj) => this == (obj as FileLogConfig);
+        public override bool Equals(object obj) => this == (obj as FileLogConfig);
 
         /// <inheritdoc />
-        public override int GetHashCode() =>
-            HashCodeHelper
-                .Initialize()
-                .Hash(this.LogItemPropertiesToIncludeInLogMessage)
-                .Hash(this.LogInclusionKindToOriginsMapFriendlyString)
-                .Hash(this.LogFilePath)
-                .Hash(this.CreateDirectoryStructureIfMissing)
-                .Value;
+        public override int GetHashCode() => HashCodeHelper.Initialize(this.GetBaseHashCode())
+                                                           .Hash(this.LogFilePath)
+                                                           .Hash(this.CreateDirectoryStructureIfMissing)
+                                                           .Value;
     }
 }

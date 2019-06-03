@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogWriterBase.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="LogWriterBase.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ namespace Naos.Logging.Domain
     using Naos.Serialization.Json;
     using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Enum.Recipes;
-
+    using OBeautifulCode.Type;
     using static System.FormattableString;
     using SerializationFormat = Naos.Serialization.Domain.SerializationFormat;
 
@@ -32,7 +32,7 @@ namespace Naos.Logging.Domain
         /// Default serializer description to use for converting a <see cref="LogItem" /> into a string.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Is immuatable.")]
-        public static readonly SerializationDescription DefaultLogItemSerializationDescription = new SerializationDescription(SerializationFormat.Json, SerializationRepresentation.String);
+        public static readonly SerializationDescription DefaultLogItemSerializationDescription = new SerializationDescription(SerializationKind.Json, SerializationFormat.String, typeof(LoggingJsonConfiguration).ToTypeDescription());
 
         /// <summary>
         /// Default serializer to use for converting a <see cref="LogItem" /> into a string.

@@ -13,6 +13,7 @@ namespace OBeautifulCode.Validation.Recipes
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
     using static System.FormattableString;
 
@@ -1462,6 +1463,69 @@ namespace OBeautifulCode.Validation.Recipes
         }
 
         /// <summary>
+        /// Validates that the string parameter is alphabetic.
+        /// </summary>
+        /// <remarks>
+        /// An empty string is considered to be alphabetic.
+        /// </remarks>
+        /// <param name="parameter">The parameter to validate.</param>
+        /// <param name="otherAllowedCharacters">Optional set of other characters that are allowed (e.g. '-').  Default is none (strict definition of alphabetic).</param>
+        /// <param name="because">Optional rationale for the validation, used in the exception message if the parameter fails this validation.  The default is use the framework-generated exception message as-is.</param>
+        /// <param name="applyBecause">Optional value that determines how to apply the <paramref name="because"/>, when specified.  The default is to prefix the framework-generated exception message with <paramref name="because"/>.</param>
+        /// <param name="data">Optional collection of key/value pairs that provide additional user-defined information that is added to the exception's <see cref="Exception.Data"/> property, if thrown.  The default is no user-defined information.</param>
+        /// <returns>
+        /// The validated parameter.
+        /// </returns>
+        public static Parameter BeAlphabetic(
+            [ValidatedNotNull] this Parameter parameter,
+            IReadOnlyCollection<char> otherAllowedCharacters = null,
+            string because = null,
+            ApplyBecause applyBecause = ApplyBecause.PrefixedToDefaultMessage,
+            IDictionary data = null)
+        {
+            var validation = new Validation
+            {
+                Because = because,
+                ApplyBecause = applyBecause,
+                ValueValidationHandler = BeAlphabeticInternal,
+                ValidationName = nameof(BeAlphabetic),
+                ValidationParameters = new[]
+                {
+                    new ValidationParameter
+                    {
+                        Name = nameof(otherAllowedCharacters),
+                        Value = otherAllowedCharacters,
+                        ValueType = typeof(IReadOnlyCollection<char>),
+                        ValueToStringFunc = () =>
+                        {
+                            string result;
+                            if (otherAllowedCharacters == null)
+                            {
+                                result = NullValueToString;
+                            }
+                            else if (otherAllowedCharacters.Count == 0)
+                            {
+                                result = EmptyEnumerableToString;
+                            }
+                            else
+                            {
+                                var otherAllowedCharactersToString = otherAllowedCharacters.Select(_ => Invariant($"'{_}'")).ToArray();
+                                result = Invariant($"[{string.Join(", ", otherAllowedCharactersToString)}]");
+                            }
+
+                            return result;
+                        },
+                    },
+                },
+                TypeValidations = MustBeStringTypeValidations,
+                Data = data,
+            };
+
+            parameter.Validate(validation);
+            return parameter;
+        }
+
+        /// <summary>
         /// Validates that the string parameter is alphanumeric.
         /// </summary>
         /// <remarks>
@@ -1514,6 +1578,253 @@ namespace OBeautifulCode.Validation.Recipes
 
                             return result;
                         },
+                    },
+                },
+                TypeValidations = MustBeStringTypeValidations,
+                Data = data,
+            };
+
+            parameter.Validate(validation);
+            return parameter;
+        }
+
+        /// <summary>
+        /// Validates that the string parameter is in the ASCII printable set (ASCII 32-126).
+        /// </summary>
+        /// <remarks>
+        /// An empty string is considered to be printable.
+        /// </remarks>
+        /// <param name="parameter">The parameter to validate.</param>
+        /// <param name="treatNewLineAsPrintable">Optional value indicating whether to treat newline as printable.  Default value is false; newline will not be treated as printable.</param>
+        /// <param name="because">Optional rationale for the validation, used in the exception message if the parameter fails this validation.  The default is use the framework-generated exception message as-is.</param>
+        /// <param name="applyBecause">Optional value that determines how to apply the <paramref name="because"/>, when specified.  The default is to prefix the framework-generated exception message with <paramref name="because"/>.</param>
+        /// <param name="data">Optional collection of key/value pairs that provide additional user-defined information that is added to the exception's <see cref="Exception.Data"/> property, if thrown.  The default is no user-defined information.</param>
+        /// <returns>
+        /// The validated parameter.
+        /// </returns>
+        public static Parameter BeAsciiPrintable(
+            [ValidatedNotNull] this Parameter parameter,
+            bool treatNewLineAsPrintable = false,
+            string because = null,
+            ApplyBecause applyBecause = ApplyBecause.PrefixedToDefaultMessage,
+            IDictionary data = null)
+        {
+            var validation = new Validation
+            {
+                Because = because,
+                ApplyBecause = applyBecause,
+                ValueValidationHandler = BeAsciiPrintableInternal,
+                ValidationName = nameof(BeAsciiPrintable),
+                ValidationParameters = new[]
+                {
+                    new ValidationParameter
+                    {
+                        Name = nameof(treatNewLineAsPrintable),
+                        Value = treatNewLineAsPrintable,
+                        ValueType = typeof(bool),
+                    },
+                },
+                TypeValidations = MustBeStringTypeValidations,
+                Data = data,
+            };
+
+            parameter.Validate(validation);
+
+            return parameter;
+        }
+
+        /// <summary>
+        /// Validates that a regex finds a match in the string parameter.
+        /// </summary>
+        /// <param name="parameter">The parameter to validate.</param>
+        /// <param name="regex">The regex to use.</param>
+        /// <param name="because">Optional rationale for the validation, used in the exception message if the parameter fails this validation.  The default is use the framework-generated exception message as-is.</param>
+        /// <param name="applyBecause">Optional value that determines how to apply the <paramref name="because"/>, when specified.  The default is to prefix the framework-generated exception message with <paramref name="because"/>.</param>
+        /// <param name="data">Optional collection of key/value pairs that provide additional user-defined information that is added to the exception's <see cref="Exception.Data"/> property, if thrown.  The default is no user-defined information.</param>
+        /// <returns>
+        /// The validated parameter.
+        /// </returns>
+        public static Parameter BeMatchedByRegex(
+            [ValidatedNotNull] this Parameter parameter,
+            Regex regex,
+            string because = null,
+            ApplyBecause applyBecause = ApplyBecause.PrefixedToDefaultMessage,
+            IDictionary data = null)
+        {
+            if (regex == null)
+            {
+                throw new ArgumentNullException(nameof(regex));
+            }
+
+            var validation = new Validation
+            {
+                Because = because,
+                ApplyBecause = applyBecause,
+                ValueValidationHandler = BeMatchedByRegexInternal,
+                ValidationName = nameof(BeMatchedByRegex),
+                ValidationParameters = new[]
+                {
+                    new ValidationParameter
+                    {
+                        Name = nameof(regex),
+                        Value = regex,
+                        ValueType = typeof(Regex),
+                        ValueToStringFunc = regex.ToString,
+                    },
+                },
+                TypeValidations = MustBeStringTypeValidations,
+                Data = data,
+            };
+
+            parameter.Validate(validation);
+            return parameter;
+        }
+
+        /// <summary>
+        /// Validates that a regex does not find a match in the string parameter.
+        /// </summary>
+        /// <param name="parameter">The parameter to validate.</param>
+        /// <param name="regex">The regex to use.</param>
+        /// <param name="because">Optional rationale for the validation, used in the exception message if the parameter fails this validation.  The default is use the framework-generated exception message as-is.</param>
+        /// <param name="applyBecause">Optional value that determines how to apply the <paramref name="because"/>, when specified.  The default is to prefix the framework-generated exception message with <paramref name="because"/>.</param>
+        /// <param name="data">Optional collection of key/value pairs that provide additional user-defined information that is added to the exception's <see cref="Exception.Data"/> property, if thrown.  The default is no user-defined information.</param>
+        /// <returns>
+        /// The validated parameter.
+        /// </returns>
+        public static Parameter NotBeMatchedByRegex(
+            [ValidatedNotNull] this Parameter parameter,
+            Regex regex,
+            string because = null,
+            ApplyBecause applyBecause = ApplyBecause.PrefixedToDefaultMessage,
+            IDictionary data = null)
+        {
+            if (regex == null)
+            {
+                throw new ArgumentNullException(nameof(regex));
+            }
+
+            var validation = new Validation
+            {
+                Because = because,
+                ApplyBecause = applyBecause,
+                ValueValidationHandler = NotBeMatchedByRegexInternal,
+                ValidationName = nameof(NotBeMatchedByRegex),
+                ValidationParameters = new[]
+                {
+                    new ValidationParameter
+                    {
+                        Name = nameof(regex),
+                        Value = regex,
+                        ValueType = typeof(Regex),
+                        ValueToStringFunc = regex.ToString,
+                    },
+                },
+                TypeValidations = MustBeStringTypeValidations,
+                Data = data,
+            };
+
+            parameter.Validate(validation);
+            return parameter;
+        }
+
+        /// <summary>
+        /// Validates that the string parameter starts with a specified string.
+        /// </summary>
+        /// <param name="parameter">The parameter to validate.</param>
+        /// <param name="comparisonValue">The string value to find.</param>
+        /// <param name="comparisonType">Optional value that determines how the string parameter and <paramref name="comparisonValue"/> are compared.</param>
+        /// <param name="because">Optional rationale for the validation, used in the exception message if the parameter fails this validation.  The default is use the framework-generated exception message as-is.</param>
+        /// <param name="applyBecause">Optional value that determines how to apply the <paramref name="because"/>, when specified.  The default is to prefix the framework-generated exception message with <paramref name="because"/>.</param>
+        /// <param name="data">Optional collection of key/value pairs that provide additional user-defined information that is added to the exception's <see cref="Exception.Data"/> property, if thrown.  The default is no user-defined information.</param>
+        /// <returns>
+        /// The validated parameter.
+        /// </returns>
+        public static Parameter StartWith(
+            [ValidatedNotNull] this Parameter parameter,
+            string comparisonValue,
+            StringComparison? comparisonType = null,
+            string because = null,
+            ApplyBecause applyBecause = ApplyBecause.PrefixedToDefaultMessage,
+            IDictionary data = null)
+        {
+            if (comparisonValue == null)
+            {
+                throw new ArgumentNullException(nameof(comparisonValue));
+            }
+
+            var validation = new Validation
+            {
+                Because = because,
+                ApplyBecause = applyBecause,
+                ValueValidationHandler = StartWithInternal,
+                ValidationName = nameof(StartWith),
+                ValidationParameters = new[]
+                {
+                    new ValidationParameter
+                    {
+                        Name = nameof(comparisonValue),
+                        Value = comparisonValue,
+                        ValueType = typeof(string),
+                    },
+                    new ValidationParameter
+                    {
+                        Name = nameof(comparisonType),
+                        Value = comparisonType,
+                        ValueType = typeof(StringComparison),
+                    },
+                },
+                TypeValidations = MustBeStringTypeValidations,
+                Data = data,
+            };
+
+            parameter.Validate(validation);
+            return parameter;
+        }
+
+        /// <summary>
+        /// Validates that the string parameter does not starts with a specified string.
+        /// </summary>
+        /// <param name="parameter">The parameter to validate.</param>
+        /// <param name="comparisonValue">The string value to find.</param>
+        /// <param name="comparisonType">Optional value that determines how the string parameter and <paramref name="comparisonValue"/> are compared.</param>
+        /// <param name="because">Optional rationale for the validation, used in the exception message if the parameter fails this validation.  The default is use the framework-generated exception message as-is.</param>
+        /// <param name="applyBecause">Optional value that determines how to apply the <paramref name="because"/>, when specified.  The default is to prefix the framework-generated exception message with <paramref name="because"/>.</param>
+        /// <param name="data">Optional collection of key/value pairs that provide additional user-defined information that is added to the exception's <see cref="Exception.Data"/> property, if thrown.  The default is no user-defined information.</param>
+        /// <returns>
+        /// The validated parameter.
+        /// </returns>
+        public static Parameter NotStartWith(
+            [ValidatedNotNull] this Parameter parameter,
+            string comparisonValue,
+            StringComparison? comparisonType = null,
+            string because = null,
+            ApplyBecause applyBecause = ApplyBecause.PrefixedToDefaultMessage,
+            IDictionary data = null)
+        {
+            if (comparisonValue == null)
+            {
+                throw new ArgumentNullException(nameof(comparisonValue));
+            }
+
+            var validation = new Validation
+            {
+                Because = because,
+                ApplyBecause = applyBecause,
+                ValueValidationHandler = NotStartWithInternal,
+                ValidationName = nameof(NotStartWith),
+                ValidationParameters = new[]
+                {
+                    new ValidationParameter
+                    {
+                        Name = nameof(comparisonValue),
+                        Value = comparisonValue,
+                        ValueType = typeof(string),
+                    },
+                    new ValidationParameter
+                    {
+                        Name = nameof(comparisonType),
+                        Value = comparisonType,
+                        ValueType = typeof(StringComparison),
                     },
                 },
                 TypeValidations = MustBeStringTypeValidations,

@@ -41,8 +41,8 @@ namespace OBeautifulCode.Math.Recipes
         /// <exception cref="ArgumentException"><paramref name="value1"/> or <paramref name="value2"/> is <see cref="double.NaN"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="tolerance"/> is less than 0.</exception>
         public static bool IsAlmostEqualTo(
-            this double value1, 
-            double value2, 
+            this double value1,
+            double value2,
             double tolerance = 1e-8)
         {
             if (double.IsNaN(value1))
@@ -80,8 +80,8 @@ namespace OBeautifulCode.Math.Recipes
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="tolerance"/> is less than 0.</exception>
         public static bool IsAlmostEqualTo(
-            this decimal value1, 
-            decimal value2, 
+            this decimal value1,
+            decimal value2,
             decimal tolerance = 1e-8m)
         {
             if (tolerance < 0)
@@ -110,8 +110,8 @@ namespace OBeautifulCode.Math.Recipes
         /// <exception cref="ArgumentException"><paramref name="value1"/> or <paramref name="value2"/> is <see cref="double.NaN"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="tolerance"/> is less than 0.</exception>
         public static bool IsGreaterThanOrAlmostEqualTo(
-            this double value1, 
-            double value2, 
+            this double value1,
+            double value2,
             double tolerance = 1e-8)
         {
             if (double.IsNaN(value1))
@@ -148,8 +148,8 @@ namespace OBeautifulCode.Math.Recipes
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="tolerance"/> is less than 0.</exception>
         public static bool IsGreaterThanOrAlmostEqualTo(
-            this decimal value1, 
-            decimal value2, 
+            this decimal value1,
+            decimal value2,
             decimal tolerance = 1e-8m)
         {
             if (tolerance < 0)
@@ -177,8 +177,8 @@ namespace OBeautifulCode.Math.Recipes
         /// <exception cref="ArgumentException"><paramref name="value1"/> or <paramref name="value2"/> is <see cref="double.NaN"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="tolerance"/> is less than 0.</exception>
         public static bool IsLessThanOrAlmostEqualTo(
-            this double value1, 
-            double value2, 
+            this double value1,
+            double value2,
             double tolerance = 1e-8)
         {
             if (double.IsNaN(value1))
@@ -215,8 +215,8 @@ namespace OBeautifulCode.Math.Recipes
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="tolerance"/> is less than 0.</exception>
         public static bool IsLessThanOrAlmostEqualTo(
-            this decimal value1, 
-            decimal value2, 
+            this decimal value1,
+            decimal value2,
             decimal tolerance = 1e-8m)
         {
             if (tolerance < 0)
@@ -240,7 +240,7 @@ namespace OBeautifulCode.Math.Recipes
         /// <exception cref="ArgumentException"><paramref name="values1"/> or <paramref name="values2"/> is empty.</exception>
         /// <exception cref="ArgumentException">The sets have different lengths.</exception>
         public static double Covariance(
-            IList<double> values1, 
+            IList<double> values1,
             IList<double> values2)
         {
             if (values1 == null)
@@ -300,7 +300,7 @@ namespace OBeautifulCode.Math.Recipes
         /// <exception cref="ArgumentException"><paramref name="values1"/> or <paramref name="values2"/> is empty.</exception>
         /// <exception cref="ArgumentException">The sets have different lengths.</exception>
         public static decimal Covariance(
-            IList<decimal> values1, 
+            IList<decimal> values1,
             IList<decimal> values2)
         {
             if (values1 == null)
@@ -401,8 +401,8 @@ namespace OBeautifulCode.Math.Recipes
             }
 
             double avg = valuesList.Average();
-            double sumOfSqrs = valuesList.Sum(value => Math.Pow(value - avg, 2));
-            return Math.Sqrt(sumOfSqrs / Convert.ToDouble(valuesList.Count - 1));
+            double sumOfSquares = valuesList.Sum(value => Math.Pow(value - avg, 2));
+            return Math.Sqrt(sumOfSquares / Convert.ToDouble(valuesList.Count - 1));
         }
 
         /// <summary>
@@ -482,7 +482,7 @@ namespace OBeautifulCode.Math.Recipes
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="digits"/> must be less than 0.</exception>
         /// <exception cref="OverflowException"><paramref name="digits"/> is too high.</exception>
         public static decimal TruncateSignificantDigits(
-            decimal value, 
+            decimal value,
             int digits)
         {
             if (digits < 0)
@@ -571,5 +571,29 @@ namespace OBeautifulCode.Math.Recipes
             var result = new Guid(bytes);
             return result;
         }
+
+        /// <summary>
+        /// Determines if an integer value is even.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// true if the value is even; otherwise false.
+        /// </returns>
+        public static bool IsEven(
+            this int value)
+        {
+            var result = value % 2 == 0;
+            return result;
+        }
+
+        /// <summary>
+        /// Determines if an integer value is odd.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// true if the value is odd; otherwise false.
+        /// </returns>
+        public static bool IsOdd(
+            this int value) => !IsEven(value);
     }
 }

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TimeSlicedFilesLogConfig.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="TimeSlicedFilesLogConfig.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -24,7 +24,7 @@ namespace Naos.Logging.Persistence
         private readonly IReadOnlyCollection<TimeSpan> sliceOffsets;
 
         /// <summary>
-        /// File extension of files written without the leading period/dot "."
+        /// File extension of files written without the leading period/dot.
         /// </summary>
         public const string FileExtensionWithoutDot = "log";
 
@@ -107,63 +107,57 @@ namespace Naos.Logging.Persistence
         }
 
         /// <summary>
-        /// Equality operator.
+        /// Determines whether two objects of type <see cref="TimeSlicedFilesLogConfig"/> are equal.
         /// </summary>
-        /// <param name="first">First parameter.</param>
-        /// <param name="second">Second parameter.</param>
-        /// <returns>A value indicating whether or not the two items are equal.</returns>
+        /// <param name="left">The object to the left of the operator.</param>
+        /// <param name="right">The object to the right of the operator.</param>
+        /// <returns>True if the two items are equal; false otherwise.</returns>
         public static bool operator ==(
-            TimeSlicedFilesLogConfig first,
-            TimeSlicedFilesLogConfig second)
+            TimeSlicedFilesLogConfig left,
+            TimeSlicedFilesLogConfig right)
         {
-            if (ReferenceEquals(first, second))
+            if (ReferenceEquals(left, right))
             {
                 return true;
             }
 
-            if (ReferenceEquals(first, null) || ReferenceEquals(second, null))
+            if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
             {
                 return false;
             }
 
-            var result =
-                (first.LogItemPropertiesToIncludeInLogMessage == second.LogItemPropertiesToIncludeInLogMessage) &&
-                (first.LogInclusionKindToOriginsMapFriendlyString == second.LogInclusionKindToOriginsMapFriendlyString) &&
-                (first.LogFileDirectoryPath == second.LogFileDirectoryPath) &&
-                (first.FileNamePrefix == second.FileNamePrefix) &&
-                (first.TimeSlicePerFile == second.TimeSlicePerFile) &&
-                (first.CreateDirectoryStructureIfMissing == second.CreateDirectoryStructureIfMissing);
+            var result = left.BaseEquals(right) &&
+                         left.TimeSlicePerFile == right.TimeSlicePerFile &&
+                         string.Equals(left.FileNamePrefix, right.FileNamePrefix, StringComparison.Ordinal) &&
+                         string.Equals(left.LogFileDirectoryPath, right.LogFileDirectoryPath, StringComparison.Ordinal) &&
+                         left.CreateDirectoryStructureIfMissing == right.CreateDirectoryStructureIfMissing;
+
             return result;
         }
 
         /// <summary>
-        /// Inequality operator.
+        /// Determines whether two objects of type <see cref="TimeSlicedFilesLogConfig"/> are not equal.
         /// </summary>
-        /// <param name="first">First parameter.</param>
-        /// <param name="second">Second parameter.</param>
-        /// <returns>A value indicating whether or not the two items are inequal.</returns>
+        /// <param name="left">The object to the left of the operator.</param>
+        /// <param name="right">The object to the right of the operator.</param>
+        /// <returns>True if the two items not equal; false otherwise.</returns>
         public static bool operator !=(
-            TimeSlicedFilesLogConfig first,
-            TimeSlicedFilesLogConfig second) => !(first == second);
+            TimeSlicedFilesLogConfig left,
+            TimeSlicedFilesLogConfig right)
+            => !(left == right);
 
         /// <inheritdoc />
-        public bool Equals(
-            TimeSlicedFilesLogConfig other) => this == other;
+        public bool Equals(TimeSlicedFilesLogConfig other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(
-            object obj) => this == (obj as TimeSlicedFilesLogConfig);
+        public override bool Equals(object obj) => this == (obj as TimeSlicedFilesLogConfig);
 
         /// <inheritdoc />
-        public override int GetHashCode() =>
-            HashCodeHelper
-                .Initialize()
-                .Hash(this.LogItemPropertiesToIncludeInLogMessage)
-                .Hash(this.LogInclusionKindToOriginsMapFriendlyString)
-                .Hash(this.LogFileDirectoryPath)
-                .Hash(this.FileNamePrefix)
-                .Hash(this.TimeSlicePerFile)
-                .Hash(this.CreateDirectoryStructureIfMissing)
-                .Value;
+        public override int GetHashCode() => HashCodeHelper.Initialize(this.GetBaseHashCode())
+                                                           .Hash(this.TimeSlicePerFile)
+                                                           .Hash(this.FileNamePrefix)
+                                                           .Hash(this.LogFileDirectoryPath)
+                                                           .Hash(this.CreateDirectoryStructureIfMissing)
+                                                           .Value;
     }
 }

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogWriting.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="LogWriting.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -15,12 +15,11 @@ namespace Naos.Logging.Persistence
     using Naos.Diagnostics.Recipes;
     using Naos.Logging.Domain;
     using Naos.Serialization.Domain;
-    using Naos.Serialization.Domain.Extensions;
     using Naos.Serialization.Json;
     using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Error.Recipes;
     using OBeautifulCode.Math.Recipes;
-    using OBeautifulCode.TypeRepresentation;
+    using OBeautifulCode.Type;
     using static System.FormattableString;
     using CorrelationManager = System.Diagnostics.CorrelationManager;
     using Log = Naos.Logging.Domain.Log;
@@ -42,6 +41,7 @@ namespace Naos.Logging.Persistence
         private IReadOnlyCollection<LogWriterBase> activeLogWriters;
 
         private IReadOnlyCollection<string> errorCodeKeysField;
+        private static readonly NaosJsonSerializer LogEntrySerializer = new NaosJsonSerializer(typeof(LoggingJsonConfiguration), UnregisteredTypeEncounteredStrategy.Attempt);
 
         private LogWriting()
         {
@@ -158,7 +158,7 @@ namespace Naos.Logging.Persistence
                 string serializedLogEntry;
                 try
                 {
-                    serializedLogEntry = new NaosJsonSerializer().SerializeToString(logEntry);
+                    serializedLogEntry = LogEntrySerializer.SerializeToString(logEntry);
                 }
                 catch (Exception failToSerializeLogEntryException)
                 {
@@ -175,7 +175,8 @@ namespace Naos.Logging.Persistence
                 catch (Exception failedToBuildInvalidLogEntryException)
                 {
                     var rawSubject = new RawSubject(
-                        new FailedToBuildInvalidLogEntryException("Failed to build invalid log entry.",
+                        new FailedToBuildInvalidLogEntryException(
+                            "Failed to build invalid log entry.",
                             failedToBuildInvalidLogEntryException),
                         serializedLogEntry);
 

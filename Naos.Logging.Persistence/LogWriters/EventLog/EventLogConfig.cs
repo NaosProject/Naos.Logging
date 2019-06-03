@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="EventLogConfig.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="EventLogConfig.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -9,7 +9,6 @@ namespace Naos.Logging.Persistence
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using Naos.Diagnostics.Recipes;
     using Naos.Logging.Domain;
     using Naos.Serialization.Domain;
@@ -83,62 +82,57 @@ namespace Naos.Logging.Persistence
         public string MachineName { get; private set; }
 
         /// <summary>
-        /// Equality operator.
+        /// Determines whether two objects of type <see cref="EventLogConfig"/> are equal.
         /// </summary>
-        /// <param name="first">First parameter.</param>
-        /// <param name="second">Second parameter.</param>
-        /// <returns>A value indicating whether or not the two items are equal.</returns>
+        /// <param name="left">The object to the left of the operator.</param>
+        /// <param name="right">The object to the right of the operator.</param>
+        /// <returns>True if the two items are equal; false otherwise.</returns>
         public static bool operator ==(
-            EventLogConfig first,
-            EventLogConfig second)
+            EventLogConfig left,
+            EventLogConfig right)
         {
-            if (ReferenceEquals(first, second))
+            if (ReferenceEquals(left, right))
             {
                 return true;
             }
 
-            if (ReferenceEquals(first, null) || ReferenceEquals(second, null))
+            if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
             {
                 return false;
             }
 
-            var result = (first.LogItemPropertiesToIncludeInLogMessage == second.LogItemPropertiesToIncludeInLogMessage) &&
-                         (first.LogInclusionKindToOriginsMapFriendlyString == second.LogInclusionKindToOriginsMapFriendlyString) &&
-                         (first.Source == second.Source) &&
-                         (first.ShouldCreateSourceIfMissing == second.ShouldCreateSourceIfMissing) &&
-                         (first.LogName == second.LogName) &&
-                         (first.MachineName == second.MachineName);
+            var result = left.BaseEquals(right) &&
+                         string.Equals(left.Source, right.Source, StringComparison.Ordinal) &&
+                         left.ShouldCreateSourceIfMissing == right.ShouldCreateSourceIfMissing &&
+                         string.Equals(left.LogName, right.LogName, StringComparison.Ordinal) &&
+                         string.Equals(left.MachineName, right.MachineName, StringComparison.Ordinal);
+
             return result;
         }
 
         /// <summary>
-        /// Inequality operator.
+        /// Determines whether two objects of type <see cref="EventLogConfig"/> are not equal.
         /// </summary>
-        /// <param name="first">First parameter.</param>
-        /// <param name="second">Second parameter.</param>
-        /// <returns>A value indicating whether or not the two items are inequal.</returns>
+        /// <param name="left">The object to the left of the operator.</param>
+        /// <param name="right">The object to the right of the operator.</param>
+        /// <returns>True if the two items not equal; false otherwise.</returns>
         public static bool operator !=(
-            EventLogConfig first,
-            EventLogConfig second) => !(first == second);
+            EventLogConfig left,
+            EventLogConfig right)
+            => !(left == right);
 
         /// <inheritdoc />
-        public bool Equals(
-            EventLogConfig other) => this == other;
+        public bool Equals(EventLogConfig other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(
-            object obj) => this == (obj as EventLogConfig);
+        public override bool Equals(object obj) => this == (obj as EventLogConfig);
 
         /// <inheritdoc />
-        public override int GetHashCode() =>
-            HashCodeHelper
-                .Initialize()
-                .Hash(this.LogItemPropertiesToIncludeInLogMessage)
-                .Hash(this.LogInclusionKindToOriginsMapFriendlyString)
-                .Hash(this.Source)
-                .Hash(this.ShouldCreateSourceIfMissing)
-                .Hash(this.LogName)
-                .Hash(this.MachineName)
-                .Value;
+        public override int GetHashCode() => HashCodeHelper.Initialize(this.GetBaseHashCode())
+                                                           .Hash(this.Source)
+                                                           .Hash(this.ShouldCreateSourceIfMissing)
+                                                           .Hash(this.LogName)
+                                                           .Hash(this.MachineName)
+                                                           .Value;
     }
 }

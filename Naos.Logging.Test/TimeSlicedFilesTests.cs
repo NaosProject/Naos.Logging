@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TimeSlicedFilesTests.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="TimeSlicedFilesTests.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@ namespace Naos.Logging.Test
     using Naos.Compression.Domain;
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
-    using Naos.Serialization.Domain.Extensions;
+    using Naos.Serialization.Domain;
     using Naos.Serialization.Json;
 
     using Xunit;
@@ -45,7 +45,7 @@ namespace Naos.Logging.Test
                      ""logItemPropertiesToIncludeInLogMessage"": ""default""
                  }";
 
-            var serializer = new NaosJsonSerializer();
+            var serializer = new NaosJsonSerializer<LoggingJsonConfiguration>();
 
             // Act
             var result = serializer.Deserialize<LogWriterConfigBase>(input);

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="BuildingHelpers.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="BuildingHelpers.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -12,8 +12,9 @@ namespace Naos.Logging.Test
     using Naos.Compression.Domain;
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
-    using Naos.Serialization.Domain.Extensions;
+    using Naos.Serialization.Domain;
     using Naos.Serialization.Json;
+    using OBeautifulCode.Validation.Recipes;
 
     public static class BuildingHelpers
     {
@@ -60,12 +61,14 @@ namespace Naos.Logging.Test
 
         public static object DeserializeSubject(this Subject subject)
         {
+            new { subject }.Must().NotBeNull();
             return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(JsonSerializerFactory.Instance, CompressorFactory.Instance);
         }
 
         public static T DeserializeSubject<T>(this Subject subject)
         {
-            return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory<T>(JsonSerializerFactory.Instance, CompressorFactory.Instance);
+            new { subject }.Must().NotBeNull();
+            return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory<T>(JsonSerializerFactory.Instance, CompressorFactory.Instance, unregisteredTypeEncounteredStrategy: UnregisteredTypeEncounteredStrategy.Attempt);
         }
     }
 }

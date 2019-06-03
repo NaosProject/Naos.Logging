@@ -1,13 +1,13 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ErrorCodeCorrelation.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="ErrorCodeCorrelation.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Naos.Logging.Domain
 {
     using System;
-
+    using OBeautifulCode.Math.Recipes;
     using static System.FormattableString;
 
     /// <summary>
@@ -15,7 +15,7 @@ namespace Naos.Logging.Domain
     /// <see cref="LogItem"/>s with a shared <see cref="Exception"/> in
     /// the chain of <see cref="Exception.InnerException"/>.
     /// </summary>
-    public class ErrorCodeCorrelation : IHaveCorrelationId
+    public class ErrorCodeCorrelation : IHaveCorrelationId, IEquatable<ErrorCodeCorrelation>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorCodeCorrelation"/> class.
@@ -63,5 +63,49 @@ namespace Naos.Logging.Domain
         {
             return Invariant($"{nameof(this.CorrelationId)}:{this.CorrelationId} - ErrorCode {this.ErrorCodeKey}={this.ErrorCode}");
         }
+
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        /// <param name="first">First parameter.</param>
+        /// <param name="second">Second parameter.</param>
+        /// <returns>A value indicating whether or not the two items are equal.</returns>
+        public static bool operator ==(ErrorCodeCorrelation first, ErrorCodeCorrelation second)
+        {
+            if (ReferenceEquals(first, second))
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(first, null) || ReferenceEquals(second, null))
+            {
+                return false;
+            }
+
+            return first.CorrelationId == second.CorrelationId &&
+                   first.ErrorCodeKey == second.ErrorCodeKey &&
+                   first.ErrorCode == second.ErrorCode;
+        }
+
+        /// <summary>
+        /// Inequality operator.
+        /// </summary>
+        /// <param name="first">First parameter.</param>
+        /// <param name="second">Second parameter.</param>
+        /// <returns>A value indicating whether or not the two items are inequal.</returns>
+        public static bool operator !=(ErrorCodeCorrelation first, ErrorCodeCorrelation second) => !(first == second);
+
+        /// <inheritdoc />
+        public bool Equals(ErrorCodeCorrelation other) => this == other;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => this == (obj as ErrorCodeCorrelation);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => HashCodeHelper.Initialize()
+            .Hash(this.CorrelationId)
+            .Hash(this.ErrorCodeKey)
+            .Hash(this.ErrorCode)
+            .Value;
     }
 }

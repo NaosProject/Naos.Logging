@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogWritingForItsLogTest.cs" company="Naos">
-//    Copyright (c) Naos 2017. All Rights Reserved.
+// <copyright file="LogWritingForItsLogTest.cs" company="Naos Project">
+//    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -518,9 +518,9 @@ namespace Naos.Logging.Test
             // Assert
             logWriter.LoggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is ElapsedCorrelation).Should().NotBeNull());
             logWriter.LoggedItems.ToList().ForEach(_ => _.Correlations.Single(c => c is SubjectCorrelation).Should().NotBeNull());
-            logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is ElapsedCorrelation).CorrelationId).Distinct().Count().Should()
+            logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is ElapsedCorrelation).CorrelationId).Count().Should()
                 .Be(logWriter.LoggedItems.Count);
-            logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is SubjectCorrelation).CorrelationId).Distinct().Count().Should()
+            logWriter.LoggedItems.Select(_ => _.Correlations.Single(c => c is SubjectCorrelation).CorrelationId).Count().Should()
                 .Be(logWriter.LoggedItems.Count);
             logWriter.LoggedItems.ToList().ForEach(
                 _ => ((SubjectCorrelation)_.Correlations.Single(c => c is SubjectCorrelation)).Subject
