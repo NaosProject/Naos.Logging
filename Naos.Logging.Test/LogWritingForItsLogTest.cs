@@ -56,7 +56,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             logItem.Correlations.Should().BeEmpty();
         }
@@ -90,7 +90,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             logItem.Correlations.Should().BeEmpty();
         }
@@ -123,7 +123,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             logItem.Correlations.Should().BeEmpty();
         }
@@ -157,7 +157,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             logItem.Correlations.Should().BeEmpty();
         }
@@ -190,7 +190,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             logItem.Correlations.Should().BeEmpty();
         }
@@ -224,7 +224,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             logItem.Correlations.Should().BeEmpty();
         }
@@ -257,7 +257,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             logItem.Correlations.Should().BeEmpty();
         }
@@ -291,7 +291,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             logItem.Correlations.Should().BeEmpty();
         }
@@ -331,7 +331,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single();
             exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
@@ -373,7 +373,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             var exceptionCorrelation = (ExceptionIdCorrelation)logItem.Correlations.Single();
             exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
@@ -417,7 +417,7 @@ namespace Naos.Logging.Test
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.TimestampUtc.Should().BeBefore(DateTime.UtcNow);
+            logItem.Context.TimestampUtc.Should().BeOnOrBefore(DateTime.UtcNow);
 
             var errorCodeCorrelation = (ErrorCodeCorrelation)logItem.Correlations.Single(_ => _.GetType() == typeof(ErrorCodeCorrelation));
             errorCodeCorrelation.ErrorCode.Should().Be(errorCode);
