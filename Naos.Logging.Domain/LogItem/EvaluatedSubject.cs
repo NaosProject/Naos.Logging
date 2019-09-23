@@ -9,6 +9,7 @@ namespace Naos.Logging.Domain
     using System;
     using System.Runtime.CompilerServices;
     using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Representation;
 
     /// <summary>
     /// Some core piece of information that is being logged.
@@ -22,7 +23,7 @@ namespace Naos.Logging.Domain
         public EvaluatedSubject(Func<object> correlatingSubjectFunc)
         {
             this.Subject = correlatingSubjectFunc?.Invoke();
-            this.SubjectToString = this.Subject?.ToString();
+            this.SubjectToString = this.Subject?.GetType() == typeof(Type) ? ((Type)this.Subject).ToStringReadable() : this.Subject?.ToString();
             this.SubjectHashCode = this.Subject?.GetHashCode().ToGuid().ToString().ToUpperInvariant();
         }
 

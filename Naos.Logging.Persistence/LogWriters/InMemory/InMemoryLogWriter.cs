@@ -10,6 +10,7 @@ namespace Naos.Logging.Persistence
     using System.Collections.Generic;
     using System.Linq;
     using Naos.Logging.Domain;
+    using OBeautifulCode.Representation;
 
     /// <summary>
     /// In memory implementation of <see cref="LogWriterBase" />.
@@ -87,7 +88,7 @@ namespace Naos.Logging.Persistence
         /// <inheritdoc />
         public override string ToString()
         {
-            var ret = FormattableString.Invariant($"{this.GetType().FullName}; {nameof(this.memoryLogConfig.LogInclusionKindToOriginsMap)}: {this.memoryLogConfig.LogInclusionKindToOriginsMapFriendlyString}; {nameof(this.memoryLogConfig.MaxLoggedItemCount)}: {this.memoryLogConfig.MaxLoggedItemCount}");
+            var ret = FormattableString.Invariant($"{this.GetType().ToStringReadable()}; {nameof(this.memoryLogConfig.LogInclusionKindToOriginsMap)}: {this.memoryLogConfig.LogInclusionKindToOriginsMapFriendlyString}; {nameof(this.memoryLogConfig.MaxLoggedItemCount)}: {this.memoryLogConfig.MaxLoggedItemCount}");
             return ret;
         }
     }

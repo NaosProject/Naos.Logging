@@ -8,7 +8,7 @@ namespace Naos.Logging.Domain
 {
     using System;
     using OBeautifulCode.Math.Recipes;
-    using OBeautifulCode.Type;
+    using OBeautifulCode.Representation;
 
     using static System.FormattableString;
 
@@ -36,7 +36,7 @@ namespace Naos.Logging.Domain
             string processName = null,
             string processFileVersion = null,
             string callingMethod = null,
-            TypeDescription callingType = null,
+            TypeRepresentation callingType = null,
             string stackTrace = null)
         {
             if (timestampUtc.Kind != DateTimeKind.Utc)
@@ -92,7 +92,7 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Gets a description of the calling type.
         /// </summary>
-        public TypeDescription CallingType { get; private set; }
+        public TypeRepresentation CallingType { get; private set; }
 
         /// <summary>
         /// Gets the stack trace.

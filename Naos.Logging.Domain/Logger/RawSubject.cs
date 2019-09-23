@@ -12,6 +12,7 @@ namespace Naos.Logging.Domain
     using Naos.Serialization.Domain;
     using Naos.Serialization.Json;
     using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Representation;
     using OBeautifulCode.Type;
     using OBeautifulCode.Validation.Recipes;
     using static System.FormattableString;
@@ -147,7 +148,7 @@ namespace Naos.Logging.Domain
                 return LogWriterBase.DefaultLogItemSerializer;
             }
 
-            var configurationType = serializationDescription.ConfigurationTypeDescription?.ResolveFromLoadedTypes(typeMatchStrategy, multipleMatchStrategy);
+            var configurationType = serializationDescription.ConfigurationTypeRepresentation?.ResolveFromLoadedTypes(typeMatchStrategy, multipleMatchStrategy);
             lock (this.sync)
             {
                 switch (serializationDescription.SerializationKind)

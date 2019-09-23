@@ -8,6 +8,7 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
+    using OBeautifulCode.Representation;
     using static System.FormattableString;
 
     /// <summary>
@@ -46,6 +47,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void Write(Func<object> subjectFunc, string comment = null, string origin = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             LogItem logItem = null;
@@ -55,7 +57,7 @@ namespace Naos.Logging.Domain
             }
             catch (Exception failedToBuildException)
             {
-                LastDitchLogger.LogError(Invariant($"Error in {this.GetType().FullName}.{nameof(this.Write)} - {nameof(failedToBuildException)}: {failedToBuildException}"));
+                LastDitchLogger.LogError(Invariant($"Error in {this.GetType().ToStringReadable()}.{nameof(this.Write)} - {nameof(failedToBuildException)}: {failedToBuildException}"));
             }
 
             try
@@ -64,7 +66,7 @@ namespace Naos.Logging.Domain
             }
             catch (Exception failedToWriteException)
             {
-                LastDitchLogger.LogError(Invariant($"Error in {this.GetType().FullName}.{nameof(this.Write)} - {nameof(failedToWriteException)}: {failedToWriteException}"));
+                LastDitchLogger.LogError(Invariant($"Error in {this.GetType().ToStringReadable()}.{nameof(this.Write)} - {nameof(failedToWriteException)}: {failedToWriteException}"));
             }
         }
 

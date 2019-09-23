@@ -19,6 +19,7 @@ namespace Naos.Logging.Domain
     using Naos.Serialization.Json;
     using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Enum.Recipes;
+    using OBeautifulCode.Representation;
     using OBeautifulCode.Type;
     using static System.FormattableString;
     using SerializationFormat = Naos.Serialization.Domain.SerializationFormat;
@@ -32,7 +33,7 @@ namespace Naos.Logging.Domain
         /// Default serializer description to use for converting a <see cref="LogItem" /> into a string.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Is immuatable.")]
-        public static readonly SerializationDescription DefaultLogItemSerializationDescription = new SerializationDescription(SerializationKind.Json, SerializationFormat.String, typeof(LoggingJsonConfiguration).ToTypeDescription());
+        public static readonly SerializationDescription DefaultLogItemSerializationDescription = new SerializationDescription(SerializationKind.Json, SerializationFormat.String, typeof(LoggingJsonConfiguration).ToRepresentation());
 
         /// <summary>
         /// Default serializer to use for converting a <see cref="LogItem" /> into a string.
@@ -56,6 +57,7 @@ namespace Naos.Logging.Domain
         /// Logs a <see cref="LogItem" />.
         /// </summary>
         /// <param name="logItem">The item to log.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void Log(
             LogItem logItem)
         {
@@ -200,6 +202,7 @@ namespace Naos.Logging.Domain
         /// Log the message to several locations as an error.
         /// </summary>
         /// <param name="message">Message to log.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static void LogError(string message)
         {
             try

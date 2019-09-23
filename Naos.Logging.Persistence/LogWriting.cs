@@ -19,6 +19,7 @@ namespace Naos.Logging.Persistence
     using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Error.Recipes;
     using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Representation;
     using OBeautifulCode.Type;
     using static System.FormattableString;
     using CorrelationManager = System.Diagnostics.CorrelationManager;
@@ -120,7 +121,7 @@ namespace Naos.Logging.Persistence
                             logWriter = new ConsoleLogWriter(consoleLogConfig);
                             break;
                         default:
-                            throw new NotSupportedException(Invariant($"Unsupported implementation of {nameof(LogWriterConfigBase)} - {config.GetType().FullName}, try providing a pre-configured implementation of {nameof(LogWriterBase)} until the config type is supported."));
+                            throw new NotSupportedException(Invariant($"Unsupported implementation of {nameof(LogWriterConfigBase)} - {config.GetType().ToStringReadable()}, try providing a pre-configured implementation of {nameof(LogWriterBase)} until the config type is supported."));
                     }
 
                     logWriters.Add(logWriter);
@@ -141,6 +142,7 @@ namespace Naos.Logging.Persistence
         /// </summary>
         /// <param name="logItemOrigin">Origin of the log entry.</param>
         /// <param name="logEntry">Log entry to record.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void LogToActiveLogWriters(
             string logItemOrigin,
             LogEntry logEntry)
@@ -191,6 +193,7 @@ namespace Naos.Logging.Persistence
         /// Log the log item to any configured active log writers.
         /// </summary>
         /// <param name="logItem">Log item to record.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void LogToActiveLogWriters(LogItem logItem)
         {
             logItem = logItem ?? throw new ArgumentNullException(nameof(logItem));
@@ -211,7 +214,7 @@ namespace Naos.Logging.Persistence
                     }
                     catch (Exception failedToSerialize)
                     {
-                        message = Invariant($"Error in {this.GetType().FullName}.{nameof(this.LogToActiveLogWriters)} - {nameof(failedToLogException)}: {failedToLogException} - {nameof(failedToSerialize)}: {failedToSerialize}");
+                        message = Invariant($"Error in {this.GetType().ToStringReadable()}.{nameof(this.LogToActiveLogWriters)} - {nameof(failedToLogException)}: {failedToLogException} - {nameof(failedToSerialize)}: {failedToSerialize}");
                     }
 
                     LastDitchLogger.LogError(message);
@@ -298,22 +301,6 @@ namespace Naos.Logging.Persistence
             return result;
         }
 
-        private static string BuildSummaryFromSubjectObject(
-            object subjectObject)
-        {
-            string result;
-            if (subjectObject is Exception ex)
-            {
-                result = Invariant($"{ex.GetType().Name}: {ex.Message}");
-            }
-            else
-            {
-                result = Formatter.Format(subjectObject);
-            }
-
-            return result;
-        }
-
         /// <summary>
         /// Build a <see cref="LogItem" /> from a <see cref="LogEntry" />.
         /// </summary>
@@ -321,6 +308,7 @@ namespace Naos.Logging.Persistence
         /// <param name="logEntry"><see cref="LogEntry" /> to convert.</param>
         /// <param name="additionalCorrelations">Additional correlations to add.</param>
         /// <returns>Correct <see cref="LogItem" />.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Acceptable coupling.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Acceptable complexity.")]
         public LogItem BuildLogItem(
@@ -381,7 +369,7 @@ namespace Naos.Logging.Persistence
 
                 var activityCorrelatingSubject = new RawSubject(
                     logEntry.Subject,
-                    BuildSummaryFromSubjectObject(logEntry.Subject));
+                    LogHelper.BuildSummaryFromSubjectObject(logEntry.Subject));
 
                 correlationId = activityCorrelatingSubject.GetHashCode().ToGuid().ToString().ToLowerInvariant();
                 var elapsedMilliseconds = psuedoOrderCorrelationPosition == 0 ? 0 : logEntry.ElapsedMilliseconds ?? throw new InvalidOperationException(Invariant($"{nameof(logEntry)}.{nameof(LogEntry.ElapsedMilliseconds)} is null when there is an {nameof(ElapsedCorrelation)}"));
@@ -419,9 +407,9 @@ namespace Naos.Logging.Persistence
 
             var logItemRawSubject = new RawSubject(
                 logItemSubjectObject,
-                BuildSummaryFromSubjectObject(logItemSubjectObject));
+                LogHelper.BuildSummaryFromSubjectObject(logItemSubjectObject));
 
-            var context = new LogItemContext(logEntry.TimeStamp, logItemOrigin, LogHelper.MachineName, LogHelper.ProcessName, LogHelper.ProcessFileVersion, logEntry.CallingMethod, logEntry.CallingType?.ToTypeDescription(), stackTrace);
+            var context = new LogItemContext(logEntry.TimeStamp, logItemOrigin, LogHelper.MachineName, LogHelper.ProcessName, LogHelper.ProcessFileVersion, logEntry.CallingMethod, logEntry.CallingType?.ToRepresentation(), stackTrace);
 
             var comment = (logItemSubjectObject is string logItemSubjectAsString) && (logItemSubjectAsString == logEntry.Message) ? null : logEntry.Message;
 

@@ -60,6 +60,7 @@ namespace Naos.Logging.Domain
         /// Gets the next correlations and advances any that require.
         /// </summary>
         /// <returns>The set of correlations to be logged next.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         IReadOnlyCollection<IHaveCorrelationId> GetNextCorrelations();
 
         /// <summary>

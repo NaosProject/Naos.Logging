@@ -13,7 +13,7 @@ namespace OBeautifulCode.Reflection.Recipes
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-
+    using OBeautifulCode.Representation;
     using OBeautifulCode.Validation.Recipes;
 
     /// <summary>
@@ -129,7 +129,7 @@ namespace OBeautifulCode.Reflection.Recipes
             var fi = item.GetType().GetFieldInfo(fieldName, bindingFlags);
             if (fi == null)
             {
-                throw new InvalidOperationException($"Field {fieldName} was not found on type {item.GetType().FullName}");
+                throw new InvalidOperationException($"Field {fieldName} was not found on type {item.GetType().ToStringReadable()}");
             }
 
             var ret = fi.GetFieldValue<T>(item);
@@ -200,7 +200,7 @@ namespace OBeautifulCode.Reflection.Recipes
             var fi = item.GetType().GetFieldInfo(fieldName, bindingFlags);
             if (fi == null)
             {
-                throw new InvalidOperationException($"Field {fieldName} was not found in Type {item.GetType().FullName}");
+                throw new InvalidOperationException($"Field {fieldName} was not found in Type {item.GetType().ToStringReadable()}");
             }
 
             fi.SetFieldValue(item, value);

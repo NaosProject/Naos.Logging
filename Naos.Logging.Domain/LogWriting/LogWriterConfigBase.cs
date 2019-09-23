@@ -174,6 +174,7 @@ namespace Naos.Logging.Domain
         /// <returns>
         /// A <see cref="HashCodeHelper"/> pre-computed by hashing the base class's properties.
         /// </returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         protected virtual int GetBaseHashCode()
         {
             var result = HashCodeHelper.Initialize()

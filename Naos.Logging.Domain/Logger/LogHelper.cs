@@ -14,6 +14,7 @@ namespace Naos.Logging.Domain
     using Naos.Diagnostics.Recipes;
     using Naos.Serialization.Domain;
     using Naos.Telemetry.Domain;
+    using OBeautifulCode.Representation;
     using OBeautifulCode.Type;
 
     using static System.FormattableString;
@@ -36,7 +37,7 @@ namespace Naos.Logging.Domain
             SubjectSerializationDescription = new SerializationDescription(
                 SerializationKind.Json,
                 SerializationFormat.String,
-                typeof(LoggingJsonConfiguration).ToTypeDescription());
+                typeof(LoggingJsonConfiguration).ToRepresentation());
         }
 
         /// <summary>
@@ -133,7 +134,7 @@ namespace Naos.Logging.Domain
                 ProcessName,
                 ProcessFileVersion,
                 anonymousMethodInfo?.MethodName,
-                anonymousMethodInfo?.EnclosingType?.ToTypeDescription(),
+                anonymousMethodInfo?.EnclosingType?.ToRepresentation(),
                 stackTrace);
 
             var result = new LogItem(rawSubject.ToSubject(), kind, context, comment, correlations);
@@ -152,7 +153,11 @@ namespace Naos.Logging.Domain
             string result;
             if (subjectObject is Exception ex)
             {
-                result = Invariant($"{ex.GetType().Name}: {ex.Message}");
+                result = Invariant($"{ex.GetType().ToStringReadable()}: {ex.Message}");
+            }
+            else if (subjectObject is Type type)
+            {
+                result = type.ToStringReadable();
             }
             else
             {

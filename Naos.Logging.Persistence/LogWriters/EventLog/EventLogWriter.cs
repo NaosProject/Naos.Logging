@@ -10,6 +10,7 @@ namespace Naos.Logging.Persistence
     using System.Diagnostics;
     using System.Threading;
     using Naos.Logging.Domain;
+    using OBeautifulCode.Representation;
     using static System.FormattableString;
 
     /// <summary>
@@ -84,7 +85,7 @@ namespace Naos.Logging.Persistence
         /// <inheritdoc />
         public override string ToString()
         {
-            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.eventLogConfig.LogInclusionKindToOriginsMap)}: {this.eventLogConfig.LogInclusionKindToOriginsMapFriendlyString}; {nameof(this.eventLogConfig.Source)}: {this.eventLogConfig.Source}; {nameof(this.eventLogConfig.ShouldCreateSourceIfMissing)}: {this.eventLogConfig.ShouldCreateSourceIfMissing}");
+            var ret = Invariant($"{this.GetType().ToStringReadable()}; {nameof(this.eventLogConfig.LogInclusionKindToOriginsMap)}: {this.eventLogConfig.LogInclusionKindToOriginsMapFriendlyString}; {nameof(this.eventLogConfig.Source)}: {this.eventLogConfig.Source}; {nameof(this.eventLogConfig.ShouldCreateSourceIfMissing)}: {this.eventLogConfig.ShouldCreateSourceIfMissing}");
             return ret;
         }
     }

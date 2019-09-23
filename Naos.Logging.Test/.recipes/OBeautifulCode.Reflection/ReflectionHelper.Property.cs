@@ -13,7 +13,7 @@ namespace OBeautifulCode.Reflection.Recipes
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-
+    using OBeautifulCode.Representation;
     using OBeautifulCode.Validation.Recipes;
 
     /// <summary>
@@ -129,7 +129,7 @@ namespace OBeautifulCode.Reflection.Recipes
             var pi = item.GetType().GetPropertyInfo(propertyName, bindingFlags);
             if (pi == null)
             {
-                throw new InvalidOperationException($"Property {propertyName} was not found on type {item.GetType().FullName}");
+                throw new InvalidOperationException($"Property {propertyName} was not found on type System.List<CoMetrics.Entity.Domain.Entity> -  {item.GetType().ToStringReadable()}");
             }
 
             var ret = pi.GetPropertyValue<T>(item);
@@ -206,7 +206,7 @@ namespace OBeautifulCode.Reflection.Recipes
             var pi = item.GetType().GetPropertyInfo(propertyName, bindingFlags);
             if (pi == null)
             {
-                throw new InvalidOperationException($"Property {propertyName} was not found in Type {item.GetType().FullName}");
+                throw new InvalidOperationException($"Property {propertyName} was not found in Type {item.GetType().ToStringReadable()}");
             }
 
             pi.SetPropertyValue(item, value);

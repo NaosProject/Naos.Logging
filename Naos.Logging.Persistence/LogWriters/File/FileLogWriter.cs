@@ -9,6 +9,7 @@ namespace Naos.Logging.Persistence
     using System;
     using System.IO;
     using Naos.Logging.Domain;
+    using OBeautifulCode.Representation;
     using static System.FormattableString;
 
     /// <summary>
@@ -50,7 +51,7 @@ namespace Naos.Logging.Persistence
             }
 
             // this is to capture the directory creation info as well as prevent inconsistent syncronization usage of this.fileLogConfig...
-            this.thisToString = Invariant($"{this.GetType().FullName}; {nameof(this.fileLogConfig.LogInclusionKindToOriginsMap)}: {this.fileLogConfig.LogInclusionKindToOriginsMapFriendlyString}; {nameof(this.fileLogConfig.LogFilePath)}: {this.fileLogConfig.LogFilePath}; {nameof(this.fileLogConfig.CreateDirectoryStructureIfMissing)}: {this.fileLogConfig.CreateDirectoryStructureIfMissing}; {nameof(didCreateDirectory)}: {didCreateDirectory}");
+            this.thisToString = Invariant($"{this.GetType().ToStringReadable()}; {nameof(this.fileLogConfig.LogInclusionKindToOriginsMap)}: {this.fileLogConfig.LogInclusionKindToOriginsMapFriendlyString}; {nameof(this.fileLogConfig.LogFilePath)}: {this.fileLogConfig.LogFilePath}; {nameof(this.fileLogConfig.CreateDirectoryStructureIfMissing)}: {this.fileLogConfig.CreateDirectoryStructureIfMissing}; {nameof(didCreateDirectory)}: {didCreateDirectory}");
         }
 
         /// <inheritdoc />

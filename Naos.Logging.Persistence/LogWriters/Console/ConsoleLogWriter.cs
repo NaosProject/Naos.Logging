@@ -8,6 +8,7 @@ namespace Naos.Logging.Persistence
 {
     using System;
     using Naos.Logging.Domain;
+    using OBeautifulCode.Representation;
     using static System.FormattableString;
 
     /// <summary>
@@ -53,7 +54,7 @@ namespace Naos.Logging.Persistence
         /// <inheritdoc />
         public override string ToString()
         {
-            var ret = Invariant($"{this.GetType().FullName}; {nameof(this.consoleConfig.LogInclusionKindToOriginsMapForConsoleOut)}: {this.consoleConfig.LogInclusionKindToOriginsMapForConsoleOutFriendlyString}; {nameof(this.consoleConfig.LogInclusionKindToOriginsMapForConsoleError)}: {this.consoleConfig.LogInclusionKindToOriginsMapForConsoleErrorFriendlyString}");
+            var ret = Invariant($"{this.GetType().ToStringReadable()}; {nameof(this.consoleConfig.LogInclusionKindToOriginsMapForConsoleOut)}: {this.consoleConfig.LogInclusionKindToOriginsMapForConsoleOutFriendlyString}; {nameof(this.consoleConfig.LogInclusionKindToOriginsMapForConsoleError)}: {this.consoleConfig.LogInclusionKindToOriginsMapForConsoleErrorFriendlyString}");
             return ret;
         }
     }
