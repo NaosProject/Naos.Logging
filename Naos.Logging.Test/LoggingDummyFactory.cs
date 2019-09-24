@@ -59,11 +59,19 @@ namespace Naos.Logging.Recipes
                 });
 
 
-
             AutoFixtureBackedDummyFactory.AddDummyCreator(
                 () =>
                 {
                     var result = new RawSubject(A.Dummy<string>(), A.Dummy<string>());
+
+                    return result;
+                });
+
+            AutoFixtureBackedDummyFactory.AddDummyCreator(
+                () =>
+                {
+                    var rawSubject = A.Dummy<RawSubject>();
+                    var result     = rawSubject.ToSubject();
 
                     return result;
                 });
