@@ -142,7 +142,7 @@ namespace Naos.Logging.Persistence
         /// </summary>
         /// <param name="logItemOrigin">Origin of the log entry.</param>
         /// <param name="logEntry">Log entry to record.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Expected to not fail and have meaningful decisions ")]
         public void LogToActiveLogWriters(
             string logItemOrigin,
             LogEntry logEntry)
@@ -193,7 +193,7 @@ namespace Naos.Logging.Persistence
         /// Log the log item to any configured active log writers.
         /// </summary>
         /// <param name="logItem">Log item to record.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = Justifications.IntendToMakeMeaninfulDecisionFromGeneralException)]
         public void LogToActiveLogWriters(LogItem logItem)
         {
             logItem = logItem ?? throw new ArgumentNullException(nameof(logItem));
@@ -308,7 +308,7 @@ namespace Naos.Logging.Persistence
         /// <param name="logEntry"><see cref="LogEntry" /> to convert.</param>
         /// <param name="additionalCorrelations">Additional correlations to add.</param>
         /// <returns>Correct <see cref="LogItem" />.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = Justifications.CA1308_NormalizeStringsToUppercase_PreferGuidsLowercase)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Acceptable coupling.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Acceptable complexity.")]
         public LogItem BuildLogItem(
