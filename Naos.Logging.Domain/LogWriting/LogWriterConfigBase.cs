@@ -9,9 +9,8 @@ namespace Naos.Logging.Domain
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using OBeautifulCode.Collection.Recipes;
-    using OBeautifulCode.Math.Recipes;
-    using OBeautifulCode.Validation.Recipes;
+    using OBeautifulCode.Assertion.Recipes;
+    using OBeautifulCode.Equality.Recipes;
     using static System.FormattableString;
 
     /// <summary>
@@ -28,7 +27,7 @@ namespace Naos.Logging.Domain
             IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<string>> logInclusionKindToOriginsMap,
             LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage)
         {
-            new { logInclusionKindToOriginsMap }.Must().NotBeNull();
+            new { logInclusionKindToOriginsMap }.AsArg().Must().NotBeNull();
             this.LogInclusionKindToOriginsMap = logInclusionKindToOriginsMap;
 
             this.LogItemPropertiesToIncludeInLogMessage = logItemPropertiesToIncludeInLogMessage;
@@ -91,7 +90,7 @@ namespace Naos.Logging.Domain
             LogItemKind logItemKind,
             string logItemOrigin)
         {
-            new { logInclusionKindToOriginsMap }.Must().NotBeNull();
+            new { logInclusionKindToOriginsMap }.AsArg().Must().NotBeNull();
 
             var hasKey = logInclusionKindToOriginsMap.TryGetValue(logItemKind, out IReadOnlyCollection<string> origins);
             var result = !hasKey || (origins?.Contains(logItemOrigin) ?? true);
@@ -143,8 +142,12 @@ namespace Naos.Logging.Domain
         public bool Equals(
             LogWriterConfigBase other)
             => this == other;
-        /// <inheritdoc />
 
+        /// <summary>
+        /// Determines whether the specified <see cref="object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current object.</param>
+        /// <returns><c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.</returns>
         public abstract override bool Equals(object obj);
 
         /// <inheritdoc />
@@ -160,9 +163,9 @@ namespace Naos.Logging.Domain
         protected virtual bool BaseEquals(
             LogWriterConfigBase other)
         {
-            new { other }.Must().NotBeNull();
+            new { other }.AsArg().Must().NotBeNull();
 
-            var result = this.LogInclusionKindToOriginsMap.DictionaryEqualHavingEnumerableValues(other.LogInclusionKindToOriginsMap, enumerableEqualityComparerStrategy: EnumerableEqualityComparerStrategy.NoSymmetricDifference) &&
+            var result = this.LogInclusionKindToOriginsMap.IsEqualTo(other.LogInclusionKindToOriginsMap) &&
                          this.LogItemPropertiesToIncludeInLogMessage == other.LogItemPropertiesToIncludeInLogMessage;
 
             return result;
@@ -174,11 +177,11 @@ namespace Naos.Logging.Domain
         /// <returns>
         /// A <see cref="HashCodeHelper"/> pre-computed by hashing the base class's properties.
         /// </returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Want a method here.")]
         protected virtual int GetBaseHashCode()
         {
             var result = HashCodeHelper.Initialize()
-                .HashDictionaryHavingEnumerableValuesForSymmetricDifferenceValueEquality(this.LogInclusionKindToOriginsMap)
+                .Hash(this.LogInclusionKindToOriginsMap)
                 .Hash(this.LogItemPropertiesToIncludeInLogMessage)
                 .Value;
 

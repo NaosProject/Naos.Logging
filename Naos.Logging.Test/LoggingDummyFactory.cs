@@ -9,13 +9,12 @@ namespace Naos.Logging.Recipes
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
-
     using FakeItEasy;
     using Naos.Logging;
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
-    using Naos.Serialization.Domain;
     using OBeautifulCode.AutoFakeItEasy;
+    using OBeautifulCode.Serialization;
 
     /// <summary>
     /// A dummy factory for Accounting Time types.

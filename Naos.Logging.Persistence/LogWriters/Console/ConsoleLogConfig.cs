@@ -12,7 +12,7 @@ namespace Naos.Logging.Persistence
     using System.Runtime.CompilerServices;
     using Naos.Logging.Domain;
     using OBeautifulCode.Collection.Recipes;
-    using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Equality.Recipes;
 
     /// <summary>
     /// <see cref="Console" /> focused implementation of <see cref="LogWriterConfigBase" />.
@@ -81,8 +81,8 @@ namespace Naos.Logging.Persistence
             }
 
             var result = left.BaseEquals(right) &&
-                         left.LogInclusionKindToOriginsMapForConsoleOut.DictionaryEqualHavingEnumerableValues(right.LogInclusionKindToOriginsMapForConsoleOut, enumerableEqualityComparerStrategy: EnumerableEqualityComparerStrategy.NoSymmetricDifference) &&
-                         left.LogInclusionKindToOriginsMapForConsoleError.DictionaryEqualHavingEnumerableValues(right.LogInclusionKindToOriginsMapForConsoleError, enumerableEqualityComparerStrategy: EnumerableEqualityComparerStrategy.NoSymmetricDifference);
+                         left.LogInclusionKindToOriginsMapForConsoleOut.IsEqualTo(right.LogInclusionKindToOriginsMapForConsoleOut) &&
+                         left.LogInclusionKindToOriginsMapForConsoleError.IsEqualTo(right.LogInclusionKindToOriginsMapForConsoleError);
 
             return result;
         }
@@ -106,8 +106,8 @@ namespace Naos.Logging.Persistence
 
         /// <inheritdoc />
         public override int GetHashCode() => HashCodeHelper.Initialize(this.GetBaseHashCode())
-                                                           .HashDictionaryHavingEnumerableValuesForSymmetricDifferenceValueEquality(this.LogInclusionKindToOriginsMapForConsoleOut)
-                                                           .HashDictionaryHavingEnumerableValuesForSymmetricDifferenceValueEquality(this.LogInclusionKindToOriginsMapForConsoleError)
+                                                           .Hash(this.LogInclusionKindToOriginsMapForConsoleOut)
+                                                           .Hash(this.LogInclusionKindToOriginsMapForConsoleError)
                                                            .Value;
 
         /// <summary>

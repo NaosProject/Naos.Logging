@@ -11,10 +11,9 @@ namespace Naos.Logging.Persistence
     using System.Diagnostics;
     using Naos.Diagnostics.Recipes;
     using Naos.Logging.Domain;
-    using Naos.Serialization.Domain;
-    using Naos.Serialization.Json;
-
-    using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Equality.Recipes;
+    using OBeautifulCode.Serialization;
+    using OBeautifulCode.Serialization.Json;
 
     /// <summary>
     /// <see cref="EventLog"/> focused implementation of <see cref="LogWriterConfigBase" />.
@@ -35,7 +34,7 @@ namespace Naos.Logging.Persistence
         /// Serializes and deserializes a log-item.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Want a field here.")]
-        public static readonly IBinarySerializeAndDeserialize EventLogRawDataLogItemSerializer = new NaosJsonSerializer();
+        public static readonly IBinarySerializeAndDeserialize EventLogRawDataLogItemSerializer = new ObcJsonSerializer();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventLogConfig"/> class.

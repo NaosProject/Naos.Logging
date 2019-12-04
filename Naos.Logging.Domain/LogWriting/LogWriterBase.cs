@@ -15,14 +15,14 @@ namespace Naos.Logging.Domain
     using System.Linq;
     using System.Text;
     using Naos.Logging.Domain;
-    using Naos.Serialization.Domain;
-    using Naos.Serialization.Json;
     using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Enum.Recipes;
-    using OBeautifulCode.Representation;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Serialization;
+    using OBeautifulCode.Serialization.Json;
     using OBeautifulCode.Type;
     using static System.FormattableString;
-    using SerializationFormat = Naos.Serialization.Domain.SerializationFormat;
+    using SerializationFormat = OBeautifulCode.Serialization.SerializationFormat;
 
     /// <summary>
     /// Base class for all log writers.
@@ -57,7 +57,7 @@ namespace Naos.Logging.Domain
         /// Logs a <see cref="LogItem" />.
         /// </summary>
         /// <param name="logItem">The item to log.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching to avoid failures externally.")]
         public void Log(
             LogItem logItem)
         {
@@ -202,12 +202,12 @@ namespace Naos.Logging.Domain
         /// Log the message to several locations as an error.
         /// </summary>
         /// <param name="message">Message to log.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching to avoid failures externally.")]
         public static void LogError(string message)
         {
             try
             {
-                var serializedDateTimeUtcNow = NaosDateTimeStringSerializer.SerializeDateTimeToString(DateTime.UtcNow);
+                var serializedDateTimeUtcNow = ObcDateTimeStringSerializer.SerializeToString(DateTime.UtcNow);
                 const ushort eventLogCharacterLimit = 31914;
 
                 Action<string> logToFile = localMessage =>

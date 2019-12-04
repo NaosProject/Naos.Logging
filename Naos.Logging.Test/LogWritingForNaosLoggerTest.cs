@@ -10,13 +10,11 @@ namespace Naos.Logging.Test
     using System.Collections.Generic;
     using System.Linq;
     using FakeItEasy;
-
     using FluentAssertions;
-
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
-    using Naos.Serialization.Json;
-    using OBeautifulCode.Error.Recipes;
+    using OBeautifulCode.Exception.Recipes;
+    using OBeautifulCode.Serialization.Json;
     using Xunit;
     using Xunit.Abstractions;
     using static System.FormattableString;
@@ -50,7 +48,7 @@ namespace Naos.Logging.Test
                 shouldCreateSourceIfMissing: true,
                 logName: "NaosLoggingTestLogName",
                 source: "NaosLoggingTestSource");
-            var json = new NaosJsonSerializer().SerializeToString(config);
+            var json = new ObcJsonSerializer().SerializeToString(config);
             this.testOutputHelper.WriteLine(json);
         }
 
@@ -243,7 +241,7 @@ namespace Naos.Logging.Test
             logItem.Correlations.Should().BeEmpty();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching to avoid external failures.")]
         [Fact]
         public void Log_Write___Records_details_correctly___With_exception_and_no_comment()
         {
@@ -284,7 +282,7 @@ namespace Naos.Logging.Test
             exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching to avoid external failures.")]
         [Fact]
         public void Log_Write___Records_details_correctly___With_exception_and_comment()
         {
@@ -326,7 +324,7 @@ namespace Naos.Logging.Test
             exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching to avoid external failures.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Need lowercase.")]
         [Fact]
         public void Log_Write___Records_details_correctly___With_exception_and_comment_and_error_code()
@@ -373,7 +371,7 @@ namespace Naos.Logging.Test
             exceptionCorrelation.ExceptionId.Should().Be(actualSubject.GetExceptionIdFromExceptionData(searchInnerExceptionChain: true).ToString());
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching to avoid external failures.")]
         [Fact]
         public void Log_Write___Records_details_correctly___With_exception_and_inner_exception()
         {
@@ -433,7 +431,7 @@ namespace Naos.Logging.Test
             innerCorrelation.ExceptionId.Should().Be(exceptionCorrelation.ExceptionId);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching to avoid external failures.")]
         [Fact]
         public void Log_Enter_Activity_Trace___Records_details_correctly___With_exception_and_comment()
         {

@@ -8,13 +8,13 @@ namespace Naos.Logging.Test
 {
     using System;
     using Its.Log.Instrumentation;
-
-    using Naos.Compression.Domain;
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
-    using Naos.Serialization.Domain;
-    using Naos.Serialization.Json;
-    using OBeautifulCode.Validation.Recipes;
+    using OBeautifulCode.Assertion.Recipes;
+    using OBeautifulCode.Compression;
+    using OBeautifulCode.Compression.Recipes;
+    using OBeautifulCode.Serialization;
+    using OBeautifulCode.Serialization.Json;
 
     public static class BuildingHelpers
     {
@@ -61,13 +61,13 @@ namespace Naos.Logging.Test
 
         public static object DeserializeSubject(this Subject subject)
         {
-            new { subject }.Must().NotBeNull();
+            new { subject }.AsArg().Must().NotBeNull();
             return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(JsonSerializerFactory.Instance, CompressorFactory.Instance);
         }
 
         public static T DeserializeSubject<T>(this Subject subject)
         {
-            new { subject }.Must().NotBeNull();
+            new { subject }.AsArg().Must().NotBeNull();
             return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory<T>(JsonSerializerFactory.Instance, CompressorFactory.Instance, unregisteredTypeEncounteredStrategy: UnregisteredTypeEncounteredStrategy.Attempt);
         }
     }

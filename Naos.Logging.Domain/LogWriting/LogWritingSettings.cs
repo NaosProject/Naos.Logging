@@ -9,7 +9,7 @@ namespace Naos.Logging.Domain
     using System;
     using System.Collections.Generic;
     using OBeautifulCode.Collection.Recipes;
-    using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Equality.Recipes;
 
     /// <summary>
     /// Settings to use when configuring log writing.
@@ -51,7 +51,7 @@ namespace Naos.Logging.Domain
                 return false;
             }
 
-            return first.Configs.SequenceEqualHandlingNulls(second.Configs);
+            return first.Configs.IsEqualTo(second.Configs);
         }
 
         /// <summary>
@@ -69,6 +69,6 @@ namespace Naos.Logging.Domain
         public override bool Equals(object obj) => this == (obj as LogWritingSettings);
 
         /// <inheritdoc />
-        public override int GetHashCode() => HashCodeHelper.Initialize().HashElements(this.Configs).Value;
+        public override int GetHashCode() => HashCodeHelper.Initialize().Hash(this.Configs).Value;
     }
 }

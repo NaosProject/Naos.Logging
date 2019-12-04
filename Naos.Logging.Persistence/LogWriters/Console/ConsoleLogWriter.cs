@@ -8,7 +8,8 @@ namespace Naos.Logging.Persistence
 {
     using System;
     using Naos.Logging.Domain;
-    using OBeautifulCode.Representation;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
 
     /// <summary>

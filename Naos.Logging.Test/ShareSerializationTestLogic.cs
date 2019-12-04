@@ -9,20 +9,20 @@ namespace Naos.Logging.Test
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
     using FluentAssertions;
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
-    using Naos.Serialization.Bson;
-    using Naos.Serialization.Domain;
-    using Naos.Serialization.Json;
-
+    using OBeautifulCode.Serialization;
+    using OBeautifulCode.Serialization.Bson;
+    using OBeautifulCode.Serialization.Json;
     using static System.FormattableString;
 
     public static class ShareSerializationTestLogic
     {
-        private static readonly NaosBsonSerializer BsonSerializerToUse = new NaosBsonSerializer(typeof(LoggingBsonConfiguration), UnregisteredTypeEncounteredStrategy.Attempt);
+        private static readonly ObcBsonSerializer BsonSerializerToUse = new ObcBsonSerializer(typeof(LoggingBsonConfiguration), UnregisteredTypeEncounteredStrategy.Attempt);
 
-        private static readonly NaosJsonSerializer JsonSerializerToUse = new NaosJsonSerializer(typeof(LoggingJsonConfiguration), UnregisteredTypeEncounteredStrategy.Attempt);
+        private static readonly ObcJsonSerializer JsonSerializerToUse = new ObcJsonSerializer(typeof(LoggingJsonConfiguration), UnregisteredTypeEncounteredStrategy.Attempt);
 
         private static readonly IReadOnlyCollection<IStringSerializeAndDeserialize> StringSerializers = new IStringSerializeAndDeserialize[] { BsonSerializerToUse, JsonSerializerToUse }.ToList();
 
@@ -55,7 +55,7 @@ namespace Naos.Logging.Test
                 }
                 catch (Exception ex)
                 {
-                    throw new NaosSerializationException(Invariant($"Failure with {nameof(stringSerializer)} - {stringSerializer.GetType()}"), ex);
+                    throw new SerializationException(Invariant($"Failure with {nameof(stringSerializer)} - {stringSerializer.GetType()}"), ex);
                 }
             }
 
@@ -72,7 +72,7 @@ namespace Naos.Logging.Test
                 }
                 catch (Exception ex)
                 {
-                    throw new NaosSerializationException(Invariant($"Failure with {nameof(binarySerializer)} - {binarySerializer.GetType()}"), ex);
+                    throw new SerializationException(Invariant($"Failure with {nameof(binarySerializer)} - {binarySerializer.GetType()}"), ex);
                 }
             }
         }

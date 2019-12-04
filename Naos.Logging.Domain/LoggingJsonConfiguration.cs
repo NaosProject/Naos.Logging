@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LogReaderBase.cs" company="Naos Project">
+// <copyright file="LoggingJsonConfiguration.cs" company="Naos Project">
 //    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -9,7 +9,7 @@ namespace Naos.Logging.Domain
     using System;
     using System.Collections.Generic;
     using Naos.Logging.Domain;
-    using Naos.Serialization.Json;
+    using OBeautifulCode.Serialization.Json;
 
     /// <summary>
     /// Base class for readers.

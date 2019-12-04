@@ -10,7 +10,8 @@ namespace Naos.Logging.Persistence
     using System.Collections.Generic;
     using System.Linq;
     using Naos.Logging.Domain;
-    using OBeautifulCode.Representation;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Type.Recipes;
 
     /// <summary>
     /// In memory implementation of <see cref="LogWriterBase" />.

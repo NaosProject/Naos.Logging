@@ -9,7 +9,7 @@ namespace Naos.Logging.Test
     using System;
     using System.Collections.Generic;
     using Naos.Logging.Domain;
-    using Naos.Serialization.Bson;
+    using OBeautifulCode.Serialization.Bson;
 
     /// <summary>
     /// Implementation for the <see cref="Naos.Logging" /> domain.

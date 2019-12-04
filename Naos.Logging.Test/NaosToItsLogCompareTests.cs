@@ -16,7 +16,7 @@ namespace Naos.Logging.Test
 
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
-    using OBeautifulCode.Error.Recipes;
+    using OBeautifulCode.Exception.Recipes;
     using Xunit;
     using Xunit.Abstractions;
     using static System.FormattableString;
@@ -41,7 +41,7 @@ namespace Naos.Logging.Test
             LogWriting.Instance.Setup(
                 settings,
                 configuredAndManagedLogWriters: new[] { memoryLogWriter },
-                errorCodeKeys: new[] { Constants.ExceptionDataKeyForErrorCode },
+                errorCodeKeys: new[] { ErrorCodeConstants.ExceptionDataKeyForErrorCode },
                 multipleCallsToSetupStrategy: MultipleCallsToSetupStrategy.Overwrite);
 
             var itsLogStopwatch = new Stopwatch();

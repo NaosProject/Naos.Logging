@@ -10,7 +10,7 @@ namespace Naos.Logging.Domain
     using System.Collections.Generic;
     using System.Linq;
     using OBeautifulCode.Collection.Recipes;
-    using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Equality.Recipes;
     using static System.FormattableString;
 
     /// <summary>
@@ -120,10 +120,10 @@ namespace Naos.Logging.Domain
             }
 
             return first.Subject == second.Subject &&
-                   first.Kind == second.Kind && 
-                   first.Context == second.Context && 
+                   first.Kind == second.Kind &&
+                   first.Context == second.Context &&
                    string.Equals(first.Comment, second.Comment, StringComparison.OrdinalIgnoreCase) &&
-                   first.Correlations.SequenceEqualHandlingNulls(second.Correlations);
+                   first.Correlations.IsEqualTo(second.Correlations);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Naos.Logging.Domain
             .Hash(this.Kind)
             .Hash(this.Context)
             .Hash(this.Comment)
-            .HashElements(this.Correlations)
+            .Hash(this.Correlations)
             .Value;
     }
 }

@@ -8,7 +8,7 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
-    using OBeautifulCode.Error.Recipes;
+    using OBeautifulCode.Exception.Recipes;
 
     /// <summary>
     /// Interface for a client facing logger.
@@ -60,7 +60,7 @@ namespace Naos.Logging.Domain
         /// Gets the next correlations and advances any that require.
         /// </summary>
         /// <returns>The set of correlations to be logged next.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Want a method here.")]
         IReadOnlyCollection<IHaveCorrelationId> GetNextCorrelations();
 
         /// <summary>

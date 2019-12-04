@@ -10,19 +10,15 @@ namespace Naos.Logging.Test
     using System.IO;
     using System.Linq;
     using System.Threading;
-
     using FakeItEasy;
-
     using FluentAssertions;
-
-    using Naos.Compression.Domain;
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
-    using Naos.Serialization.Domain;
-    using Naos.Serialization.Json;
-
+    using OBeautifulCode.Compression;
+    using OBeautifulCode.Compression.Recipes;
+    using OBeautifulCode.Serialization;
+    using OBeautifulCode.Serialization.Json;
     using Xunit;
-
     using static System.FormattableString;
 
     public static class TimeSlicedFilesTests
@@ -45,7 +41,7 @@ namespace Naos.Logging.Test
                      ""logItemPropertiesToIncludeInLogMessage"": ""default""
                  }";
 
-            var serializer = new NaosJsonSerializer<LoggingJsonConfiguration>();
+            var serializer = new ObcJsonSerializer<LoggingJsonConfiguration>();
 
             // Act
             var result = serializer.Deserialize<LogWriterConfigBase>(input);

@@ -11,7 +11,7 @@ namespace Naos.Logging.Persistence
     using System.IO;
     using System.Linq;
     using Naos.Logging.Domain;
-    using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Equality.Recipes;
 
     using static System.FormattableString;
 

@@ -18,7 +18,7 @@ namespace Naos.Logging.Domain
         public const string InitialItemOfUsingBlockSubject = "Initial Item of Using Block.";
 
         /// <summary>
-        /// Final item subject;
+        /// Final item subject.
         /// </summary>
         public const string FinalItemOfUsingBlockSubject = "Final Item of Using Block.";
 

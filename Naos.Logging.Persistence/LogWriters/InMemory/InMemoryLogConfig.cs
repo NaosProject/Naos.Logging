@@ -9,7 +9,7 @@ namespace Naos.Logging.Persistence
     using System;
     using System.Collections.Generic;
     using Naos.Logging.Domain;
-    using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Equality.Recipes;
 
     using static System.FormattableString;
 

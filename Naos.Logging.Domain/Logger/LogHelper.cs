@@ -12,11 +12,11 @@ namespace Naos.Logging.Domain
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using Naos.Diagnostics.Recipes;
-    using Naos.Serialization.Domain;
     using Naos.Telemetry.Domain;
-    using OBeautifulCode.Representation;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Serialization;
     using OBeautifulCode.Type;
-
+    using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
 
     /// <summary>
@@ -250,7 +250,7 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Is the type anonymous.
         /// </summary>
-        /// <param name="type">Type to check</param>
+        /// <param name="type">Type to check.</param>
         /// <returns>A value indicating whether or not the type is anonymous.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Brought over code, keeping as is.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1307:SpecifyStringComparison", MessageId = "System.String.StartsWith(System.String)", Justification = "Brought over code, keeping as is.")]
@@ -270,7 +270,7 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Is the type compiler generated.
         /// </summary>
-        /// <param name="type">Type to check</param>
+        /// <param name="type">Type to check.</param>
         /// <returns>A value indicating whether or not the type is compiler generated.</returns>
         public static bool IsCompilerGenerated(this Type type) =>
         Attribute.IsDefined(type, typeof(CompilerGeneratedAttribute), false);
@@ -278,7 +278,7 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Is the type async.
         /// </summary>
-        /// <param name="type">Type to check</param>
+        /// <param name="type">Type to check.</param>
         /// <returns>A value indicating whether or not the type is async.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Brought over code, keeping as is.")]
         public static bool IsAsync(this Type type) =>

@@ -8,8 +8,10 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Runtime.CompilerServices;
+    using OBeautifulCode.Equality.Recipes;
     using OBeautifulCode.Math.Recipes;
-    using OBeautifulCode.Representation;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Type.Recipes;
 
     /// <summary>
     /// Some core piece of information that is being logged.

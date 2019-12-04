@@ -17,16 +17,16 @@ namespace Naos.Logging.Test
 
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
-    using Naos.Serialization.Bson;
-    using Naos.Serialization.Json;
+    using OBeautifulCode.Serialization.Bson;
+    using OBeautifulCode.Serialization.Json;
     using Xunit;
 
     using static System.FormattableString;
 
     public static class SerializationTests
     {
-        private static readonly NaosBsonSerializer BsonSerializer = new NaosBsonSerializer(typeof(LoggingBsonConfiguration));
-        private static readonly NaosJsonSerializer JsonSerializer = new NaosJsonSerializer(typeof(LoggingJsonConfiguration));
+        private static readonly ObcBsonSerializer BsonSerializer = new ObcBsonSerializer(typeof(LoggingBsonConfiguration));
+        private static readonly ObcJsonSerializer JsonSerializer = new ObcJsonSerializer(typeof(LoggingJsonConfiguration));
 
         [Fact]
         public static void RawSubject_Roundtrips()

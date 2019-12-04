@@ -10,7 +10,8 @@ namespace Naos.Logging.Persistence
     using System.Diagnostics;
     using System.Threading;
     using Naos.Logging.Domain;
-    using OBeautifulCode.Representation;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
 
     /// <summary>

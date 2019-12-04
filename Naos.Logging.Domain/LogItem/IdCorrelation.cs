@@ -7,7 +7,7 @@
 namespace Naos.Logging.Domain
 {
     using System;
-    using OBeautifulCode.Math.Recipes;
+    using OBeautifulCode.Equality.Recipes;
     using static System.FormattableString;
 
     /// <summary>
@@ -69,7 +69,11 @@ namespace Naos.Logging.Domain
         /// <returns>A value indicating whether or not the two items are inequal.</returns>
         public static bool operator !=(IdCorrelation first, IdCorrelation second) => !(first == second);
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Equals the specified other.
+        /// </summary>
+        /// <param name="other">The other.</param>
+        /// <returns><c>true</c> if equal, <c>false</c> otherwise.</returns>
         public bool Equals(IdCorrelation other) => this == other;
 
         /// <inheritdoc />

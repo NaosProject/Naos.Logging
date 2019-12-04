@@ -8,13 +8,14 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
-    using Naos.Compression.Domain;
-    using Naos.Serialization.Domain;
-    using Naos.Serialization.Json;
-    using OBeautifulCode.Math.Recipes;
-    using OBeautifulCode.Representation;
+    using OBeautifulCode.Assertion.Recipes;
+    using OBeautifulCode.Compression;
+    using OBeautifulCode.Compression.Recipes;
+    using OBeautifulCode.Equality.Recipes;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Serialization;
+    using OBeautifulCode.Serialization.Json;
     using OBeautifulCode.Type;
-    using OBeautifulCode.Validation.Recipes;
     using static System.FormattableString;
 
     /// <summary>
@@ -90,7 +91,6 @@ namespace Naos.Logging.Domain
                 }
             }
 
-
             return originalSubjectEqual &&
                    string.Equals(first.Summary, second.Summary, StringComparison.Ordinal);
         }
@@ -141,7 +141,7 @@ namespace Naos.Logging.Domain
         /// <inheritdoc />
         public ISerializeAndDeserialize BuildSerializer(SerializationDescription serializationDescription, TypeMatchStrategy typeMatchStrategy = TypeMatchStrategy.NamespaceAndName, MultipleMatchStrategy multipleMatchStrategy = MultipleMatchStrategy.ThrowOnMultiple, UnregisteredTypeEncounteredStrategy unregisteredTypeEncounteredStrategy = UnregisteredTypeEncounteredStrategy.Default)
         {
-            new { serializationDescription }.Must().NotBeNull();
+            new { serializationDescription }.AsArg().Must().NotBeNull();
 
             if (serializationDescription == LogHelper.SubjectSerializationDescription)
             {
@@ -158,13 +158,14 @@ namespace Naos.Logging.Domain
                         var configurationTypeForKeyCheck = configurationType ?? typeof(NullJsonConfiguration);
                         if (!this.configurationTypeToSerializerMap.ContainsKey(configurationTypeForKeyCheck))
                         {
-                            var serializer = new NaosJsonSerializer(configurationTypeForKeyCheck, UnregisteredTypeEncounteredStrategy.Attempt);
+                            var serializer = new ObcJsonSerializer(configurationTypeForKeyCheck, UnregisteredTypeEncounteredStrategy.Attempt);
                             this.configurationTypeToSerializerMap[configurationTypeForKeyCheck] = serializer;
                         }
 
                         var result = this.configurationTypeToSerializerMap[configurationTypeForKeyCheck];
                         return result;
                     }
+
                     default: throw new NotSupportedException(Invariant($"{nameof(serializationDescription)} from enumeration {nameof(SerializationKind)} of {serializationDescription.SerializationKind} is not supported."));
                 }
             }

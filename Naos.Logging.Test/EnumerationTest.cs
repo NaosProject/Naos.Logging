@@ -43,7 +43,7 @@ namespace Naos.Logging.Test
         public static void LogItemOrigin_values_can_cast_to_short_to_use_in_WindowsEventLog()
         {
             // Arrange
-            var all = EnumExtensions.GetEnumValues<LogItemOrigin>();
+            var all = EnumExtensions.GetAllPossibleEnumValues<LogItemOrigin>();
 
             // Act
             var actual = all.Select(_ => (short)_).ToList();

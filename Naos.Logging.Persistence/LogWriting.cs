@@ -11,16 +11,18 @@ namespace Naos.Logging.Persistence
     using System.Diagnostics;
     using System.Linq;
     using Its.Log.Instrumentation;
-    using Naos.Compression.Domain;
     using Naos.Diagnostics.Recipes;
     using Naos.Logging.Domain;
-    using Naos.Serialization.Domain;
-    using Naos.Serialization.Json;
     using OBeautifulCode.Collection.Recipes;
-    using OBeautifulCode.Error.Recipes;
+    using OBeautifulCode.Compression;
+    using OBeautifulCode.Equality.Recipes;
+    using OBeautifulCode.Exception.Recipes;
     using OBeautifulCode.Math.Recipes;
-    using OBeautifulCode.Representation;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Serialization;
+    using OBeautifulCode.Serialization.Json;
     using OBeautifulCode.Type;
+    using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
     using CorrelationManager = System.Diagnostics.CorrelationManager;
     using Log = Naos.Logging.Domain.Log;
@@ -42,7 +44,7 @@ namespace Naos.Logging.Persistence
         private IReadOnlyCollection<LogWriterBase> activeLogWriters;
 
         private IReadOnlyCollection<string> errorCodeKeysField;
-        private static readonly NaosJsonSerializer LogEntrySerializer = new NaosJsonSerializer(typeof(LoggingJsonConfiguration), UnregisteredTypeEncounteredStrategy.Attempt);
+        private static readonly ObcJsonSerializer LogEntrySerializer = new ObcJsonSerializer(typeof(LoggingJsonConfiguration), UnregisteredTypeEncounteredStrategy.Attempt);
 
         private LogWriting()
         {
@@ -193,7 +195,7 @@ namespace Naos.Logging.Persistence
         /// Log the log item to any configured active log writers.
         /// </summary>
         /// <param name="logItem">Log item to record.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = Justifications.IntendToMakeMeaninfulDecisionFromGeneralException)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching to avoid external failure.")]
         public void LogToActiveLogWriters(LogItem logItem)
         {
             logItem = logItem ?? throw new ArgumentNullException(nameof(logItem));
@@ -308,7 +310,7 @@ namespace Naos.Logging.Persistence
         /// <param name="logEntry"><see cref="LogEntry" /> to convert.</param>
         /// <param name="additionalCorrelations">Additional correlations to add.</param>
         /// <returns>Correct <see cref="LogItem" />.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = Justifications.CA1308_NormalizeStringsToUppercase_PreferGuidsLowercase)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = SuppressBecause.CA1308_NormalizeStringsToUppercase_PreferGuidLowercase)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Acceptable coupling.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Acceptable complexity.")]
         public LogItem BuildLogItem(

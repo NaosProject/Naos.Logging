@@ -10,7 +10,7 @@ namespace Naos.Logging.Domain
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using OBeautifulCode.Error.Recipes;
+    using OBeautifulCode.Exception.Recipes;
 
     using static System.FormattableString;
 
@@ -26,7 +26,7 @@ namespace Naos.Logging.Domain
         private readonly object positionCorrelationsSync = new object();
         private readonly List<ManagedCorrelation<int>> positionCorrelations;
         private readonly object additionalCorrelationsSync = new object();
-        private IReadOnlyCollection<string> errorCodeKeysField = new[] { Constants.ExceptionDataKeyForErrorCode };
+        private IReadOnlyCollection<string> errorCodeKeysField = new[] { ErrorCodeConstants.ExceptionDataKeyForErrorCode };
         private string exceptionCorrelationsCorrelationId;
         private IList<IHaveCorrelationId> additionalCorrelations;
 
@@ -119,7 +119,7 @@ namespace Naos.Logging.Domain
             IReadOnlyCollection<string> errorCodeKey = null,
             string correlationId = null)
         {
-            this.errorCodeKeysField = errorCodeKey ?? new[] { Constants.ExceptionDataKeyForErrorCode };
+            this.errorCodeKeysField = errorCodeKey ?? new[] { ErrorCodeConstants.ExceptionDataKeyForErrorCode };
             this.exceptionCorrelationsCorrelationId = correlationId;
         }
 
@@ -229,7 +229,7 @@ namespace Naos.Logging.Domain
                 var exceptionIdCorrelation = new ExceptionIdCorrelation(localCorrelationId, exceptionId);
                 result.Add(exceptionIdCorrelation);
 
-                foreach (var errorCodeKey in errorCodeKeys ?? new[] { Constants.ExceptionDataKeyForErrorCode })
+                foreach (var errorCodeKey in errorCodeKeys ?? new[] { ErrorCodeConstants.ExceptionDataKeyForErrorCode })
                 {
                     var errorCode = exception.GetErrorCode(errorCodeKey);
                     if (!string.IsNullOrWhiteSpace(errorCode))

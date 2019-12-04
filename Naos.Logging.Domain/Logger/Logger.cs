@@ -8,7 +8,8 @@ namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
-    using OBeautifulCode.Representation;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
 
     /// <summary>
@@ -47,7 +48,7 @@ namespace Naos.Logging.Domain
         }
 
         /// <inheritdoc />
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching to avoid external failures.")]
         public void Write(Func<object> subjectFunc, string comment = null, string origin = null, IReadOnlyCollection<IHaveCorrelationId> additionalCorrelations = null)
         {
             LogItem logItem = null;

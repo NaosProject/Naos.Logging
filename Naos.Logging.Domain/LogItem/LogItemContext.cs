@@ -7,8 +7,8 @@
 namespace Naos.Logging.Domain
 {
     using System;
-    using OBeautifulCode.Math.Recipes;
-    using OBeautifulCode.Representation;
+    using OBeautifulCode.Equality.Recipes;
+    using OBeautifulCode.Representation.System;
 
     using static System.FormattableString;
 
