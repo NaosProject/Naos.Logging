@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Naos.Logging.Persistence
+namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;

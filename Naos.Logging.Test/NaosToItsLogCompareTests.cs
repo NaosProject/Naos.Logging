@@ -46,7 +46,7 @@ namespace Naos.Logging.Test
 
             var itsLogStopwatch = new Stopwatch();
             var naosLogStopwatch = new Stopwatch();
-            var testSubjects = Enumerable.Range(0, 100).Select(_ => Guid.NewGuid().ToString() + _).ToList();
+            var testSubjects = Enumerable.Range(0, 100).Select(_ => Invariant($"{Guid.NewGuid().ToString()}{_}")).ToList();
 
             // Act
             itsLogStopwatch.Start();

@@ -37,7 +37,7 @@ namespace Naos.Logging.Persistence
             {
                 foreach (EventLogEntry entry in eventLog.Entries)
                 {
-                    var logItem = EventLogConfig.EventLogRawDataLogItemSerializer.Deserialize<LogItem>(entry.Data);
+                    var logItem = this.eventLogConfig.GetEventLogRawDataLogItemSerializer().Deserialize<LogItem>(entry.Data);
                     result.Add(logItem);
                 }
             }

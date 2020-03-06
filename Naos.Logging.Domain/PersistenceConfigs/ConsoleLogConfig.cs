@@ -4,14 +4,10 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Naos.Logging.Persistence
+namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Runtime.CompilerServices;
-    using Naos.Logging.Domain;
-    using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Equality.Recipes;
 
     /// <summary>

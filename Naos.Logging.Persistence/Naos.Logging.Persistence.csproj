@@ -121,22 +121,16 @@
     <Compile Include=".recipes\OBeautifulCode.Type\SuppressBecause.cs" />
     <Compile Include=".recipes\OBeautifulCode.Type\ToStringReadableOptions.cs" />
     <Compile Include=".recipes\OBeautifulCode.Type\TypeExtensions.cs" />
-    <Compile Include="LogWriters\Console\ConsoleLogConfig.cs" />
     <Compile Include="LogWriters\Console\ConsoleLogWriter.cs" />
-    <Compile Include="LogWriters\EventLog\EventLogConfig.cs" />
     <Compile Include="LogWriters\EventLog\EventLogConfigExtensions.cs" />
     <Compile Include="LogWriters\EventLog\EventLogReader.cs" />
     <Compile Include="LogWriters\EventLog\EventLogWriter.cs" />
     <Compile Include="LogWriters\FailedToBuildInvalidLogEntryException.cs" />
-    <Compile Include="LogWriters\File\FileLogConfig.cs" />
     <Compile Include="LogWriters\File\FileLogWriter.cs" />
-    <Compile Include="LogWriters\InMemory\InMemoryLogConfig.cs" />
     <Compile Include="LogWriters\InMemory\InMemoryLogWriter.cs" />
     <Compile Include="LogWriters\InvalidLogEntryException.cs" />
-    <Compile Include="LogWriters\TimeSlicedFiles\TimeSlicedFilesLogConfig.cs" />
     <Compile Include="LogWriters\TimeSlicedFiles\TimeSlicedFilesLogReader.cs" />
     <Compile Include="LogWriters\TimeSlicedFiles\TimeSlicedFilesLogWriter.cs" />
-    <Compile Include="LogWriters\TimeSlicedFiles\TimeSlicingExtensions.cs" />
     <Compile Include="LogWriting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

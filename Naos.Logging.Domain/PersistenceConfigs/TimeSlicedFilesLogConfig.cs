@@ -4,14 +4,12 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Naos.Logging.Persistence
+namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
-    using System.Linq;
-    using Naos.Logging.Domain;
     using OBeautifulCode.Equality.Recipes;
 
     using static System.FormattableString;

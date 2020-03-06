@@ -10,7 +10,6 @@ namespace Naos.Logging.Persistence
     using System.Diagnostics;
     using System.Threading;
     using Naos.Logging.Domain;
-    using OBeautifulCode.Representation.System;
     using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
 
@@ -71,7 +70,7 @@ namespace Naos.Logging.Persistence
                     ? EventLogEntryType.Error
                     : EventLogEntryType.Information;
 
-                var bytes = EventLogConfig.EventLogRawDataLogItemSerializer.SerializeToBytes(logItem);
+                var bytes = this.eventLogConfig.GetEventLogRawDataLogItemSerializer().SerializeToBytes(logItem);
                 var logMessage = BuildLogMessageFromLogItem(logItem, this.eventLogConfig.LogItemPropertiesToIncludeInLogMessage);
                 var wasEnumerationOrigin = Enum.TryParse<LogItemOrigin>(logItem.Context.Origin, true, out LogItemOrigin enumerationOrigin);
                 if (!wasEnumerationOrigin)

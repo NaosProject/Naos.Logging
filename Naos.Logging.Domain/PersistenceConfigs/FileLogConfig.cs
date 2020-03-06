@@ -1,57 +1,65 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="InMemoryLogConfig.cs" company="Naos Project">
+// <copyright file="FileLogConfig.cs" company="Naos Project">
 //    Copyright (c) Naos Project 2019. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Naos.Logging.Persistence
+namespace Naos.Logging.Domain
 {
     using System;
     using System.Collections.Generic;
-    using Naos.Logging.Domain;
+    using System.IO;
     using OBeautifulCode.Equality.Recipes;
 
     using static System.FormattableString;
 
     /// <summary>
-    /// In memory implementation of <see cref="LogWriterConfigBase" />.
+    /// <see cref="File"/> focused implementation of <see cref="LogWriterConfigBase" />.
     /// </summary>
-    public class InMemoryLogConfig : LogWriterConfigBase, IEquatable<InMemoryLogConfig>
+    public class FileLogConfig : LogWriterConfigBase, IEquatable<FileLogConfig>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryLogConfig"/> class.
+        /// Initializes a new instance of the <see cref="FileLogConfig"/> class.
         /// </summary>
         /// <param name="logInclusionKindToOriginsMap">The log-item origins to log for.</param>
-        /// <param name="maxLoggedItemCount">Optional maximum number of elements to keep internally before removing the oldest items; DEFAULT is -1 which is infinite.</param>
+        /// <param name="logFilePath">File path to write logs to.</param>
+        /// <param name="createDirectoryStructureIfMissing">Optional value indicating whether to create the directory structure if it's missing; DEFAULT is true.</param>
         /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
-        public InMemoryLogConfig(
+        public FileLogConfig(
             IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<string>> logInclusionKindToOriginsMap,
-            int maxLoggedItemCount = -1,
+            string logFilePath,
+            bool createDirectoryStructureIfMissing = true,
             LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage = LogItemPropertiesToIncludeInLogMessage.Default)
             : base(logInclusionKindToOriginsMap, logItemPropertiesToIncludeInLogMessage)
         {
-            if (maxLoggedItemCount < -1)
+            if (string.IsNullOrWhiteSpace(logFilePath))
             {
-                throw new ArgumentOutOfRangeException(Invariant($"{nameof(maxLoggedItemCount)} is <= -1; value is {maxLoggedItemCount}"));
+                throw new ArgumentException(Invariant($"{nameof(logFilePath)} is null or white space"));
             }
 
-            this.MaxLoggedItemCount = maxLoggedItemCount;
+            this.LogFilePath = logFilePath;
+            this.CreateDirectoryStructureIfMissing = createDirectoryStructureIfMissing;
         }
 
         /// <summary>
-        /// Gets the maximum number of elements to keep internally before removing the oldest items.
+        /// Gets the file path to write logs to.
         /// </summary>
-        public int MaxLoggedItemCount { get; private set; }
+        public string LogFilePath { get; private set; }
 
         /// <summary>
-        /// Determines whether two objects of type <see cref="InMemoryLogConfig"/> are equal.
+        /// Gets a value indicating whether to create the directory structure if it's missing.
+        /// </summary>
+        public bool CreateDirectoryStructureIfMissing { get; private set; }
+
+        /// <summary>
+        /// Determines whether two objects of type <see cref="FileLogConfig"/> are equal.
         /// </summary>
         /// <param name="left">The object to the left of the operator.</param>
         /// <param name="right">The object to the right of the operator.</param>
         /// <returns>True if the two items are equal; false otherwise.</returns>
         public static bool operator ==(
-            InMemoryLogConfig left,
-            InMemoryLogConfig right)
+            FileLogConfig left,
+            FileLogConfig right)
         {
             if (ReferenceEquals(left, right))
             {
@@ -64,31 +72,33 @@ namespace Naos.Logging.Persistence
             }
 
             var result = left.BaseEquals(right) &&
-                         left.MaxLoggedItemCount == right.MaxLoggedItemCount;
+                         string.Equals(left.LogFilePath, right.LogFilePath, StringComparison.Ordinal) &&
+                         left.CreateDirectoryStructureIfMissing == right.CreateDirectoryStructureIfMissing;
 
             return result;
         }
 
         /// <summary>
-        /// Determines whether two objects of type <see cref="InMemoryLogConfig"/> are not equal.
+        /// Determines whether two objects of type <see cref="FileLogConfig"/> are not equal.
         /// </summary>
         /// <param name="left">The object to the left of the operator.</param>
         /// <param name="right">The object to the right of the operator.</param>
         /// <returns>True if the two items not equal; false otherwise.</returns>
         public static bool operator !=(
-            InMemoryLogConfig left,
-            InMemoryLogConfig right)
+            FileLogConfig left,
+            FileLogConfig right)
             => !(left == right);
 
         /// <inheritdoc />
-        public bool Equals(InMemoryLogConfig other) => this == other;
+        public bool Equals(FileLogConfig other) => this == other;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => this == (obj as InMemoryLogConfig);
+        public override bool Equals(object obj) => this == (obj as FileLogConfig);
 
         /// <inheritdoc />
         public override int GetHashCode() => HashCodeHelper.Initialize(this.GetBaseHashCode())
-                                                           .Hash(this.MaxLoggedItemCount)
+                                                           .Hash(this.LogFilePath)
+                                                           .Hash(this.CreateDirectoryStructureIfMissing)
                                                            .Value;
     }
 }

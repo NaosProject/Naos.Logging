@@ -8,7 +8,9 @@ namespace Naos.Logging.Persistence
 {
     using System;
     using System.Diagnostics;
-
+    using Naos.Logging.Domain;
+    using OBeautifulCode.Serialization;
+    using OBeautifulCode.Serialization.Json;
     using static System.FormattableString;
 
     /// <summary>
@@ -16,6 +18,20 @@ namespace Naos.Logging.Persistence
     /// </summary>
     public static class EventLogConfigExtensions
     {
+        private static readonly IBinarySerializeAndDeserialize EventLogItemSerializer = new ObcJsonSerializer();
+
+        /// <summary>
+        /// Gets the serializer for a log-item.
+        /// </summary>
+        /// <param name="eventLogConfig">Event log config.</param>
+        /// <returns>Serializer for a log-item.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "eventLogConfig", Justification = "Just to get this as an extension method.")]
+        public static IBinarySerializeAndDeserialize GetEventLogRawDataLogItemSerializer(
+            this EventLogConfig eventLogConfig)
+        {
+            return EventLogItemSerializer;
+        }
+
         /// <summary>
         /// Create the <see cref="EventLog" /> <see cref="EventLog.Source" /> from configuration if it does not exist (requires considerable set of permissions).
         /// </summary>

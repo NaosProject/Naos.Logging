@@ -33,7 +33,7 @@ namespace Naos.Logging.Recipes
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "This is not excessively complex.  Dummy factories typically wire-up many types.")]
         public LoggingDummyFactory()
         {
-            var logWriterConfigTypes = typeof(LogWriting).Assembly.DefinedTypes.Where(_ => _.BaseType == typeof(LogWriterConfigBase)).ToList();
+            var logWriterConfigTypes = typeof(LogWriterConfigBase).Assembly.DefinedTypes.Where(_ => _.BaseType == typeof(LogWriterConfigBase)).ToList();
             AutoFixtureBackedDummyFactory.UseRandomConcreteSubclassForDummy<LogWriterConfigBase>(
                 null,
                 logWriterConfigTypes);
