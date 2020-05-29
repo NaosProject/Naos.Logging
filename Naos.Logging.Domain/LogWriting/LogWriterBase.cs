@@ -15,6 +15,7 @@ namespace Naos.Logging.Domain
     using System.Linq;
     using System.Text;
     using Naos.Logging.Domain;
+    using Naos.Logging.Domain.Internal;
     using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Enum.Recipes;
     using OBeautifulCode.Representation.System;
@@ -29,28 +30,30 @@ namespace Naos.Logging.Domain
     /// </summary>
     public abstract class LogWriterBase
     {
-        /// <summary>
-        /// Default serializer description to use for converting a <see cref="LogItem" /> into a string.
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Is immuatable.")]
-        public static readonly SerializationDescription DefaultLogItemSerializationDescription = new SerializationDescription(SerializationKind.Json, SerializationFormat.String, typeof(LoggingJsonConfiguration).ToRepresentation());
-
-        /// <summary>
-        /// Default serializer to use for converting a <see cref="LogItem" /> into a string.
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Is immuatable.")]
-        public static readonly ISerializeAndDeserialize DefaultLogItemSerializer = JsonSerializerFactory.Instance.BuildSerializer(DefaultLogItemSerializationDescription, unregisteredTypeEncounteredStrategy: UnregisteredTypeEncounteredStrategy.Attempt);
-
         private readonly LogWriterConfigBase logWriterConfigBase;
+        private readonly ISerializerFactory serializerFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogWriterBase"/> class.
         /// </summary>
         /// <param name="logWriterConfigBase">The base log writer configuration.</param>
+        /// <param name="logItemSerializerFactory">Serializer factory to use.</param>
         protected LogWriterBase(
-            LogWriterConfigBase logWriterConfigBase)
+            LogWriterConfigBase logWriterConfigBase,
+            ISerializerFactory logItemSerializerFactory = null)
         {
             this.logWriterConfigBase = logWriterConfigBase ?? throw new ArgumentNullException(nameof(logWriterConfigBase));
+            this.serializerFactory = logItemSerializerFactory ?? new JsonSerializerFactory();
+        }
+
+        /// <summary>
+        /// Builds the serializer for a log item.
+        /// </summary>
+        /// <returns>ISerializer.</returns>
+        public ISerializer BuildSerializer()
+        {
+            var result = this.serializerFactory.BuildSerializer(this.logWriterConfigBase.LogItemSerializerRepresentation);
+            return result;
         }
 
         /// <summary>
@@ -75,7 +78,7 @@ namespace Naos.Logging.Domain
                 catch (Exception failedToLogException)
                 {
                     var logPayload = new Tuple<LogItem, LogWriterConfigBase, Exception>(logItem, this.logWriterConfigBase, failedToLogException);
-                    var logPayloadJson = DefaultLogItemSerializer.SerializeToString(logPayload);
+                    var logPayloadJson = this.serializerFactory.BuildSerializer(this.logWriterConfigBase.LogItemSerializerRepresentation).SerializeToString(logPayload);
                     LastDitchLogger.LogError(logPayloadJson);
                 }
             }
@@ -93,11 +96,14 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <param name="logItem">The log item.</param>
         /// <param name="logItemPropertiesToIncludeInLogMessage"> The properties/aspects of a <see cref="LogItem"/> to include when building a log message.</param>
+        /// <param name="serializer">Serializer to use on object.</param>
         /// <param name="appendTrailingNewLine">Optional value indicating whether or not to append a trailing new line; DEFAULT is false.</param>
         /// <returns>Log message.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "This is the contract being used.")]
         public static string BuildLogMessageFromLogItem(
             LogItem logItem,
             LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
+            ISerializer serializer,
             bool appendTrailingNewLine = false)
         {
             if (logItem == null)
@@ -115,7 +121,7 @@ namespace Naos.Logging.Domain
 
             if (itemsToLog.Contains(LogItemPropertiesToIncludeInLogMessage.LogItemSerialization))
             {
-                var serializedLogItem = DefaultLogItemSerializer.SerializeToString(logItem);
+                var serializedLogItem = serializer.SerializeToString(logItem);
                 stringBuilder.AppendLine();
                 stringBuilder.Append(serializedLogItem);
                 stringBuilder.Append(",");

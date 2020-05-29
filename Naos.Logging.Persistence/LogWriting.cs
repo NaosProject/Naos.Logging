@@ -11,17 +11,13 @@ namespace Naos.Logging.Persistence
     using System.Diagnostics;
     using System.Linq;
     using Its.Log.Instrumentation;
-    using Naos.Diagnostics.Recipes;
     using Naos.Logging.Domain;
+    using Naos.Logging.Persistence.Internal;
     using OBeautifulCode.Collection.Recipes;
-    using OBeautifulCode.Compression;
-    using OBeautifulCode.Equality.Recipes;
-    using OBeautifulCode.Exception.Recipes;
     using OBeautifulCode.Math.Recipes;
     using OBeautifulCode.Representation.System;
     using OBeautifulCode.Serialization;
     using OBeautifulCode.Serialization.Json;
-    using OBeautifulCode.Type;
     using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
     using CorrelationManager = System.Diagnostics.CorrelationManager;
@@ -37,6 +33,10 @@ namespace Naos.Logging.Persistence
         /// </summary>
         public static LogWriting Instance { get; } = new LogWriting();
 
+        private readonly ISerializerFactory failingSerializerFactory = new JsonSerializerFactory();
+
+        private readonly SerializerRepresentation failingSerializerRepresentation = new SerializerRepresentation(SerializationKind.Json, typeof(LoggingJsonSerializationConfiguration).ToRepresentation());
+
         private readonly object sync = new object();
 
         private bool hasBeenSetup = false;
@@ -44,7 +44,6 @@ namespace Naos.Logging.Persistence
         private IReadOnlyCollection<LogWriterBase> activeLogWriters;
 
         private IReadOnlyCollection<string> errorCodeKeysField;
-        private static readonly ObcJsonSerializer LogEntrySerializer = new ObcJsonSerializer(typeof(LoggingJsonConfiguration), UnregisteredTypeEncounteredStrategy.Attempt);
 
         private LogWriting()
         {
@@ -162,7 +161,7 @@ namespace Naos.Logging.Persistence
                 string serializedLogEntry;
                 try
                 {
-                    serializedLogEntry = LogEntrySerializer.SerializeToString(logEntry);
+                    serializedLogEntry = this.failingSerializerFactory.BuildSerializer(this.failingSerializerRepresentation).SerializeToString(logEntry);
                 }
                 catch (Exception failToSerializeLogEntryException)
                 {
@@ -212,7 +211,7 @@ namespace Naos.Logging.Persistence
                     try
                     {
                         var logPayload = new Tuple<LogItem, string, Exception>(logItem, logWriter.ToString(), failedToLogException);
-                        message = LogWriterBase.DefaultLogItemSerializer.SerializeToString(logPayload);
+                        message = this.failingSerializerFactory.BuildSerializer(this.failingSerializerRepresentation).SerializeToString(logPayload);
                     }
                     catch (Exception failedToSerialize)
                     {
@@ -310,7 +309,7 @@ namespace Naos.Logging.Persistence
         /// <param name="logEntry"><see cref="LogEntry" /> to convert.</param>
         /// <param name="additionalCorrelations">Additional correlations to add.</param>
         /// <returns>Correct <see cref="LogItem" />.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = SuppressBecause.CA1308_NormalizeStringsToUppercase_PreferGuidLowercase)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = NaosSuppressBecause.CA1308_NormalizeStringsToUppercase_PreferGuidLowercase)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Acceptable coupling.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Acceptable complexity.")]
         public LogItem BuildLogItem(

@@ -11,6 +11,8 @@ namespace Naos.Logging.Domain
     using System.Linq;
     using OBeautifulCode.Assertion.Recipes;
     using OBeautifulCode.Equality.Recipes;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Serialization;
     using static System.FormattableString;
 
     /// <summary>
@@ -23,15 +25,22 @@ namespace Naos.Logging.Domain
         /// </summary>
         /// <param name="logInclusionKindToOriginsMap">The log items to log.</param>
         /// <param name="logItemPropertiesToIncludeInLogMessage">The properties/aspects of an <see cref="LogItem"/> to include when building a log message.</param>
+        /// <param name="logItemSerializerRepresentation">Optional serializer representation; DEFAULT is JSON.</param>
         protected LogWriterConfigBase(
             IReadOnlyDictionary<LogItemKind, IReadOnlyCollection<string>> logInclusionKindToOriginsMap,
-            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage)
+            LogItemPropertiesToIncludeInLogMessage logItemPropertiesToIncludeInLogMessage,
+            SerializerRepresentation logItemSerializerRepresentation = null)
         {
             new { logInclusionKindToOriginsMap }.AsArg().Must().NotBeNull();
             this.LogInclusionKindToOriginsMap = logInclusionKindToOriginsMap;
 
             this.LogItemPropertiesToIncludeInLogMessage = logItemPropertiesToIncludeInLogMessage;
             this.LogInclusionKindToOriginsMapFriendlyString = GenerateFriendlyStringFromLogInclusionKindToOriginsMap(this.LogInclusionKindToOriginsMap);
+
+            this.LogItemSerializerRepresentation = logItemSerializerRepresentation
+                                                ?? new SerializerRepresentation(
+                                                       SerializationKind.Json,
+                                                       typeof(LoggingJsonSerializationConfiguration).ToRepresentation());
         }
 
         /// <summary>
@@ -43,6 +52,12 @@ namespace Naos.Logging.Domain
         /// Gets the properties/aspects of an <see cref="LogItem"/> to include when building a log message.
         /// </summary>
         public LogItemPropertiesToIncludeInLogMessage LogItemPropertiesToIncludeInLogMessage { get; private set; }
+
+        /// <summary>
+        /// Gets the log item serializer representation.
+        /// </summary>
+        /// <value>The log item serializer representation.</value>
+        public SerializerRepresentation LogItemSerializerRepresentation { get; private set; }
 
         /// <summary>
         /// Generates a string friendly version of <see cref="LogInclusionKindToOriginsMap" />.

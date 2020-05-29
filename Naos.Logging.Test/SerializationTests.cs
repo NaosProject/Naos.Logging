@@ -25,8 +25,8 @@ namespace Naos.Logging.Test
 
     public static class SerializationTests
     {
-        private static readonly ObcBsonSerializer BsonSerializer = new ObcBsonSerializer(typeof(LoggingBsonConfiguration));
-        private static readonly ObcJsonSerializer JsonSerializer = new ObcJsonSerializer(typeof(LoggingJsonConfiguration));
+        private static readonly ObcBsonSerializer BsonSerializer = new ObcBsonSerializer(typeof(LoggingBsonSerializationConfiguration).ToBsonSerializationConfigurationType());
+        private static readonly ObcJsonSerializer JsonSerializer = new ObcJsonSerializer(typeof(LoggingJsonSerializationConfiguration).ToJsonSerializationConfigurationType());
 
         [Fact]
         public static void RawSubject_Roundtrips()

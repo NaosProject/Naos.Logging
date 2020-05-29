@@ -20,9 +20,9 @@ namespace Naos.Logging.Test
 
     public static class ShareSerializationTestLogic
     {
-        private static readonly ObcBsonSerializer BsonSerializerToUse = new ObcBsonSerializer(typeof(LoggingBsonConfiguration), UnregisteredTypeEncounteredStrategy.Attempt);
+        private static readonly ObcBsonSerializer BsonSerializerToUse = new ObcBsonSerializer<LoggingBsonSerializationConfiguration>();
 
-        private static readonly ObcJsonSerializer JsonSerializerToUse = new ObcJsonSerializer(typeof(LoggingJsonConfiguration), UnregisteredTypeEncounteredStrategy.Attempt);
+        private static readonly ObcJsonSerializer JsonSerializerToUse = new ObcJsonSerializer<LoggingJsonSerializationConfiguration>();
 
         private static readonly IReadOnlyCollection<IStringSerializeAndDeserialize> StringSerializers = new IStringSerializeAndDeserialize[] { BsonSerializerToUse, JsonSerializerToUse }.ToList();
 

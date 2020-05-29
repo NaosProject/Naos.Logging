@@ -66,7 +66,7 @@ namespace Naos.Logging.Persistence
 
             lock (this.fileLock)
             {
-                var logMessage = BuildLogMessageFromLogItem(logItem, this.fileLogConfig.LogItemPropertiesToIncludeInLogMessage, true);
+                var logMessage = BuildLogMessageFromLogItem(logItem, this.fileLogConfig.LogItemPropertiesToIncludeInLogMessage, this.BuildSerializer(), true);
                 File.AppendAllText(this.fileLogConfig.LogFilePath, logMessage);
             }
         }

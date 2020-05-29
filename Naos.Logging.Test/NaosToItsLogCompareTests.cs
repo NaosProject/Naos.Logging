@@ -90,7 +90,7 @@ namespace Naos.Logging.Test
 
             foreach (var logItem in memoryLogWriter.LoggedItems)
             {
-                var message = LogWriterBase.BuildLogMessageFromLogItem(logItem, LogItemPropertiesToIncludeInLogMessage.Default);
+                var message = LogWriterBase.BuildLogMessageFromLogItem(logItem, LogItemPropertiesToIncludeInLogMessage.Default, memoryLogWriter.BuildSerializer());
                 this.testOutputHelper.WriteLine(message);
             }
         }

@@ -35,17 +35,20 @@ namespace Naos.Logging.Test
             var staticClassType = typeof(Log);
             var interfaceLogType = typeof(ILog);
 
-            var classSkipNames = new[]
+            var methodNamesOnClassToIgnore = new[]
             {
                 nameof(Log.ToString),
                 nameof(Log.GetType),
                 nameof(Log.GetHashCode),
                 nameof(Log.Equals),
+                nameof(Log.SetupSubjectSerialization),
+                Invariant($"get_{nameof(Log.SubjectSerializerRepresentation)}"),
+                Invariant($"get_{nameof(Log.SubjectSerializerFactory)}"),
                 Invariant($"get_{nameof(Log.Instance)}"),
             }.ToList();
 
             // Act
-            var staticLogMethods = staticClassType.GetMethods().Where(_ => !classSkipNames.Contains(_.Name)).ToList();
+            var staticLogMethods = staticClassType.GetMethods().Where(_ => !methodNamesOnClassToIgnore.Contains(_.Name)).ToList();
             var interfaceLogMethods = interfaceLogType.GetMethods().ToList();
 
             string BuildCompareNameFromMethod(MethodInfo info)

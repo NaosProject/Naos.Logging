@@ -41,7 +41,7 @@ namespace Naos.Logging.Test
                      ""logItemPropertiesToIncludeInLogMessage"": ""default""
                  }";
 
-            var serializer = new ObcJsonSerializer<LoggingJsonConfiguration>();
+            var serializer = new ObcJsonSerializer<LoggingJsonSerializationConfiguration>();
 
             // Act
             var result = serializer.Deserialize<LogWriterConfigBase>(input);
@@ -302,8 +302,8 @@ namespace Naos.Logging.Test
 
                 // Assert
                 all.Count.Should().Be(2);
-                all.First().Subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(JsonSerializerFactory.Instance, CompressorFactory.Instance).Should().Be(subjectOne);
-                all.Last().Subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(JsonSerializerFactory.Instance, CompressorFactory.Instance).Should().Be(subjectTwo);
+                all.First().Subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(new JsonSerializerFactory()).Should().Be(subjectOne);
+                all.Last().Subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(new JsonSerializerFactory()).Should().Be(subjectTwo);
             }
             finally
             {

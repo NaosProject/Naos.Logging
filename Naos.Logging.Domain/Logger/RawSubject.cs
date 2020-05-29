@@ -51,10 +51,10 @@ namespace Naos.Logging.Domain
         public Subject ToSubject()
         {
             var describedSerialization = this.OriginalSubject.ToDescribedSerializationUsingSpecificFactory(
-                LogHelper.SubjectSerializationDescription,
-                RawSubjectSerializerFactory.Instance,
-                CompressorFactory.Instance,
-                unregisteredTypeEncounteredStrategy: UnregisteredTypeEncounteredStrategy.Attempt);
+                Log.SubjectSerializerRepresentation,
+                Log.SubjectSerializerFactory,
+                SerializationFormat.String,
+                AssemblyMatchStrategy.AnySingleVersion);
             var result = new Subject(describedSerialization, this.Summary);
             return result;
         }
@@ -114,61 +114,5 @@ namespace Naos.Logging.Domain
             .Hash(this.OriginalSubject)
             .Hash(this.Summary)
             .Value;
-    }
-
-    /// <summary>
-    /// Implementation of <see cref="ISerializerFactory" /> for use with converting a <see cref="RawSubject" /> to a <see cref="Subject" />.
-    /// </summary>
-    /// <remarks>Caching is needed due to cost of creation with a serializer.</remarks>
-    public class RawSubjectSerializerFactory : ISerializerFactory
-    {
-        private static readonly RawSubjectSerializerFactory InternalInstance = new RawSubjectSerializerFactory();
-
-        /// <summary>
-        /// Gets the singleton entry point to the code.
-        /// </summary>
-        public static ISerializerFactory Instance => InternalInstance;
-
-        private readonly object sync = new object();
-
-        private readonly IDictionary<Type, ISerializeAndDeserialize> configurationTypeToSerializerMap = new Dictionary<Type, ISerializeAndDeserialize>();
-
-        private RawSubjectSerializerFactory()
-        {
-            /* no-op to make sure this can only be accessed via instance property */
-        }
-
-        /// <inheritdoc />
-        public ISerializeAndDeserialize BuildSerializer(SerializationDescription serializationDescription, TypeMatchStrategy typeMatchStrategy = TypeMatchStrategy.NamespaceAndName, MultipleMatchStrategy multipleMatchStrategy = MultipleMatchStrategy.ThrowOnMultiple, UnregisteredTypeEncounteredStrategy unregisteredTypeEncounteredStrategy = UnregisteredTypeEncounteredStrategy.Default)
-        {
-            new { serializationDescription }.AsArg().Must().NotBeNull();
-
-            if (serializationDescription == LogHelper.SubjectSerializationDescription)
-            {
-                return LogWriterBase.DefaultLogItemSerializer;
-            }
-
-            var configurationType = serializationDescription.ConfigurationTypeRepresentation?.ResolveFromLoadedTypes(typeMatchStrategy, multipleMatchStrategy);
-            lock (this.sync)
-            {
-                switch (serializationDescription.SerializationKind)
-                {
-                    case SerializationKind.Json:
-                    {
-                        var configurationTypeForKeyCheck = configurationType ?? typeof(NullJsonConfiguration);
-                        if (!this.configurationTypeToSerializerMap.ContainsKey(configurationTypeForKeyCheck))
-                        {
-                            var serializer = new ObcJsonSerializer(configurationTypeForKeyCheck, UnregisteredTypeEncounteredStrategy.Attempt);
-                            this.configurationTypeToSerializerMap[configurationTypeForKeyCheck] = serializer;
-                        }
-
-                        var result = this.configurationTypeToSerializerMap[configurationTypeForKeyCheck];
-                        return result;
-                    }
-
-                    default: throw new NotSupportedException(Invariant($"{nameof(serializationDescription)} from enumeration {nameof(SerializationKind)} of {serializationDescription.SerializationKind} is not supported."));
-                }
-            }
-        }
     }
 }

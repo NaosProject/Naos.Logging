@@ -73,7 +73,7 @@ namespace Naos.Logging.Persistence
                                     stringBuiler.Append(fileContents);
                                     stringBuiler.Append("]");
 
-                                    var deserializedLogItems = LogWriterBase.DefaultLogItemSerializer.Deserialize<IReadOnlyCollection<LogItem>>(stringBuiler.ToString());
+                                    var deserializedLogItems = this.BuildSerializer().Deserialize<IReadOnlyCollection<LogItem>>(stringBuiler.ToString());
                                     var filtered = deserializedLogItems.Where(
                                         _ => _.Context.TimestampUtc >= startUtcInclusive && _.Context.TimestampUtc <= endUtcInclusive);
                                     return filtered;

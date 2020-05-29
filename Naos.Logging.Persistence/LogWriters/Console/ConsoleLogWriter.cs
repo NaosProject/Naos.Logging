@@ -39,7 +39,7 @@ namespace Naos.Logging.Persistence
                 throw new ArgumentNullException(nameof(logItem));
             }
 
-            var logMessage = BuildLogMessageFromLogItem(logItem, this.consoleConfig.LogItemPropertiesToIncludeInLogMessage, true);
+            var logMessage = BuildLogMessageFromLogItem(logItem, this.consoleConfig.LogItemPropertiesToIncludeInLogMessage, this.BuildSerializer(), true);
 
             if (this.consoleConfig.ShouldLogConsole(logItem.Kind, logItem.Context.Origin))
             {

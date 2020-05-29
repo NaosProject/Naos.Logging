@@ -62,13 +62,13 @@ namespace Naos.Logging.Test
         public static object DeserializeSubject(this Subject subject)
         {
             new { subject }.AsArg().Must().NotBeNull();
-            return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(JsonSerializerFactory.Instance, CompressorFactory.Instance);
+            return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory(new JsonSerializerFactory());
         }
 
         public static T DeserializeSubject<T>(this Subject subject)
         {
             new { subject }.AsArg().Must().NotBeNull();
-            return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory<T>(JsonSerializerFactory.Instance, CompressorFactory.Instance, unregisteredTypeEncounteredStrategy: UnregisteredTypeEncounteredStrategy.Attempt);
+            return subject.DescribedSerialization.DeserializePayloadUsingSpecificFactory<T>(new JsonSerializerFactory());
         }
     }
 }

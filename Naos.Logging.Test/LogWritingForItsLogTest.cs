@@ -328,7 +328,7 @@ namespace Naos.Logging.Test
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
             logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.BuildAssemblyQualifiedName().Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
@@ -371,7 +371,7 @@ namespace Naos.Logging.Test
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
             logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.BuildAssemblyQualifiedName().Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();
@@ -416,7 +416,7 @@ namespace Naos.Logging.Test
             logItem.Context.StackTrace.Should().Be(actualSubject.StackTrace);
             logItem.Context.Origin.Should().Be(LogItemOrigin.ItsLogEntryPosted.ToString());
             logItem.Context.CallingMethod.Should().NotBeNullOrWhiteSpace();
-            logItem.Context.CallingType.AssemblyQualifiedName.Should().NotBeNullOrWhiteSpace();
+            logItem.Context.CallingType.BuildAssemblyQualifiedName().Should().NotBeNullOrWhiteSpace();
             logItem.Context.MachineName.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessFileVersion.Should().NotBeNullOrWhiteSpace();
             logItem.Context.ProcessName.Should().NotBeNullOrWhiteSpace();

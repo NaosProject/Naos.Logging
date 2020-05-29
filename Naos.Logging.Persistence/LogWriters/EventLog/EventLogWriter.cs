@@ -71,7 +71,7 @@ namespace Naos.Logging.Persistence
                     : EventLogEntryType.Information;
 
                 var bytes = this.eventLogConfig.GetEventLogRawDataLogItemSerializer().SerializeToBytes(logItem);
-                var logMessage = BuildLogMessageFromLogItem(logItem, this.eventLogConfig.LogItemPropertiesToIncludeInLogMessage);
+                var logMessage = BuildLogMessageFromLogItem(logItem, this.eventLogConfig.LogItemPropertiesToIncludeInLogMessage, this.BuildSerializer());
                 var wasEnumerationOrigin = Enum.TryParse<LogItemOrigin>(logItem.Context.Origin, true, out LogItemOrigin enumerationOrigin);
                 if (!wasEnumerationOrigin)
                 {

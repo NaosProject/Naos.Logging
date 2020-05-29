@@ -9,7 +9,6 @@ namespace Naos.Logging.Persistence
     using System;
     using System.IO;
     using Naos.Logging.Domain;
-    using OBeautifulCode.Representation.System;
     using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
 
@@ -60,7 +59,7 @@ namespace Naos.Logging.Persistence
                 throw new ArgumentNullException(nameof(logItem));
             }
 
-            var logMessage = BuildLogMessageFromLogItem(logItem, this.timeSlicedFilesLogConfig.LogItemPropertiesToIncludeInLogMessage, true);
+            var logMessage = BuildLogMessageFromLogItem(logItem, this.timeSlicedFilesLogConfig.LogItemPropertiesToIncludeInLogMessage, this.BuildSerializer(), true);
 
             lock (this.fileLock)
             {

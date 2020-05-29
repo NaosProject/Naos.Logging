@@ -1,12 +1,12 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <package>
   <metadata>
     <id>Naos.Logging.Recipes.DummyFactory</id>
     <description>A dummy factory for Logging types.</description>
     <tags>naos logging fakeiteasy autofixture dummy factory</tags>
     <dependencies>
-      <dependency id="Naos.Logging" version ="$version$" />
-      <dependency id="OBeautifulCode.AutoFakeItEasy" version ="1.0.113" />
+      <dependency id="Naos.Logging" version="$version$" />
+      <dependency id="OBeautifulCode.AutoFakeItEasy" version="1.0.127" />
     </dependencies>
   </metadata>
   <files>

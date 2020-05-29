@@ -34,10 +34,6 @@ namespace Naos.Logging.Domain
             MachineName = Diagnostics.Recipes.MachineName.GetMachineName();
             ProcessName = ProcessHelpers.GetRunningProcess().GetName();
             ProcessFileVersion = ProcessHelpers.GetRunningProcess().GetFileVersion();
-            SubjectSerializationDescription = new SerializationDescription(
-                SerializationKind.Json,
-                SerializationFormat.String,
-                typeof(LoggingJsonConfiguration).ToRepresentation());
         }
 
         /// <summary>
@@ -54,11 +50,6 @@ namespace Naos.Logging.Domain
         /// Gets the process file version, initialized in static constructor.
         /// </summary>
         public static string ProcessFileVersion { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="SerializationDescription" /> to use for serializing the subject object.
-        /// </summary>
-        public static SerializationDescription SubjectSerializationDescription { get; private set; }
 
         /// <summary>
         /// Determine the <see cref="LogItemKind" /> from the subject.

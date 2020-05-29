@@ -9,23 +9,39 @@ namespace Naos.Logging.Domain
     using System;
     using System.Collections.Generic;
     using Naos.Logging.Domain;
+    using OBeautifulCode.Serialization;
+    using OBeautifulCode.Serialization.Json;
 
     /// <summary>
     /// Base class for readers.
     /// </summary>
     public abstract class LogReaderBase
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields", Justification = "Keeping for now to maintain contract of providing it.")]
-        private readonly LogWriterConfigBase logConfigBase;
+        private readonly LogWriterConfigBase logWriterConfigBase;
+
+        private readonly ISerializerFactory serializerFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogReaderBase"/> class.
         /// </summary>
         /// <param name="logConfigBase">Base configuration.</param>
+        /// <param name="logItemSerializerFactory">Optional serialization factory; DEFAULT is JSON.</param>
         protected LogReaderBase(
-            LogWriterConfigBase logConfigBase)
+            LogWriterConfigBase logConfigBase,
+            ISerializerFactory logItemSerializerFactory = null)
         {
-            this.logConfigBase = logConfigBase ?? throw new ArgumentNullException(nameof(logConfigBase));
+            this.logWriterConfigBase = logConfigBase ?? throw new ArgumentNullException(nameof(logConfigBase));
+            this.serializerFactory = logItemSerializerFactory ?? new JsonSerializerFactory();
+        }
+
+        /// <summary>
+        /// Builds the serializer for a log item.
+        /// </summary>
+        /// <returns>ISerializer.</returns>
+        public ISerializer BuildSerializer()
+        {
+            var result = this.serializerFactory.BuildSerializer(this.logWriterConfigBase.LogItemSerializerRepresentation);
+            return result;
         }
 
         /// <summary>

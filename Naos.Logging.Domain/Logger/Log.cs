@@ -9,17 +9,54 @@ namespace Naos.Logging.Domain
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using Naos.Logging.Domain.Internal;
+    using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Serialization;
+    using OBeautifulCode.Serialization.Json;
 
     /// <summary>
     /// Helper to deal with correlations of <see cref="Exception" />'s.
     /// </summary>
     public static class Log
     {
+        private static readonly object SyncSerializationSettings = new object();
+
+        [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Justification = NaosSuppressBecause.CA1810_InitializeReferenceTypeStaticFieldsInline_FieldsDeclaredInCodeGeneratedPartialTestClass)]
+        static Log()
+        {
+            SubjectSerializerRepresentation = new SerializerRepresentation(SerializationKind.Json,  typeof(LoggingJsonSerializationConfiguration).ToRepresentation());
+            SubjectSerializerFactory = new JsonSerializerFactory();
+        }
+
+        /// <summary>
+        /// Gets the <see cref="SerializerRepresentation" /> to use for serializing the subject object.
+        /// </summary>
+        public static SerializerRepresentation SubjectSerializerRepresentation { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="ISerializerFactory" /> to use for serializing the subject object.
+        /// </summary>
+        public static ISerializerFactory SubjectSerializerFactory { get; private set; }
+
         /// <summary>
         /// Gets the singleton logger being used.
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Keeping for preferred IL.")]
         public static ILog Instance { get; private set; } = new Logger();
+
+        /// <summary>
+        /// Setup the subject serialization to be used when packing and handing in payload object to a writer.
+        /// </summary>
+        /// <param name="subjectSerializerRepresentation">The subject serializer representation.</param>
+        /// <param name="subjectSerializerFactory">The subject serializer factory.</param>
+        public static void SetupSubjectSerialization(SerializerRepresentation subjectSerializerRepresentation, ISerializerFactory subjectSerializerFactory)
+        {
+            lock (SyncSerializationSettings)
+            {
+                SubjectSerializerRepresentation = subjectSerializerRepresentation;
+                SubjectSerializerFactory = subjectSerializerFactory;
+            }
+        }
 
         /// <summary>
         /// Write a message.
