@@ -10,6 +10,7 @@ namespace Naos.Logging.Persistence
     using System.IO;
     using Naos.Logging.Domain;
     using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Serialization;
     using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
 
@@ -28,9 +29,11 @@ namespace Naos.Logging.Persistence
         /// Initializes a new instance of the <see cref="FileLogWriter"/> class.
         /// </summary>
         /// <param name="fileLogConfig">Configuration.</param>
+        /// <param name="logItemSerializerFactory">Optional serializer factory; DEFAULT will be base version.</param>
         public FileLogWriter(
-            FileLogConfig fileLogConfig)
-            : base(fileLogConfig)
+            FileLogConfig fileLogConfig,
+            ISerializerFactory logItemSerializerFactory = null)
+            : base(fileLogConfig, logItemSerializerFactory)
         {
             this.fileLogConfig = fileLogConfig ?? throw new ArgumentNullException(nameof(fileLogConfig));
 

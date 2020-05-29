@@ -9,6 +9,7 @@ namespace Naos.Logging.Persistence
     using System;
     using Naos.Logging.Domain;
     using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Serialization;
     using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
 
@@ -23,9 +24,11 @@ namespace Naos.Logging.Persistence
         /// Initializes a new instance of the <see cref="ConsoleLogWriter"/> class.
         /// </summary>
         /// <param name="consoleConfig">Configuration.</param>
+        /// <param name="logItemSerializerFactory">Optional serializer factory; DEFAULT will be base version.</param>
         public ConsoleLogWriter(
-            ConsoleLogConfig consoleConfig)
-            : base(consoleConfig)
+            ConsoleLogConfig consoleConfig,
+            ISerializerFactory logItemSerializerFactory = null)
+            : base(consoleConfig, logItemSerializerFactory)
         {
             this.consoleConfig = consoleConfig ?? throw new ArgumentNullException(nameof(consoleConfig));
         }

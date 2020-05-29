@@ -11,6 +11,7 @@ namespace Naos.Logging.Persistence
     using System.Linq;
     using Naos.Logging.Domain;
     using OBeautifulCode.Representation.System;
+    using OBeautifulCode.Serialization;
     using OBeautifulCode.Type.Recipes;
 
     /// <summary>
@@ -28,9 +29,11 @@ namespace Naos.Logging.Persistence
         /// Initializes a new instance of the <see cref="InMemoryLogWriter"/> class.
         /// </summary>
         /// <param name="memoryConfig">Configuration.</param>
+        /// <param name="logItemSerializerFactory">Optional serializer factory; DEFAULT will be base version.</param>
         public InMemoryLogWriter(
-            InMemoryLogConfig memoryConfig)
-            : base(memoryConfig)
+            InMemoryLogConfig memoryConfig,
+            ISerializerFactory logItemSerializerFactory = null)
+            : base(memoryConfig, logItemSerializerFactory)
         {
             this.memoryLogConfig = memoryConfig ?? throw new ArgumentNullException(nameof(memoryConfig));
         }

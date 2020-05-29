@@ -10,6 +10,7 @@ namespace Naos.Logging.Persistence
     using System.Collections.Generic;
     using System.Diagnostics;
     using Naos.Logging.Domain;
+    using OBeautifulCode.Serialization;
 
     /// <summary>
     /// <see cref="EventLog"/> focused implementation of <see cref="LogReaderBase" />.
@@ -22,9 +23,11 @@ namespace Naos.Logging.Persistence
         /// Initializes a new instance of the <see cref="EventLogReader"/> class.
         /// </summary>
         /// <param name="eventLogConfig">Configuration.</param>
+        /// <param name="logItemSerializerFactory">Optional serializer factory; DEFAULT will be base version.</param>
         public EventLogReader(
-            EventLogConfig eventLogConfig)
-            : base(eventLogConfig)
+            EventLogConfig eventLogConfig,
+            ISerializerFactory logItemSerializerFactory = null)
+            : base(eventLogConfig, logItemSerializerFactory)
         {
             this.eventLogConfig = eventLogConfig ?? throw new ArgumentNullException(nameof(eventLogConfig));
         }

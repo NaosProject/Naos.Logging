@@ -9,6 +9,7 @@ namespace Naos.Logging.Persistence
     using System;
     using System.IO;
     using Naos.Logging.Domain;
+    using OBeautifulCode.Serialization;
     using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
 
@@ -27,9 +28,11 @@ namespace Naos.Logging.Persistence
         /// Initializes a new instance of the <see cref="TimeSlicedFilesLogWriter"/> class.
         /// </summary>
         /// <param name="timeSlicedFilesLogConfig">Configuration.</param>
+        /// <param name="logItemSerializerFactory">Optional serializer factory; DEFAULT will be base version.</param>
         public TimeSlicedFilesLogWriter(
-            TimeSlicedFilesLogConfig timeSlicedFilesLogConfig)
-            : base(timeSlicedFilesLogConfig)
+            TimeSlicedFilesLogConfig timeSlicedFilesLogConfig,
+            ISerializerFactory logItemSerializerFactory = null)
+            : base(timeSlicedFilesLogConfig, logItemSerializerFactory)
         {
             this.timeSlicedFilesLogConfig = timeSlicedFilesLogConfig ?? throw new ArgumentNullException(nameof(timeSlicedFilesLogConfig));
 

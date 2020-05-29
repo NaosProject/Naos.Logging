@@ -10,6 +10,7 @@ namespace Naos.Logging.Persistence
     using System.Diagnostics;
     using System.Threading;
     using Naos.Logging.Domain;
+    using OBeautifulCode.Serialization;
     using OBeautifulCode.Type.Recipes;
     using static System.FormattableString;
 
@@ -31,9 +32,11 @@ namespace Naos.Logging.Persistence
         /// Initializes a new instance of the <see cref="EventLogWriter"/> class.
         /// </summary>
         /// <param name="eventLogConfig">Configuration.</param>
+        /// <param name="logItemSerializerFactory">Optional serializer factory; DEFAULT will be base version.</param>
         public EventLogWriter(
-            EventLogConfig eventLogConfig)
-            : base(eventLogConfig)
+            EventLogConfig eventLogConfig,
+            ISerializerFactory logItemSerializerFactory = null)
+            : base(eventLogConfig, logItemSerializerFactory)
         {
             this.eventLogConfig = eventLogConfig ?? throw new ArgumentNullException(nameof(eventLogConfig));
 
