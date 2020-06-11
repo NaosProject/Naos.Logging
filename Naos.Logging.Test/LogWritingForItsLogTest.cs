@@ -40,7 +40,7 @@ namespace Naos.Logging.Test
             Log.Write(subject);
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.Contains(subject));
             var actualSubject = logItem.Subject.DeserializeSubject<string>();
 
             logItem.Subject.Summary.Should().Be(subject);
@@ -74,7 +74,7 @@ namespace Naos.Logging.Test
             Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.Contains(subject));
             var actualSubject = logItem.Subject.DeserializeSubject<string>();
 
             logItem.Subject.Summary.Should().Be(subject);
@@ -107,7 +107,7 @@ namespace Naos.Logging.Test
             Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.Contains(subject));
             var actualSubject = logItem.Subject.DeserializeSubject<string>();
 
             logItem.Subject.Summary.Should().Be(subject);
@@ -141,7 +141,7 @@ namespace Naos.Logging.Test
             Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Comment.Contains(comment));
             var actualSubject = logItem.Subject.DeserializeSubject<TestObjectWithToStringForItsLog>();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
@@ -174,7 +174,7 @@ namespace Naos.Logging.Test
             Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.Contains(subject.ToString()));
             var actualSubject = logItem.Subject.DeserializeSubject<TestObjectWithToStringForItsLog>();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
@@ -208,7 +208,7 @@ namespace Naos.Logging.Test
             Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.Contains(subject.Message));
             dynamic actualSubject = logItem.Subject.DeserializeSubject();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
@@ -241,7 +241,7 @@ namespace Naos.Logging.Test
             Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.Contains(subject.Message));
             dynamic actualSubject = logItem.Subject.DeserializeSubject();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
@@ -275,7 +275,7 @@ namespace Naos.Logging.Test
             Thread.Sleep(TimeSpan.FromMilliseconds(200));
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.Contains(subject));
             var actualSubject = logItem.Subject.DeserializeSubject<string>();
 
             logItem.Subject.Summary.Should().Be(subject);
@@ -315,7 +315,7 @@ namespace Naos.Logging.Test
             }
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.Contains(exceptionMessage));
             var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
 
             logItem.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {exceptionMessage}"));
@@ -358,7 +358,7 @@ namespace Naos.Logging.Test
             }
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.Contains(exceptionMessage));
             var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
 
             logItem.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {exceptionMessage}"));
@@ -403,7 +403,7 @@ namespace Naos.Logging.Test
             }
 
             // Assert
-            var logItem = logWriter.LoggedItems.Single();
+            var logItem = logWriter.LoggedItems.Single(_ => _.Subject.Summary.Contains(exceptionMessage));
             var actualSubject = logItem.Subject.DeserializeSubject<InvalidOperationException>();
 
             logItem.Subject.Summary.Should().Be(Invariant($"{nameof(InvalidOperationException)}: {exceptionMessage}"));
