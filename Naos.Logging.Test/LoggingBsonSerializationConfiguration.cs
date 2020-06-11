@@ -18,6 +18,12 @@ namespace Naos.Logging.Test
     public class LoggingBsonSerializationConfiguration : BsonSerializationConfigurationBase
     {
         /// <inheritdoc />
+        protected override IReadOnlyCollection<string> TypeToRegisterNamespacePrefixFilters => new[]
+                                                                                               {
+                                                                                                   typeof(RawSubject).Namespace,
+                                                                                               };
+        
+        /// <inheritdoc />
         public override UnregisteredTypeEncounteredStrategy UnregisteredTypeEncounteredStrategy => UnregisteredTypeEncounteredStrategy.Attempt;
 
         /// <inheritdoc />
