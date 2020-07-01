@@ -27,11 +27,10 @@ namespace OBeautifulCode.Serialization.Test
             AutoFixtureBackedDummyFactory.ConstrainDummyToExclude(SerializationKind.Invalid, SerializationKind.Proprietary);
             AutoFixtureBackedDummyFactory.ConstrainDummyToExclude(SerializationFormat.Invalid);
 
-#if OBeautifulCodeSerializationRecipesProject
-            AutoFixtureBackedDummyFactory.ConstrainDummyToExclude(OBeautifulCode.Serialization.Json.JsonConverterOutputKind.Unknown);
+            #if OBeautifulCodeSerializationRecipesProject
             AutoFixtureBackedDummyFactory.UseRandomConcreteSubclassForDummy<KeyOrValueObjectHierarchyBase>();
             AutoFixtureBackedDummyFactory.UseRandomConcreteSubclassForDummy<TestBase>();
-#endif
+            #endif
         }
     }
 }
