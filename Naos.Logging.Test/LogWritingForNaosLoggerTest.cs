@@ -14,6 +14,7 @@ namespace Naos.Logging.Test
     using Naos.Logging.Domain;
     using Naos.Logging.Persistence;
     using OBeautifulCode.Exception.Recipes;
+    using OBeautifulCode.Representation.System;
     using OBeautifulCode.Serialization.Json;
     using Xunit;
     using Xunit.Abstractions;

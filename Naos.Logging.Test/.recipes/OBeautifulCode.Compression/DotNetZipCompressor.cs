@@ -9,12 +9,12 @@
 
 namespace OBeautifulCode.Compression.Recipes
 {
+    using System;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.IO.Compression;
 
-    using OBeautifulCode.Assertion.Recipes;
-    using OBeautifulCode.Compression.Recipes.Internal;
+    using OBeautifulCode.Compression.Test.Internal;
 
     /// <summary>
     /// Build in dot net implementation of <see cref="ICompressAndDecompress"/>.
@@ -44,7 +44,10 @@ namespace OBeautifulCode.Compression.Recipes
         public static byte[] CompressBytes(
             byte[] uncompressedBytes)
         {
-            new { uncompressedBytes }.AsArg().Must().NotBeNull();
+            if (uncompressedBytes == null)
+            {
+                throw new ArgumentNullException(nameof(uncompressedBytes));
+            }
 
             byte[] result;
 
@@ -75,7 +78,10 @@ namespace OBeautifulCode.Compression.Recipes
         public static byte[] DecompressBytes(
             byte[] compressedBytes)
         {
-            new { compressedBytes }.AsArg().Must().NotBeNull();
+            if (compressedBytes == null)
+            {
+                throw new ArgumentNullException(nameof(compressedBytes));
+            }
 
             byte[] result;
 
@@ -99,7 +105,10 @@ namespace OBeautifulCode.Compression.Recipes
         byte[] ICompress.CompressBytes(
             byte[] uncompressedBytes)
         {
-            new { uncompressedBytes }.AsArg().Must().NotBeNull();
+            if (uncompressedBytes == null)
+            {
+                throw new ArgumentNullException(nameof(uncompressedBytes));
+            }
 
             var result = CompressBytes(uncompressedBytes);
 
@@ -110,7 +119,10 @@ namespace OBeautifulCode.Compression.Recipes
         byte[] IDecompress.DecompressBytes(
             byte[] compressedBytes)
         {
-            new { compressedBytes }.AsArg().Must().NotBeNull();
+            if (compressedBytes == null)
+            {
+                throw new ArgumentNullException(nameof(compressedBytes));
+            }
 
             var result = DecompressBytes(compressedBytes);
 
