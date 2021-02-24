@@ -23,18 +23,21 @@ namespace OBeautifulCode.Representation.System.Test
     /// <summary>
     /// A Dummy Factory for types in <see cref="OBeautifulCode.Representation.System"/>.
     /// </summary>
-#if !OBeautifulCodeRepresentationRecipesProject
+#if !OBeautifulCodeRepresentationSolution
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    [global::System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Representation.System.Test", "See package version number")]
+    [global::System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Compression.Test", "See package version number")]
+    internal
+#else
+    public
 #endif
-    public class RepresentationSystemDummyFactory : DefaultRepresentationSystemDummyFactory
+    class RepresentationSystemDummyFactory : DefaultRepresentationSystemDummyFactory
     {
         public RepresentationSystemDummyFactory()
         {
             AutoFixtureBackedDummyFactory.AddDummyCreator(
                 () =>
                 {
-                    // TypeDummyFactory will return a real, loaded type. 
+                    // TypeDummyFactory will return a real, loaded type.
                     var result = A.Dummy<Type>().ToRepresentation();
 
                     return result;

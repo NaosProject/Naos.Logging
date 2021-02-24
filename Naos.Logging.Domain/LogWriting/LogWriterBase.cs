@@ -15,7 +15,6 @@ namespace Naos.Logging.Domain
     using System.Linq;
     using System.Text;
     using Naos.Logging.Domain;
-    using Naos.Logging.Domain.Internal;
     using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Enum.Recipes;
     using OBeautifulCode.Representation.System;

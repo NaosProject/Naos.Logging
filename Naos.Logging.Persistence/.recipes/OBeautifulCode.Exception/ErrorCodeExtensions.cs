@@ -9,23 +9,23 @@
 
 namespace OBeautifulCode.Exception.Recipes
 {
-    using System;
-    using System.Collections;
-    using System.Linq;
+    using global::System;
+    using global::System.Collections;
+    using global::System.Linq;
 
-    using static System.FormattableString;
+    using static global::System.FormattableString;
 
     /// <summary>
     /// Extension methods on type <see cref="Exception"/>.
     /// </summary>
-#if !OBeautifulCodeExceptionRecipesProject
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    [System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Exception.Recipes", "See package version number")]
+#if !OBeautifulCodeExceptionSolution
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    [global::System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Exception.Recipes", "See package version number")]
     internal
 #else
     public
 #endif
-        static class ErrorCodeExtensions
+    static class ErrorCodeExtensions
     {
         /// <summary>
         /// Adds an error code to the specified exception.

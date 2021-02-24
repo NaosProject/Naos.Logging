@@ -11,8 +11,8 @@ namespace Naos.Logging.Persistence
     using System.Diagnostics;
     using System.Linq;
     using Its.Log.Instrumentation;
+    using Naos.CodeAnalysis.Recipes;
     using Naos.Logging.Domain;
-    using Naos.Logging.Persistence.Internal;
     using OBeautifulCode.Collection.Recipes;
     using OBeautifulCode.Math.Recipes;
     using OBeautifulCode.Representation.System;

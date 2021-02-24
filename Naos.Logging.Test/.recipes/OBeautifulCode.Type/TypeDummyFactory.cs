@@ -9,9 +9,9 @@
 
 namespace OBeautifulCode.Type.Test
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    using global::System;
+    using global::System.Collections.Generic;
+    using global::System.Linq;
 
     using FakeItEasy;
 
@@ -21,11 +21,14 @@ namespace OBeautifulCode.Type.Test
     /// <summary>
     /// A Dummy Factory for types in <see cref="OBeautifulCode.Type"/>.
     /// </summary>
-#if !OBeautifulCodeTypeRecipesProject
+#if !OBeautifulCodeTypeSolution
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     [System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Type.Test", "See package version number")]
+    internal
+#else
+    public
 #endif
-    public class TypeDummyFactory : DefaultTypeDummyFactory
+    class TypeDummyFactory : DefaultTypeDummyFactory
     {
         private static readonly IReadOnlyList<Type> LoadedTypes =
             AppDomain

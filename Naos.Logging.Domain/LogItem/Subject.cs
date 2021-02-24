@@ -22,7 +22,7 @@ namespace Naos.Logging.Domain
         /// <param name="describedSerialization">A described serialization of the subject.</param>
         /// <param name="summary">A string summary of the subject.</param>
         public Subject(
-            DescribedSerialization describedSerialization,
+            DescribedSerializationBase describedSerialization,
             string summary)
         {
             this.DescribedSerialization = describedSerialization ?? throw new ArgumentNullException(nameof(describedSerialization));
@@ -32,7 +32,7 @@ namespace Naos.Logging.Domain
         /// <summary>
         /// Gets a described serialization of the subject.
         /// </summary>
-        public DescribedSerialization DescribedSerialization { get; private set; }
+        public DescribedSerializationBase DescribedSerialization { get; private set; }
 
         /// <summary>
         /// Gets a string summary of the subject.

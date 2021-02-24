@@ -9,16 +9,16 @@
 
 namespace OBeautifulCode.Math.Recipes
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    using global::System;
+    using global::System.Collections.Generic;
+    using global::System.Linq;
 
     /// <summary>
     /// Supports various mathematical and numerical methods.
     /// </summary>
-#if !OBeautifulCodeMathRecipesProject
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    [System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Math.Recipes", "See package version number")]
+#if !OBeautifulCodeMathSolution
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    [global::System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Math.Recipes", "See package version number")]
     internal
 #else
     public

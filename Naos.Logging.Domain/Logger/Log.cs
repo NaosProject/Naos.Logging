@@ -9,7 +9,7 @@ namespace Naos.Logging.Domain
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using Naos.Logging.Domain.Internal;
+    using Naos.CodeAnalysis.Recipes;
     using OBeautifulCode.Representation.System;
     using OBeautifulCode.Serialization;
     using OBeautifulCode.Serialization.Json;

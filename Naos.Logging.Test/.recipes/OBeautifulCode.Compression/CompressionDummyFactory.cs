@@ -9,20 +9,19 @@
 
 namespace OBeautifulCode.Compression.Test
 {
-    using System;
-
-    using FakeItEasy;
-
     using OBeautifulCode.AutoFakeItEasy;
 
     /// <summary>
     /// A Dummy Factory for types in <see cref="OBeautifulCode.Compression"/>.
     /// </summary>
- #if !OBeautifulCodeCompressionRecipesProject
+#if !OBeautifulCodeCompressionSolution
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     [System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Compression.Test", "See package version number")]
+    internal
+#else
+    public
 #endif
-    public class CompressionDummyFactory : DefaultCompressionDummyFactory
+    class CompressionDummyFactory : DefaultCompressionDummyFactory
     {
         public CompressionDummyFactory()
         {

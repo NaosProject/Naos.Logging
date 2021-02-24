@@ -162,7 +162,7 @@ namespace Naos.Logging.Test
             dynamic actualSubject = logItem.Subject.DeserializeSubject();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
-            ((string)actualSubject.Message).Should().Be(subject.Message);
+            ((string)actualSubject.message).Should().Be(subject.Message);
             logItem.Kind.Should().Be(LogItemKind.Object);
             logItem.Comment.Should().Be(comment);
 
@@ -193,7 +193,7 @@ namespace Naos.Logging.Test
             dynamic actualSubject = logItem.Subject.DeserializeSubject();
 
             logItem.Subject.Summary.Should().Be(subject.ToString());
-            ((string)actualSubject.Message).Should().Be(subject.Message);
+            ((string)actualSubject.message).Should().Be(subject.Message);
             logItem.Kind.Should().Be(LogItemKind.Object);
             logItem.Comment.Should().BeNull();
 

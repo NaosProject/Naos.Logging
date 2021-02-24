@@ -9,19 +9,19 @@
 
 namespace OBeautifulCode.Exception.Recipes
 {
-    using System;
+    using global::System;
 
     /// <summary>
     /// Extension methods on type <see cref="Exception"/>.
     /// </summary>
-#if !OBeautifulCodeExceptionRecipesProject
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    [System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Exception.Recipes", "See package version number")]
+#if !OBeautifulCodeExceptionSolution
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    [global::System.CodeDom.Compiler.GeneratedCode("OBeautifulCode.Exception.Recipes", "See package version number")]
     internal
 #else
     public
 #endif
-        static class ErrorCodeConstants
+    static class ErrorCodeConstants
     {
         /// <summary>
         /// The key for the error code in <see cref="Exception.Data"/>.
