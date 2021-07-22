@@ -54,7 +54,7 @@ namespace Naos.Logging.Domain
                 Log.SubjectSerializerRepresentation,
                 Log.SubjectSerializerFactory,
                 SerializationFormat.String,
-                AssemblyMatchStrategy.AnySingleVersion);
+                VersionMatchStrategy.AnySingleVersion);
             var result = new Subject(describedSerialization, this.Summary);
             return result;
         }

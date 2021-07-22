@@ -16,7 +16,7 @@ namespace OBeautifulCode.Exception.Recipes
     using static global::System.FormattableString;
 
     /// <summary>
-    /// Extension methods on type <see cref="Exception"/>.
+    /// Error code related extension methods on type <see cref="Exception"/>.
     /// </summary>
 #if !OBeautifulCodeExceptionSolution
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
