@@ -26,7 +26,7 @@ namespace Naos.Logging.Test
 
     public static class LogWritingForItsLogTest
     {
-        private static readonly object MemoryLogWriterSync = new object();
+        public static readonly object MemoryLogWriterSync = new object();
 
         private static InMemoryLogWriter memoryLogWriter;
 
@@ -648,7 +648,7 @@ namespace Naos.Logging.Test
             }
         }
 
-        private static InMemoryLogWriter BuildAndConfigureMemoryLogWriter()
+        internal static InMemoryLogWriter BuildAndConfigureMemoryLogWriter()
         {
             if (memoryLogWriter == null)
             {
