@@ -7,16 +7,9 @@
 namespace Naos.Logging.Domain
 {
     using System;
-    using System.Collections.Generic;
-    using OBeautifulCode.Assertion.Recipes;
-    using OBeautifulCode.Compression;
-    using OBeautifulCode.Compression.Recipes;
     using OBeautifulCode.Equality.Recipes;
-    using OBeautifulCode.Representation.System;
     using OBeautifulCode.Serialization;
-    using OBeautifulCode.Serialization.Json;
     using OBeautifulCode.Type;
-    using static System.FormattableString;
 
     /// <summary>
     /// Model object to encapsulate the conversion of a subject object into a payload for logging.
@@ -52,6 +45,7 @@ namespace Naos.Logging.Domain
         {
             var describedSerialization = this.OriginalSubject.ToDescribedSerializationUsingSpecificFactory(
                 Log.SubjectSerializerRepresentation,
+                SerializerRepresentationSelectionStrategy.UseRepresentationOfSerializerBuiltByFactory,
                 Log.SubjectSerializerFactory,
                 SerializationFormat.String,
                 VersionMatchStrategy.AnySingleVersion);
